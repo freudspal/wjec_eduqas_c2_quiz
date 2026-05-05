@@ -459,7 +459,7 @@ async function verifyTeacherPin(pin){
     return {ok:false,error:'No proxy configured — set PROXY_URL in index.html'};
   }
   try{
-    const r = await fetch(PROXY_URL+'?method=AUTH',{
+    const r = await fetch('/api/jsonbin?method=AUTH', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({pin})
