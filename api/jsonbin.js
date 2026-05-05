@@ -32,11 +32,12 @@ export default async function handler(req, res) {
         : (req.body || {});
     } catch {}
 
-    const { pin } = body;
+    const pin = body?.pin ?? req.query
 
     if (
-      typeof pin !== 'undefined' &&
-      String(pin).trim() === String(TEACHER_PIN).trim()
+      pin &&
+      TEACHER_PIN &&
+      pin.toString().trim() === TEACHER_PIN.toString().trim(
     ) {
       return res.status(200).json({ ok: true });
     }
