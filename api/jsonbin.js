@@ -10,7 +10,7 @@ export default async function handler(req, res) {
 
   const BIN_ID      = process.env.BIN_ID;
   const MASTER_KEY  = process.env.MASTER_KEY;
-  const TEACHER_PIN = process.env.TEACHER_PIN || '1234';
+  const TEACHER_PIN = process.env.TEACHER_PIN;
 
   if (!BIN_ID || !MASTER_KEY) {
     return res.status(500).json({ error: 'Missing BIN_ID or MASTER_KEY env vars' });
