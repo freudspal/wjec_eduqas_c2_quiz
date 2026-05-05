@@ -948,7 +948,7 @@ let quizState = {
 
 
 // ===================== CLOUD SYNC =====================
-const JSONBIN_BASE = 'https://api.jsonbin.io/v3';
+const PROXY_URL = 'https://your-vercel-app.vercel.app/api/jsonbin';
 
 function getApiKey() {
   return CONFIG.jsonbinApiKey || localStorage.getItem('psychquiz_apikey') || '';
@@ -965,7 +965,6 @@ async function cloudCreateBin() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Master-Key': key,
         'X-Bin-Name': 'psychquiz-students',
         'X-Bin-Private': 'false'
       },
@@ -979,7 +978,7 @@ async function cloudCreateBin() {
 
 async function cloudReadAll() {
   try {
-    const res = await fetch("/api/jsonbin?method=GET");
+    const res = await fetch("${PROXY_URL}?method=GET");
     return await res.json();
   } catch {
     return null;
@@ -988,7 +987,7 @@ async function cloudReadAll() {
 
 async function cloudWriteAll(record) {
   try {
-    await fetch("/api/jsonbin?method=PUT", {
+    await fetch("${PROXY_URL}?method=PUT", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(record)
