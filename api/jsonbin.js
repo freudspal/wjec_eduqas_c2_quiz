@@ -1,4 +1,4 @@
-module.exports = async function handler(req, res)
+module.exports = async (req, res) => {
   console.log('FUNCTION STARTED');
 
   const BIN_ID = process.env.BIN_ID;
