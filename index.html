@@ -431,6 +431,45 @@
   .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
   .empty-state .es-icon { font-size: 3rem; margin-bottom: 12px; }
 
+
+  /* FLAG BUTTON */
+  .flag-btn {
+    background: none; border: 1px solid var(--border);
+    border-radius: 20px; padding: 6px 14px;
+    color: var(--muted); font-family: inherit; font-size: 0.75rem;
+    cursor: pointer; transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 5px;
+    margin-top: 12px;
+  }
+  .flag-btn:hover { border-color: var(--amber); color: var(--amber); }
+
+  /* FLAGS in teacher */
+  .flag-card {
+    background: var(--surface); border: 1px solid var(--amber);
+    border-radius: 14px; padding: 16px; margin-bottom: 12px;
+  }
+  .flag-card.resolved { border-color: var(--border); opacity: 0.6; }
+  .flag-concept { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
+  .flag-meta { font-size: 0.75rem; color: var(--muted); margin-bottom: 10px; }
+  .flag-answer { background: var(--surface2); border-radius: 8px; padding: 10px; font-size: 0.85rem; margin-bottom: 10px; font-style: italic; }
+  .flag-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .flag-edit { width: 100%; padding: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: inherit; font-size: 0.85rem; margin-bottom: 8px; outline: none; }
+  .flag-edit:focus { border-color: var(--accent); }
+
+  .teacher-tab-bar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .teacher-tab {
+    padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+    border: 1px solid var(--border); background: var(--surface2);
+    color: var(--muted); cursor: pointer; transition: all 0.2s; font-family: inherit;
+  }
+  .teacher-tab.active { background: var(--accent); border-color: var(--accent); color: white; }
+  .badge-count {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--amber); color: #000; font-size: 0.65rem; font-weight: 700;
+    margin-left: 4px;
+  }
+
   .loading-overlay {
     position: fixed; inset: 0;
     background: var(--bg);
@@ -665,6 +704,34 @@
     <div id="aiModalContent">Checking your answer against the definition...</div>
     <div style="margin-top:16px;">
       <button class="btn" onclick="closeModal()">Continue</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="flagModal">
+  <div class="modal">
+    <div class="modal-title">🚩 Report an Issue <button class="modal-close" onclick="closeFlagModal()">✕</button></div>
+    <div style="font-size:0.85rem;color:var(--muted);margin-bottom:16px;" id="flagConceptLabel"></div>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label class="form-label">What's the problem?</label>
+      <select class="form-input" id="flagType">
+        <option value="unclear">Question is unclear or confusing</option>
+        <option value="wrong_answer">My answer was correct but marked wrong</option>
+        <option value="bad_definition">Definition seems incorrect</option>
+        <option value="other">Something else</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin-bottom:16px;">
+      <label class="form-label">Your answer <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+      <textarea class="text-entry-area" id="flagStudentAnswer" placeholder="Paste your answer here if you think it should be accepted..." style="min-height:70px;margin:0;"></textarea>
+    </div>
+    <div class="form-group" style="margin-bottom:16px;">
+      <label class="form-label">Extra details <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+      <input type="text" class="form-input" id="flagNote" placeholder="Any other info for your teacher...">
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn" onclick="submitFlagForm()" style="flex:1;">Send Report</button>
+      <button class="btn btn-outline" onclick="closeFlagModal()" style="width:auto;">Cancel</button>
     </div>
   </div>
 </div>
@@ -909,6 +976,27 @@ async function cloudCreateBin() {
 }
 
 async function cloudReadStudents() {
+  const rec = await cloudReadAll();
+  return rec?.students || null;
+}
+
+async function cloudWriteStudent(studentData) {
+  const key = getApiKey();
+  const binId = getBinId();
+  if (!key || !binId) return;
+  try {
+    const rec = await cloudReadAll() || {};
+    rec.students = rec.students || {};
+    rec.students[studentData.name] = studentData;
+    await fetch(JSONBIN_BASE + '/b/' + binId, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': key },
+      body: JSON.stringify(rec)
+    });
+  } catch(e) {}
+}
+
+async function cloudReadAll() {
   const key = getApiKey();
   const binId = getBinId();
   if (!key || !binId) return null;
@@ -917,27 +1005,52 @@ async function cloudReadStudents() {
       headers: { 'X-Master-Key': key }
     });
     const data = await res.json();
-    return data.record?.students || null;
+    return data.record || null;
   } catch(e) { return null; }
 }
 
-async function cloudWriteStudent(studentData) {
+async function cloudWriteAll(rec) {
   const key = getApiKey();
   const binId = getBinId();
-  if (!key || !binId) return;
+  if (!key || !binId) return false;
   try {
-    // Read current, merge, write back
-    const current = await cloudReadStudents() || {};
-    current[studentData.name] = studentData;
     await fetch(JSONBIN_BASE + '/b/' + binId, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Master-Key': key
-      },
-      body: JSON.stringify({ students: current })
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': key },
+      body: JSON.stringify(rec)
     });
-  } catch(e) { /* silent fail — local data still saved */ }
+    return true;
+  } catch(e) { return false; }
+}
+
+// Flags
+const FLAGS_KEY = 'psychquiz_flags';
+function getLocalFlags() { try { return JSON.parse(localStorage.getItem(FLAGS_KEY)) || []; } catch { return []; } }
+function saveLocalFlags(f) { localStorage.setItem(FLAGS_KEY, JSON.stringify(f)); }
+
+async function submitFlag(flag) {
+  saveLocalFlags([...getLocalFlags(), flag]);
+  const key = getApiKey(); const binId = getBinId();
+  if (!key || !binId) return;
+  try {
+    const rec = await cloudReadAll() || {};
+    rec.flags = rec.flags || [];
+    rec.flags.push(flag);
+    await cloudWriteAll(rec);
+  } catch(e) {}
+}
+
+// Approved answers
+const APPROVED_KEY = 'psychquiz_approved';
+function getApprovedAnswers() { try { return JSON.parse(localStorage.getItem(APPROVED_KEY)) || {}; } catch { return {}; } }
+function saveApprovedAnswers(a) { localStorage.setItem(APPROVED_KEY, JSON.stringify(a)); }
+
+async function syncApprovedFromCloud() {
+  const rec = await cloudReadAll();
+  if (rec?.approvedAnswers) {
+    saveApprovedAnswers(rec.approvedAnswers);
+  }
+  return getApprovedAnswers();
 }
 
 // Debounced sync — don't hammer the API on every answer
@@ -949,11 +1062,13 @@ function scheduleSync(data) {
 
 // ===================== INIT =====================
 window.addEventListener('load', () => {
-  setTimeout(() => {
+  setTimeout(async () => {
     document.getElementById('loadingOverlay').style.display = 'none';
     const saved = getCurrentUser();
     if (saved && saved.name) {
       currentUser = getUserData(saved.name);
+      // Sync approved answers from cloud quietly
+      await syncApprovedFromCloud().catch(()=>{});
       showHome();
     }
   }, 1200);
@@ -1685,16 +1800,18 @@ function showFeedback(isCorrect, definition, extraFeedback) {
   const fb = document.getElementById('feedbackBox');
   fb.style.display = 'block';
   fb.className = 'feedback-box ' + (isCorrect ? 'correct' : 'wrong');
-  
   const icon = isCorrect ? '✓' : '✗';
   const title = isCorrect ? 'Correct!' : 'Not quite!';
   const titleClass = isCorrect ? 'feedback-correct' : 'feedback-wrong';
-  
+  const qIdx = quizState.currentIdx;
+  const qObj = quizState.questions[qIdx];
+  const conceptName = qObj ? qObj.q.concept : '';
   fb.innerHTML = `
     <div class="${titleClass}">
       <div class="feedback-title">${icon} ${title}${extraFeedback ? ' — ' + extraFeedback : ''}</div>
       <div class="feedback-def"><strong>Definition:</strong> ${definition}</div>
     </div>
+    <button class="flag-btn" onclick="openFlagModal('${conceptName.replace(/'/g,"\'")}')">🚩 Report an issue with this question</button>
   `;
 }
 
@@ -1743,9 +1860,44 @@ function endQuiz() {
   }
 }
 
+
+let currentFlagConcept = '';
+function openFlagModal(concept) {
+  currentFlagConcept = concept;
+  document.getElementById('flagConceptLabel').textContent = 'Term: ' + concept;
+  document.getElementById('flagStudentAnswer').value = '';
+  document.getElementById('flagNote').value = '';
+  document.getElementById('flagModal').classList.add('open');
+}
+function closeFlagModal() {
+  document.getElementById('flagModal').classList.remove('open');
+}
+async function submitFlagForm() {
+  const flag = {
+    id: Date.now(),
+    concept: currentFlagConcept,
+    type: document.getElementById('flagType').value,
+    studentAnswer: document.getElementById('flagStudentAnswer').value.trim(),
+    note: document.getElementById('flagNote').value.trim(),
+    reportedBy: currentUser?.name || 'Unknown',
+    nickname: currentUser?.nickname || '',
+    timestamp: new Date().toISOString(),
+    status: 'pending'
+  };
+  await submitFlag(flag);
+  closeFlagModal();
+  // Show a subtle confirmation
+  const fb = document.getElementById('feedbackBox');
+  if (fb) {
+    const existing = fb.innerHTML;
+    fb.innerHTML = existing + '<div style="margin-top:8px;font-size:0.8rem;color:var(--amber);">✓ Report sent to your teacher</div>';
+  }
+}
+
 function closeModal() {
   document.getElementById('aiModal').classList.remove('open');
 }
+
 
 // ===================== RESULT =====================
 function showResult() {
@@ -1823,8 +1975,31 @@ async function renderTeacherContent() {
   const list = Object.values(merged).sort((a,b) => (b.totalAnswered||0) - (a.totalAnswered||0));
   const tags = [...new Set(QUESTIONS.map(q => q.tag).filter(Boolean))].sort();
 
+  // Load flags and approved answers from cloud
+  const rec = await cloudReadAll() || {};
+  const cloudFlags = rec.flags || [];
+  const localFlags = getLocalFlags();
+  // Merge flags by id
+  const allFlagsMap = {};
+  [...localFlags, ...cloudFlags].forEach(f => { allFlagsMap[f.id] = f; });
+  const allFlags = Object.values(allFlagsMap).sort((a,b) => b.id - a.id);
+  const pendingCount = allFlags.filter(f => f.status === 'pending').length;
+
+  // Sync approved answers
+  if (rec.approvedAnswers) saveApprovedAnswers(rec.approvedAnswers);
+
+  const activeTeacherTab = window._teacherTab || 'students';
+
   document.getElementById('teacherContent').innerHTML = `
-    <!-- CLOUD SETUP -->
+    <div class="teacher-tab-bar">
+      <button class="teacher-tab ${activeTeacherTab==='students'?'active':''}" onclick="setTeacherTab('students')">👥 Students</button>
+      <button class="teacher-tab ${activeTeacherTab==='flags'?'active':''}" onclick="setTeacherTab('flags')">🚩 Reports${pendingCount>0?'<span class=\'badge-count\'>'+pendingCount+'</span>':''}</button>
+      <button class="teacher-tab ${activeTeacherTab==='ranking'?'active':''}" onclick="setTeacherTab('ranking')">🏆 Ranking</button>
+      <button class="teacher-tab ${activeTeacherTab==='setup'?'active':''}" onclick="setTeacherTab('setup')">⚙️ Setup</button>
+    </div>
+
+    <!-- STUDENTS TAB -->
+    <div id="tTab-students" style="display:${activeTeacherTab==='students'?'block':'none'}">
     <div style="background:var(--surface);border:1px solid ${isConfigured ? 'var(--green)' : 'var(--amber)'};border-radius:14px;padding:16px;margin-bottom:20px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
         <span style="font-size:1.1rem;">${isConfigured ? '✅' : '⚙️'}</span>
@@ -1889,11 +2064,140 @@ async function renderTeacherContent() {
         }).join('')
     }
 
-    <div style="margin-top:16px;text-align:center;">
-      <button class="btn btn-outline btn-sm" onclick="renderTeacherContent()">🔄 Refresh</button>
+      <div style="margin-top:16px;text-align:center;">
+        <button class="btn btn-outline btn-sm" onclick="renderTeacherContent()">🔄 Refresh</button>
+      </div>
+    </div>
+
+    <!-- FLAGS TAB -->
+    <div id="tTab-flags" style="display:${activeTeacherTab==='flags'?'block':'none'}">
+      ${allFlags.length === 0
+        ? '<div class="empty-state"><div class="es-icon">🚩</div><div>No reports yet</div></div>'
+        : allFlags.map(f => {
+            const q = QUESTIONS.find(q => q.concept === f.concept);
+            const defn = q ? q.definition : '';
+            const statusColor = f.status === 'approved' ? 'var(--green)' : f.status === 'dismissed' ? 'var(--muted)' : 'var(--amber)';
+            const statusLabel = f.status === 'approved' ? '✅ Approved' : f.status === 'dismissed' ? 'Dismissed' : '⏳ Pending';
+            const typeLabels = {unclear:'Question unclear', wrong_answer:'Answer marked wrong', bad_definition:'Bad definition', other:'Other'};
+            return '<div class="flag-card ' + (f.status!=='pending'?'resolved':'') + '">' +
+              '<div class="flag-concept">' + f.concept + ' <span style="float:right;font-size:0.75rem;color:' + statusColor + '">' + statusLabel + '</span></div>' +
+              '<div class="flag-meta">' + (typeLabels[f.type]||f.type) + ' · ' + (f.nickname||f.reportedBy) + ' · ' + new Date(f.timestamp).toLocaleDateString('en-GB') + '</div>' +
+              (f.studentAnswer ? '<div class="flag-answer">Student wrote: "' + f.studentAnswer + '"</div>' : '') +
+              (f.note ? '<div style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;">Note: ' + f.note + '</div>' : '') +
+              (defn ? '<div style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;padding:8px;background:var(--surface2);border-radius:8px;">Current definition: ' + defn + '</div>' : '') +
+              (f.status === 'pending' ? 
+                '<textarea class="flag-edit" id="flagEdit_' + f.id + '" placeholder="Edit or confirm the approved answer before saving...">' + (f.studentAnswer||'') + '</textarea>' +
+                '<div class="flag-actions">' +
+                '<button class="btn btn-sm" onclick="approveFlag(' + f.id + ')" style="flex:1;">✅ Approve Answer</button>' +
+                '<button class="btn btn-outline btn-sm" onclick="dismissFlag(' + f.id + ')">Dismiss</button>' +
+                '</div>'
+              : '') +
+              '</div>';
+          }).join('')
+      }
+    </div>
+
+    <!-- RANKING TAB -->
+    <div id="tTab-ranking" style="display:${activeTeacherTab==='ranking'?'block':'none'}">
+      <div style="font-size:0.8rem;color:var(--muted);margin-bottom:16px;">Real names shown — same order students see on their leaderboard</div>
+      ${list.length === 0
+        ? '<div class="empty-state"><div class="es-icon">📊</div><div>No students yet</div></div>'
+        : list.map((s,i) => {
+          const rankIcons = ['🥇','🥈','🥉'];
+          const badge = getBadge(s.totalAnswered||0);
+          const pct = s.totalAnswered > 0 ? Math.round((s.totalCorrect/s.totalAnswered)*100) : 0;
+          const color = pct>=75?'var(--green)':pct>=50?'var(--amber)':'var(--red)';
+          return '<div class="lb-row"><div class="lb-rank ' + (i===0?'gold':i===1?'silver':i===2?'bronze':'') + '">' + (rankIcons[i]||(i+1)) + '</div>' +
+            '<div class="lb-name">' + s.name + '<span style="display:block;font-size:0.75rem;color:var(--accent2);font-weight:400;">' + (s.nickname||generateNickname(s.name)) + '</span></div>' +
+            '<div class="lb-badge">' + badge.icon + '</div>' +
+            '<div class="lb-score"><div class="lb-pct" style="color:' + color + '">' + pct + '%</div><div class="lb-detail">' + (s.totalAnswered||0) + ' answered</div></div></div>';
+        }).join('')
+      }
+    </div>
+
+    <!-- SETUP TAB -->
+    <div id="tTab-setup" style="display:${activeTeacherTab==='setup'?'block':'none'}">
+      <div style="background:var(--surface);border:1px solid ${isConfigured ? 'var(--green)' : 'var(--amber)'};border-radius:14px;padding:16px;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+          <span>${isConfigured ? '✅' : '⚙️'}</span>
+          <strong>${isConfigured ? 'Cloud Sync Active' : 'Cloud Setup Required'}</strong>
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <label class="form-label">JSONBin Master Key</label>
+          <input type="password" class="form-input" id="setupApiKey" value="${storedKey}" placeholder="$2b$10$...">
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <label class="form-label">Bin ID</label>
+          <input type="text" class="form-input" id="setupBinId" value="${storedBin}" placeholder="Auto-created on first save">
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-sm" onclick="saveCloudSetup()" style="flex:1;">Save &amp; Connect</button>
+          ${storedBin ? '<button class="btn btn-outline btn-sm" onclick="copyBinId()" style="width:auto;">Copy Bin ID</button>' : ''}
+        </div>
+        ${storedBin ? '<div style="margin-top:8px;font-size:0.75rem;color:var(--muted);">Bin ID: <code style="color:var(--accent2);">' + storedBin + '</code></div>' : ''}
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:16px;">
+        <div class="section-title" style="margin-bottom:10px;">Teacher PIN</div>
+        <div style="display:flex;gap:8px;">
+          <input type="password" class="form-input" id="newPin" placeholder="New PIN (4-6 digits)" style="flex:1;">
+          <button class="btn btn-sm" onclick="changePin()" style="width:auto;flex-shrink:0;">Update</button>
+        </div>
+        <div style="margin-top:8px;font-size:0.75rem;color:var(--muted);">Current PIN: ${pin}</div>
+      </div>
     </div>
   `;
 }
+
+function setTeacherTab(tab) {
+  window._teacherTab = tab;
+  ['students','flags','ranking','setup'].forEach(t => {
+    const el = document.getElementById('tTab-' + t);
+    if (el) el.style.display = t === tab ? 'block' : 'none';
+    document.querySelectorAll('.teacher-tab').forEach((btn, i) => {
+      const tabs = ['students','flags','ranking','setup'];
+      btn.classList.toggle('active', tabs[i] === tab);
+    });
+  });
+}
+
+async function approveFlag(flagId) {
+  const editEl = document.getElementById('flagEdit_' + flagId);
+  const approvedText = editEl ? editEl.value.trim() : '';
+  if (!approvedText) { alert('Please write or confirm the approved answer first.'); return; }
+
+  // Update flag status
+  const localFlags = getLocalFlags();
+  const flag = localFlags.find(f => f.id === flagId);
+  const concept = flag ? flag.concept : '';
+
+  // Save approved answer
+  const approved = getApprovedAnswers();
+  if (!approved[concept]) approved[concept] = [];
+  if (!approved[concept].includes(approvedText)) approved[concept].push(approvedText);
+  saveApprovedAnswers(approved);
+
+  // Sync to cloud
+  const rec = await cloudReadAll() || {};
+  rec.flags = (rec.flags || []).map(f => f.id === flagId ? {...f, status: 'approved'} : f);
+  rec.approvedAnswers = approved;
+  await cloudWriteAll(rec);
+
+  // Update local flags
+  saveLocalFlags(localFlags.map(f => f.id === flagId ? {...f, status: 'approved'} : f));
+
+  renderTeacherContent();
+}
+
+async function dismissFlag(flagId) {
+  const localFlags = getLocalFlags();
+  saveLocalFlags(localFlags.map(f => f.id === flagId ? {...f, status: 'dismissed'} : f));
+  const rec = await cloudReadAll() || {};
+  rec.flags = (rec.flags || []).map(f => f.id === flagId ? {...f, status: 'dismissed'} : f);
+  await cloudWriteAll(rec);
+  renderTeacherContent();
+}
+
+
 
 async function saveCloudSetup() {
   const key = document.getElementById('setupApiKey').value.trim();
