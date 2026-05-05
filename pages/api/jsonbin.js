@@ -26,6 +26,9 @@ module.exports = async function handler(req, res)
     }
 
     const pin = body?.pin;
+    
+    console.log('PIN RECEIVED:', pin);
+    console.log('PIN EXPECTED:', TEACHER_PIN);
 
     if (
       pin &&
