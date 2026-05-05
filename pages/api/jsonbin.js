@@ -1,4 +1,6 @@
 module.exports = async function handler(req, res)
+  console.log('FUNCTION STARTED');
+
   const BIN_ID = process.env.BIN_ID;
   const MASTER_KEY = process.env.MASTER_KEY;
   const TEACHER_PIN = process.env.TEACHER_PIN;
@@ -13,6 +15,8 @@ module.exports = async function handler(req, res)
 
   const op = req.query.method;
 
+  console.log('METHOD:', req.query.metho
+             
   // ✅ AUTH
   if (op === 'AUTH') {
     let body = {};
