@@ -1,7 +1,3 @@
-export const config = {
-  api: { bodyParser: { sizeLimit: '2mb' } },
-};
-
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
@@ -17,21 +13,35 @@ export default async function handler(req, res) {
   const TEACHER_PIN = process.env.TEACHER_PIN || '1234';
 
   if (!BIN_ID || !MASTER_KEY) {
-    return res.status(500).json({ error: 'Server env vars not configured (BIN_ID and MASTER_KEY required)' });
+    return res.status(500).json({ error: 'Missing BIN_ID or MASTER_KEY env vars' });
   }
 
   const op = req.query.method;
 
-  // AUTH — verify teacher PIN server-side, never exposed to browser
+  // ── AUTH ────────────────────────────────────────────────────────────────────
   if (op === 'AUTH') {
-    const { pin } = req.body || {};
-    if (String(pin) === String(TEACHER_PIN)) {
+    // Parse body robustly — handle string, object, or missing
+    let body = {};
+    try {
+      body = typeof req.body === 'string'
+        ? JSON.parse(req.body)
+        : (req.body || {});
+    } catch {
+      // If no body or unparseable, body stays {}
+    }
+
+    const { pin } = body;
+
+    // Debug info (remove after confirming it works)
+    console.log('AUTH attempt | received pin:', JSON.stringify(pin), '| env pin:', JSON.stringify(TEACHER_PIN));
+
+    if (pin !== undefined && String(pin).trim() === String(TEACHER_PIN).trim()) {
       return res.status(200).json({ ok: true });
     }
     return res.status(401).json({ ok: false, error: 'Incorrect PIN' });
   }
 
-  // GET — read full record from JSONBin
+  // ── GET ─────────────────────────────────────────────────────────────────────
   if (op === 'GET') {
     try {
       const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
@@ -45,8 +55,13 @@ export default async function handler(req, res) {
     }
   }
 
-  // PUT — write full record to JSONBin
+  // ── PUT ─────────────────────────────────────────────────────────────────────
   if (op === 'PUT') {
+    let body = {};
+    try {
+      body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+    } catch { body = {} }
+
     try {
       const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
         method: 'PUT',
@@ -54,13 +69,13 @@ export default async function handler(req, res) {
           'Content-Type': 'application/json',
           'X-Master-Key': MASTER_KEY,
         },
-        body: JSON.stringify(req.body),
+        body: JSON.stringify(body),
       });
       const data = await r.json();
       if (!r.ok) return res.status(r.status).json({ error: 'JSONBin write failed', detail: data });
       return res.status(200).json({ ok: true });
     } catch (e) {
-      return res.status(500).json({ error: 'Network error writing to JSONBin' });
+      return res.status(500).json({ error: 'Network error writing JSONBin' });
     }
   }
 
