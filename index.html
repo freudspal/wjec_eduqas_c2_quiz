@@ -411,24 +411,26 @@ let cloudOk = false;
 function proxyAvailable(){return PROXY_URL && PROXY_URL.trim()!==''}
 
 async function cloudGet(){
-  if(!proxyAvailable())return null;
-  try{
-    const r=await fetch(PROXY_URL+'?method=GET');
-    if(!r.ok)return null;
-    return await r.json();
-  }catch{return null}
+  try{ 
+    const r = await fetch('/api/jsonbin?method=GET'); 
+    if(!r.ok) return null; 
+    return await r.json(); 
+  } catch {
+    return null;
+  }
 }
 
 async function cloudPut(record){
-  if(!proxyAvailable())return false;
-  try{
-    const r=await fetch(PROXY_URL+'?method=PUT',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(record)
-    });
-    return r.ok;
-  }catch{return false}
+  try{ 
+    const r = await fetch('/api/jsonbin?method=PUT', { 
+      method:'POST', 
+      headers:{'Content-Type':'application/json'}, 
+      body:JSON.stringify(record) 
+    }); 
+    return r.ok; 
+  } catch {
+    return false;
+  }
 }
 
 async function cloudReadAll(){
