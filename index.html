@@ -745,10 +745,11 @@
 // ║  Step 4: Copy the Bin ID shown, paste it below   ║
 // ║  Step 5: Redeploy — students now sync to cloud   ║
 // ╚══════════════════════════════════════════════════╝
+
 const CONFIG = {
-  jsonbinApiKey: '$2a$10$68g5278DZp7z2rE5l99yT.qagMvRYcMcAgv.MsYhCZKxmHQuvXXtK',   // ← Paste your JSONBin Master Key here
-  jsonbinBinId:  '69f9bc3b36566621a828bf98',   // ← Paste your Bin ID here after Step 3
+ jsonbinBinId: '69f9bc3b36566621a828bf98',
 };
+
 // ═══════════════════════════════════════════════════
 
 
@@ -975,53 +976,41 @@ async function cloudCreateBin() {
   } catch(e) { return null; }
 }
 
+
+async function cloudReadAll() {
+  try {
+    const res = await fetch("/api/jsonbin?method=GET");
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+async function cloudWriteAll(record) {
+  try {
+    await fetch("/api/jsonbin?method=PUT", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(record)
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function cloudReadStudents() {
   const rec = await cloudReadAll();
   return rec?.students || null;
 }
 
 async function cloudWriteStudent(studentData) {
-  const key = getApiKey();
-  const binId = getBinId();
-  if (!key || !binId) return;
-  try {
-    const rec = await cloudReadAll() || {};
-    rec.students = rec.students || {};
-    rec.students[studentData.name] = studentData;
-    await fetch(JSONBIN_BASE + '/b/' + binId, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-Master-Key': key },
-      body: JSON.stringify(rec)
-    });
-  } catch(e) {}
+  const rec = await cloudReadAll() || {};
+  rec.students = rec.students || {};
+  rec.students[studentData.name] = studentData;
+  await cloudWriteAll(rec);
 }
-
-async function cloudReadAll() {
-  const key = getApiKey();
-  const binId = getBinId();
-  if (!key || !binId) return null;
-  try {
-    const res = await fetch(JSONBIN_BASE + '/b/' + binId + '/latest', {
-      headers: { 'X-Master-Key': key }
-    });
-    const data = await res.json();
-    return data.record || null;
-  } catch(e) { return null; }
-}
-
-async function cloudWriteAll(rec) {
-  const key = getApiKey();
-  const binId = getBinId();
-  if (!key || !binId) return false;
-  try {
-    await fetch(JSONBIN_BASE + '/b/' + binId, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-Master-Key': key },
-      body: JSON.stringify(rec)
-    });
-    return true;
-  } catch(e) { return false; }
-}
+``
 
 // Flags
 const FLAGS_KEY = 'psychquiz_flags';
