@@ -5,6 +5,8 @@ const CORS = {
 };
 
 export default async function handler(req, res) {
+  console.log('FUNCTION START');
+
   Object.entries(CORS).forEach(([k, v]) => res.setHeader(k, v));
   if (req.method === 'OPTIONS') return res.status(200).end();
 
@@ -13,16 +15,16 @@ export default async function handler(req, res) {
   const TEACHER_PIN = process.env.TEACHER_PIN;
 
   if (!BIN_ID || !MASTER_KEY) {
-    return res.status(500).json({ error: 'Missing BIN_ID or MASTER_KEY env vars' });
+    return res.status(500).json({ error: 'Missing BIN_ID or MASTER_KEY' });
   }
 
   if (!TEACHER_PIN) {
-    return res.status(500).json({ error: 'TEACHER_PIN not configured' });
+    return res.status(500).json({ error: 'TEACHER_PIN not set' });
   }
 
   const op = req.query.method;
 
-  // ── AUTH ─────────────────────────────────────────────
+  // ✅ AUTH
   if (op === 'AUTH') {
     let body = {};
 
@@ -30,14 +32,20 @@ export default async function handler(req, res) {
       body = typeof req.body === 'string'
         ? JSON.parse(req.body)
         : (req.body || {});
-    } catch {}
+    } catch (e) {
+      console.log('Parse error:', e);
+      return res.status(400).json({ error: 'Bad JSON' });
+    }
 
-    const pin = body?.pin ?? req.query
+    const pin = body?.pin;
+
+    console.log('RECEIVED PIN:', pin);
+    console.log('EXPECTED PIN:', TEACHER_PIN);
 
     if (
       pin &&
       TEACHER_PIN &&
-      pin.toString().trim() === TEACHER_PIN.toString().trim(
+      pin.toString().trim() === TEACHER_PIN.toString().trim()
     ) {
       return res.status(200).json({ ok: true });
     }
@@ -45,7 +53,7 @@ export default async function handler(req, res) {
     return res.status(401).json({ ok: false, error: 'Incorrect PIN' });
   }
 
-  // ── GET ──────────────────────────────────────────────
+  // ✅ GET
   if (op === 'GET') {
     try {
       const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
@@ -53,17 +61,19 @@ export default async function handler(req, res) {
       });
 
       const data = await r.json();
+
       if (!r.ok) {
-        return res.status(r.status).json({ error: 'JSONBin read failed', detail: data });
+        return res.status(r.status).json({ error: 'Read failed', detail: data });
       }
 
       return res.status(200).json(data.record || {});
-    } catch {
-      return res.status(500).json({ error: 'Network error reading JSONBin' });
+    } catch (e) {
+      console.log('GET error:', e);
+      return res.status(500).json({ error: 'GET failed' });
     }
   }
 
-  // ── PUT ──────────────────────────────────────────────
+  // ✅ PUT
   if (op === 'PUT') {
     let body = {};
 
@@ -71,28 +81,6 @@ export default async function handler(req, res) {
       body = typeof req.body === 'string'
         ? JSON.parse(req.body)
         : (req.body || {});
-    } catch {}
-
-    try {
-      const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Master-Key': MASTER_KEY,
-        },
-        body: JSON.stringify(body),
-      });
-
-      const data = await r.json();
-      if (!r.ok) {
-        return res.status(r.status).json({ error: 'JSONBin write failed', detail: data });
-      }
-
-      return res.status(200).json({ ok: true });
-    } catch {
-      return res.status(500).json({ error: 'Network error writing JSONBin' });
-    }
-  }
-
-  return res.status(400).json({ error: 'Unknown op. Use ?method=GET, PUT, AUTH' });
-}
+    } catch (e) {
+      console.log('Parse error:', e);
+      return res.status(400).json({ error: 'Bad JSON' });
