@@ -484,7 +484,7 @@ async function syncApprovedAnswers(){
   // Also merge cloud students locally
   if(rec&&rec.students){
     const local=getStudents();
-    const merged={...rec.students,...local}; // local takes precedence
+    const merged={...local,...rec.students}; // local takes precedence
     saveStudents(merged);
   }
 }
@@ -737,7 +737,7 @@ async function renderLeaderboard(){
   document.getElementById('lbContent').innerHTML='<div class="empty-state"><div class="checking-spinner" style="width:32px;height:32px"></div></div>';
   // Pull fresh cloud data
   const rec=await cloudReadAll();
-  if(rec&&rec.students){const local=getStudents();const merged={...rec.students,...local};saveStudents(merged)}
+  if(rec&&rec.students){const local=getStudents();const merged={...local,...rec.students};saveStudents(merged)}
   const all=getStudents();
   const me=currentUser?.name;
   const list=Object.values(all).filter(s=>s.totalAnswered>0).map(s=>({
