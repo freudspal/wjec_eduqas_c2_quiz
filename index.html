@@ -484,8 +484,7 @@ async function syncApprovedAnswers(){
   // Also merge cloud students locally
   if(rec&&rec.students){
     const local=getStudents();
-    const merged={...local,...rec.students}; // local takes precedence
-    saveStudents(merged);
+    saveStudents(rec.students); // local takes precedence
   }
 }
 
@@ -737,7 +736,7 @@ async function renderLeaderboard(){
   document.getElementById('lbContent').innerHTML='<div class="empty-state"><div class="checking-spinner" style="width:32px;height:32px"></div></div>';
   // Pull fresh cloud data
   const rec=await cloudReadAll();
-  if(rec&&rec.students){const local=getStudents();const merged={...local,...rec.students};saveStudents(merged)}
+  if(rec&&rec.students){const local=getStudents();saveStudents(rec.students);}
   const all=getStudents();
   const me=currentUser?.name;
   const list=Object.values(all).filter(s=>s.totalAnswered>0).map(s=>({
@@ -1145,7 +1144,7 @@ async function renderTeacherContent(){
   else{pill.className='cloud-pill err';pill.textContent='☁ No cloud'}
 
   // Merge students
-  if(rec.students){const local=getStudents();const merged={...local,...rec.students};saveStudents(merged)}
+  if(rec.students){const local=getStudents();saveStudents(rec.students);}
   if(rec.approvedAnswers)saveApprovedAnswers(rec.approvedAnswers);
 
   const allStudents=getStudents();
