@@ -39,7 +39,7 @@ module.exports = async (req, res) => {
   const BIN_ID           = process.env.BIN_ID;
   const MASTER_KEY       = process.env.MASTER_KEY;
   const TEACHER_PIN      = process.env.TEACHER_PIN;
-  const GEMINI_KEY       = process.env.GEMINI_API_KEY;
+  const GEMINI_API_KEY       = process.env.GEMINI_API_KEY;
   const QUESTIONS_BIN_ID = process.env.QUESTIONS_BIN_ID;
 
   if (!BIN_ID || !MASTER_KEY) {
@@ -115,7 +115,7 @@ module.exports = async (req, res) => {
 
     // ── AI_CHECK via Google Gemini ──────────────────────────────────────────
     if (op === 'AI_CHECK') {
-      if (!GEMINI_KEY) {
+      if (!GEMINI_API_KEY) {
         return res.status(400).json({ error: 'GEMINI_API_KEY not set in Vercel env vars' });
       }
 
@@ -185,7 +185,7 @@ Reply with JSON only:
       }
 
       // Call Gemini API
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`;
+      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
       const geminiRes = await fetch(geminiUrl, {
         method: 'POST',
