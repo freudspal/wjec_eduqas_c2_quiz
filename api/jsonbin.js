@@ -14,6 +14,10 @@ try {
 
 const method = body.method || req.query.method;
 
+console.log("RAW BODY:", req.body);
+console.log("PARSED BODY:", body);
+console.log("METHOD:", method);
+
 
   try {
 
