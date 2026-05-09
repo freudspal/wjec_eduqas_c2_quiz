@@ -440,8 +440,9 @@ if (qd && qd.approvedAnswers) {
   } catch(e) {
     QUESTIONS = EMBEDDED_Q;
   }
-  showHome();   // ← force UI to render
+
   hideSplash();
+  showScreen('loginScreen');
 });
 
 // ================================================================
