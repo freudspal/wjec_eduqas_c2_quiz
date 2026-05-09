@@ -809,7 +809,12 @@ function renderQ(){
     const v=type==='eval_s'?'strength':'weakness';
     const txt=v==='strength'?q.scenario_strength:q.scenario_weakness;
     const hint=v==='strength'?'What does this method do WELL? e.g. validity, reliability, ethics':'What is a PROBLEM with this method? e.g. low validity, demand characteristics';
-    h='<div class="qbadge bsc">Evaluation: '+(v==='strength'?'Strength':'Weakness')+'</div><div class="qcon">'+q.concept.replace(' (Evaluation)','')+'</div><div class="qhint">'+hint+'</div><div class="qtxt">'+(txt||q.scenario)+'</div><textarea class="tarea" id="tans" placeholder="Write one '+v+' here..."></textarea><button class="ckbtn" onclick="checkEval('+q.id+',''+v+'')">Check Answer &#10003;</button>';
+  h = `<div class="qbadge bsc">Evaluation: ${v === 'strength' ? 'Strength' : 'Weakness'}</div>
+<div class="qcon">${q.concept.replace(' (Evaluation)', '')}</div>
+<div class="qhint">${hint}</div>
+<div class="qtxt">${txt || q.scenario}</div>
+<textarea class="tarea" id="tans" placeholder="Write one ${v} here..."></textarea>
+<button class="ckbtn" onclick="checkEval(${q.id}, '${v}')">Check Answer ✔</button>`;  
   }
   h+='<div class="fbox" id="fbox"></div><button class="nxtbtn" id="nxtbtn" onclick="nextQ()">Next Question &#8594;</button>';
   document.getElementById('quizContent').innerHTML=h;
