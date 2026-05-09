@@ -39,7 +39,7 @@ module.exports = async (req, res) => {
   const BIN_ID           = process.env.BIN_ID;
   const MASTER_KEY       = process.env.MASTER_KEY;
   const TEACHER_PIN      = process.env.TEACHER_PIN;
-  const GEMINI_API_KEY       = process.env.GEMINI_API_KEY;
+  const GEMINI_API_KEY   = process.env.GEMINI_API_KEY;
   const QUESTIONS_BIN_ID = process.env.QUESTIONS_BIN_ID;
 
   if (!BIN_ID || !MASTER_KEY) {
