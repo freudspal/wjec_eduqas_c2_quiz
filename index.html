@@ -919,7 +919,9 @@ async function checkEval(qid,variant){
   if(!ans){alert('Please write something first!');return}
   document.querySelector('.ckbtn').disabled=true; showCk();
   const defn=q.definition||'';
-  const str=(defn.match(/\+([^+\-
+  const str = (defn.match(/\+([^+\-]+)/g) || [])
+  .map(s => s.slice(1).trim())
+  .join('; ');
 ]+)/g)||[]).map(s=>s.slice(1).trim()).join('; ');
   const wk=(defn.match(/\-([^+\-
 ]+)/g)||[]).map(s=>s.slice(1).trim()).join('; ');
