@@ -3,7 +3,17 @@ export default async function handler(req, res) {
   const BIN_ID = process.env.BIN_ID;
   const QUESTIONS_BIN_ID = process.env.QUESTIONS_BIN_ID;
 
-  const method = req.body?.method || req.query.method;
+  
+let body = {};
+
+try {
+  body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
+} catch (e) {
+  body = {};
+}
+
+const method = body.method || req.query.method;
+
 
   try {
 
@@ -45,7 +55,7 @@ export default async function handler(req, res) {
             "Content-Type": "application/json",
             "X-Master-Key": MASTER_KEY
           },
-          body: JSON.stringify(req.body)
+          body: JSON.stringify()
         }
       );
 
@@ -83,7 +93,12 @@ export default async function handler(req, res) {
             "Content-Type": "application/json",
             "X-Master-Key": MASTER_KEY
           },
-          body: JSON.stringify(req.body)
+          
+body: JSON.stringify({
+  method: method,
+  ...body
+})
+
         }
       );
 
