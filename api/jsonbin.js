@@ -1,21 +1,13 @@
 export default async function handler(req, res) {
-  const MASTER_KEY = process.env.MASTER_KEY;
-  const BIN_ID = process.env.BIN_ID;
-  const QUESTIONS_BIN_ID = process.env.QUESTIONS_BIN_ID;
+ 
 
-  const method = req.body?.method || req.query.method;
+  console.log("BODY:", req.body);
+  console.log("QUERY:", req.query);
 
-  try {
-
-    // =========================
-    // QUESTIONS
-    // =========================
-    if (method === "GET_QUESTIONS") {
-      const r = await fetch(`https://api.jsonbin.io/v3/b/${QUESTIONS_BIN_ID}/latest`, {
-        headers: { "X-Master-Key": MASTER_KEY }
-      });
-      const j = await r.json();
-      return res.status(200).json(j.record || {});
+  return res.status(200).json({
+    body: req.body,
+    query: req.query
+  });
     }
 
     if (method === "PUT_QUESTIONS") {
