@@ -798,9 +798,51 @@ function subTF(ch,ok,qid){
 }
 
 // AI CHECK — routes through Vercel proxy using ANTHROPIC_API_KEY
+function checkApprovedFirst(concept, answer) {
+  const list = APPROVED[concept] || [];
+  const a = answer.toLowerCase();
+
+  return list.some(x => a.includes(x.toLowerCase()));
+}
+
 async function aiCheck(concept, definition, studentAnswer, questionType){
+
+  // ✅ STEP 1 — check approved answers first
+  if (checkApprovedFirst(concept, studentAnswer)) {
+    return {
+      correct: true,
+      feedback: "Matched known correct answer"
+    };
+  }
+
+  // ✅ STEP 2 — fallback to AI
   const appd = APPROVED[concept] || [];
-  const r = await api('AI_CHECK',{concept, definition, studentAnswer, questionType, approved:appd});
+
+  const r = await api('AI_CHECK',{
+    concept,
+    definition,
+    studentAnswer,
+    questionType,
+    approved: appd
+  });
+
+  // ✅ STEP 3 — learn new answers
+  if (r.correct && studentAnswer.length > 10) {
+
+    if (!APPROVED[concept]) APPROVED[concept] = [];
+
+    if (!APPROVED[concept].includes(studentAnswer)) {
+      APPROVED[concept].push(studentAnswer);
+    }
+
+    // ✅ save to bin
+    try {
+      await api('PUT_QUESTIONS', {
+        approvedAnswers: APPROVED
+      });
+    } catch {}
+  }
+
   return r;
 }
 
