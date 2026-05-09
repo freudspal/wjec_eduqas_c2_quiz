@@ -393,19 +393,24 @@ function ragCol(r){return{green:'#22c55e',amber:'#f59e0b',red:'#ef4444',unset:'#
 // ================================================================
 // API — all calls via Vercel proxy
 // ================================================================
-async function api(method, body = {}) {
-  const r = await fetch(PROXY, {
+async function api(method, data = {}) {
+
+  const payload = {
+    method: method,
+    ...data
+  };
+
+  console.log("SENDING:", payload); // ✅ debug
+
+  const res = await fetch("/api/jsonbin", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({
-      method: method,
-      ...body
-    })
+    body: JSON.stringify(payload)
   });
 
-  return r.json();
+  return res.json();
 }
 
 // ================================================================
