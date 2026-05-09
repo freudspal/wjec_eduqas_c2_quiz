@@ -946,7 +946,20 @@ function showFb(ok,def,extra){
   const fb=document.getElementById('fbox');
   fb.style.display='block'; fb.className='fbox '+(ok?'ok':'ng');
   const con=QZ.questions[QZ.idx]?.q?.concept||'';
-  fb.innerHTML='<div class="'+(ok?'fok':'fng')+'"><div class="ftit">'+(ok?'&#10003; Correct!':'&#10007; Not quite!')+(extra?' &mdash; '+extra:'')+'</div><div class="fdef"><strong>Definition:</strong> '+def+'</div></div><button class="flgbtn" onclick="openFlag(''+con.replace(/'/g,"\'")+''")">&#x1F6A9; Report an issue</button>';
+
+b.innerHTML = `<div class="${ok ? 'fok' : 'fng'}">
+  <div class="ftit">
+    ${ok ? '✔ Correct!' : '✗ Not quite!'}
+    ${extra ? ' — ' + extra : ''}
+  </div>
+  <div class="fdef">
+    <strong>Definition:</strong> ${def}
+  </div>
+</div>
+<button class="flgbtn" onclick="openFlag('${con.replace(/'/g, "\\'")}')">
+  🚩 Report an issue
+</button>`;
+  
 }
 function rec(q,ok){
   if(!S.termStats)S.termStats={};if(!S.categoryStats)S.categoryStats={};
