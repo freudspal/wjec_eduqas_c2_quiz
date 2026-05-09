@@ -922,9 +922,15 @@ async function checkEval(qid,variant){
   const str = (defn.match(/\+([^+\-]+)/g) || [])
   .map(s => s.slice(1).trim())
   .join('; ');
-]+)/g)||[]).map(s=>s.slice(1).trim()).join('; ');
-  const wk=(defn.match(/\-([^+\-
-]+)/g)||[]).map(s=>s.slice(1).trim()).join('; ');
+
+const str = (defn.match(/\+([^+\-]+)/g) || [])
+  .map(s => s.slice(1).trim())
+  .join('; ');
+
+const wk = (defn.match(/\-([^+\-]+)/g) || [])
+  .map(s => s.slice(1).trim())
+  .join('; ');
+
   const expected=variant==='strength'?str:wk;
   try{
     const r=await aiCheck(q.concept.replace(' (Evaluation)',''),expected,ans,'eval');
