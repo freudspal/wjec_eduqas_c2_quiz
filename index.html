@@ -428,13 +428,15 @@ window.addEventListener('load', async () => {
     document.getElementById('splashMsg').textContent = 'Fetching latest questions...';
     const timeout = new Promise((_,rej) => setTimeout(()=>rej(new Error('timeout')), 5000));
     const qd = await Promise.race([api('GET_QUESTIONS'), timeout]);
-    if(qd && qd.questions && qd.questions.length > 0){
-      QUESTIONS = qd.questions;
-      APPROVED  = qd.approvedAnswers || {};
-      cloudOk = true;
-    } else {
-      QUESTIONS = EMBEDDED_Q;
-    }
+// ✅ ALWAYS use local questions
+QUESTIONS = EMBEDDED_Q;
+
+// ✅ ONLY load approved answers from cloud
+if (qd && qd.approvedAnswers) {
+  APPROVED = qd.approvedAnswers;
+  cloudOk = true;
+}
+
   } catch(e) {
     QUESTIONS = EMBEDDED_Q;
   }
