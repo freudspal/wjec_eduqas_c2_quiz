@@ -3,7 +3,7 @@ export default async function handler(req, res) {
   const BIN_ID = process.env.BIN_ID;
   const QUESTIONS_BIN_ID = process.env.QUESTIONS_BIN_ID;
 
-  const method = req.query.method;
+  const method = req.query.method || req.body?.method;
 
   try {
 
