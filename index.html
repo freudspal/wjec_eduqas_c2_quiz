@@ -619,7 +619,11 @@ function renderHome(){
     <div class="stitle">Topics</div>
     <div class="cgrid">${cats.map(c=>{
       const p=c.an>0?Math.round((c.co/c.an)*100):0,col=ragCol(c.r);
-      return '<div class="ccard" onclick="startQuiz(''+c.tag.replace(/'/g,"\'")+'''+',10)"><div class="cname">'+c.tag+'</div><div class="cbar"><div class="cbarf" style="width:'+p+'%;background:'+col+'"></div></div><div class="cstat" style="color:'+col+'">'+(c.an>0?p+'%':'Not started')+' &middot; '+c.count+' terms</div></div>';
+      
+return `<div class="ccard" onclick="startQuiz('${c.tag.replace(/'/g, "\\'")}', 10)">
+  <div class="cname">${c.tag}</div>
+</div>`;
+
     }).join('')}</div>`;
 }
 
