@@ -4,6 +4,9 @@ export default async function handler(req, res) {
   const QUESTIONS_BIN_ID = process.env.QUESTIONS_BIN_ID;
 
   const method = req.query.method || req.body?.method;
+  console.log("METHOD:", method);
+console.log("BODY:", req.body);
+
 
   try {
 
@@ -49,7 +52,10 @@ export default async function handler(req, res) {
       return res.status(200).json(j);
     }
 
-    res.status(400).json({ error: "Invalid method" });
+    res.status(400).json({
+  error: "Invalid method", 
+  received: method 
+});
 
   } catch (e) {
     res.status(500).json({ error: "Server error" });
