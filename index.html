@@ -661,7 +661,23 @@ function renderStudy(){
       const g=ts.filter(s=>rag(s.correct,s.answered)==='green').length;
       const am=ts.filter(s=>rag(s.correct,s.answered)==='amber').length;
       const rd=ts.filter(s=>rag(s.correct,s.answered)==='red').length;
-      return '<div class="ccard" style="margin-bottom:9px" onclick="startQuiz(''+tag.replace(/'/g,"\'")+'',10)"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="cname">'+tag+'</div><div style="font-size:.8rem;font-weight:700;color:'+col+'">'+(an>0?p+'%':'&mdash;')+'</div></div><div class="cbar"><div class="cbarf" style="width:'+p+'%;background:'+col+'"></div></div><div class="cstat" style="margin-top:4px">'+qs.length+' terms &middot; <span style="color:var(--gr)">&#9679;'+g+'</span><span style="color:var(--am)"> &#9679;'+am+'</span><span style="color:var(--re)"> &#9679;'+rd+'</span></div></div>';
+    return `<div class="ccard" style="margin-bottom:9px" onclick="startQuiz('${tag.replace(/'/g, "\\'")}', 10)">
+  <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+    <div class="cname">${tag}</div>
+    <div style="font-size:.8rem;font-weight:700;color:${col}">
+      ${an>0 ? p+'%' : '&mdash;'}
+    </div>
+  </div>
+  <div class="cbar">
+    <div class="cbarf" style="width:${p}%;background:${col}"></div>
+  </div>
+  <div class="cstat" style="margin-top:4px">
+    ${qs.length} terms · 
+    <span style="color:var(--gr)">●${g}</span>
+    <span style="color:var(--am)"> ●${am}</span>
+    <span style="color:var(--re)"> ●${rd}</span>
+  </div>
+</div>`;  
     }).join('')}`;
 }
 
