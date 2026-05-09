@@ -1000,10 +1000,6 @@ const wk = (defn.match(/\-([^+\-]+)/g) || [])
 }
 
 function showCk(){const fb=document.getElementById('fbox');fb.style.display='block';fb.className='fbox ck';fb.innerHTML='<span class="spnr"></span> Checking with AI...'}
-function showFb(ok,def,extra){
-  const fb=document.getElementById('fbox');
-  fb.style.display='block'; fb.className='fbox '+(ok?'ok':'ng');
-  const con=QZ.questions[QZ.idx]?.q?.concept||'';
 
 function showFb(ok, def, extra){
   const fb = document.getElementById('fbox');
