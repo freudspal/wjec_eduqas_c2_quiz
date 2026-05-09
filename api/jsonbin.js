@@ -84,7 +84,69 @@ console.log("METHOD:", method);
 
       return res.status(200).json(j.record || {});
     }
+    // =========================
+// GET STUDENT
+// =========================
+if (method === "GET_STUDENT") {
+  const { name } = body;
 
+  const r = await fetch(
+    `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`,
+    {
+      headers: { "X-Master-Key": MASTER_KEY }
+    }
+  );
+
+  const j = await r.json();
+
+  const data = j.record || {};
+  const students = data.students || {};
+
+  // ✅ KEY LINE
+  const student = students[name.toLowerCase()] || null;
+
+  return res.status(200).json({ student });
+}
+
+// =========================
+// PUT STUDENT
+// =========================
+if (method === "PUT_STUDENT") {
+  const { student } = body;
+
+  // ✅ 1. get current database
+  const r1 = await fetch(
+    `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`,
+    {
+      headers: { "X-Master-Key": MASTER_KEY }
+    }
+  );
+
+  const j = await r1.json();
+  const data = j.record || {};
+
+  // ✅ 2. make sure structure exists
+  if (!data.students) data.students = {};
+  if (!data.flags) data.flags = [];
+
+  // ✅ 3. save student correctly
+  data.students[student.name.toLowerCase()] = student;
+
+  // ✅ 4. write back to bin
+  const r2 = await fetch(
+    `https://api.jsonbin.io/v3/b/${BIN_ID}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Master-Key": MASTER_KEY
+      },
+      body: JSON.stringify(data)
+    }
+  );
+
+  return res.status(200).json(await r2.json());
+}
     // =========================
     // PUT STUDENT DB
     // =========================
