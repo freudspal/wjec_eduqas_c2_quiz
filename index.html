@@ -394,11 +394,11 @@ function ragCol(r){return{green:'#22c55e',amber:'#f59e0b',red:'#ef4444',unset:'#
 // API — all calls via Vercel proxy
 // ================================================================
 async function api(method, body = {}) {
-  if (!PROXY) throw new Error('PROXY_URL not configured in index.html');
+  if (!PROXY) throw new Error('PROXY_URL not configured');
 
   const r = await fetch(PROXY, {
     method: 'POST',
-    headers: {'Content-Type':'application/json'},
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       method: method,
       ...body
