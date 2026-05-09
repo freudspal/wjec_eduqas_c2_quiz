@@ -105,6 +105,31 @@ body: JSON.stringify(body)
 
       return res.status(200).json(await r.json());
     }
+// =========================
+// AI CHECK
+// =========================
+if (method === "AI_CHECK") {
+  const { concept, definition, studentAnswer } = body;
+
+  // ✅ simple fallback logic (no external AI)
+  const keywords = (definition || "")
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(w => w.length > 4);
+
+  const answer = (studentAnswer || "").toLowerCase();
+
+  const matches = keywords.filter(k => answer.includes(k));
+
+  const correct = matches.length >= Math.ceil(keywords.length * 0.3);
+
+  return res.status(200).json({
+    correct,
+    feedback: correct
+      ? "Good match to definition"
+      : "Try including key terms from the definition"
+  });
+}
 
     // =========================
     // FALLBACK
