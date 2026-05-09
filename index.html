@@ -358,7 +358,7 @@ select.finput option{background:#1c1c28}
 // ================================================================
 // CONFIG
 // ================================================================
-const PROXY = "https://wjec-eduqas-c2-quiz.vercel.app/api/jsonbin";
+const PROXY = "/api/jsonbin";
 
 // ================================================================
 // EMBEDDED QUESTIONS — fallback if questions bin not set up yet
@@ -394,7 +394,7 @@ function ragCol(r){return{green:'#22c55e',amber:'#f59e0b',red:'#ef4444',unset:'#
 // API — all calls via Vercel proxy
 // ================================================================
 async function api(method, body = {}) {
-  const res = await fetch("/api/jsonbin", {
+  const r = await fetch(PROXY, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -405,7 +405,7 @@ async function api(method, body = {}) {
     })
   });
 
-  return res.json();
+  return r.json();
 }
 
 // ================================================================
