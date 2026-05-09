@@ -618,8 +618,7 @@ function renderHome(){
     <button class="btn btn-o" onclick="smartReview()" style="margin-bottom:18px">&#x1F3AF; Smart Review &mdash; Focus Weak Areas</button>
     <div class="stitle">Topics</div>
     <div class="cgrid">${cats.map(c=>{
-      const p=c.an>0?Math.round((c.co/c.an)*100):0,col=ragCol(c.r);
-      
+      const p=c.an>0?Math.round((c.co/c.an)*100):0,col=ragCol(c.r);      
 return `<div class="ccard" onclick="startQuiz('${c.tag.replace(/'/g, "\\'")}', 10)">
   <div class="cname">${c.tag}</div>
 </div>`;
