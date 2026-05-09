@@ -523,25 +523,83 @@ async function createStudent(){
   const ay   = document.getElementById('sAcad').value;
   const tc   = document.getElementById('sTeacher').value;
   const pin  = [0,1,2,3].map(i=>document.getElementById('np'+i).value).join('');
+
   hideEl('newErr');
-  if(!yr||!cl||!ay||!tc){ showErr('newErr','Please fill in all fields.'); return }
-  if(pin.length<4){ showErr('newErr','Please enter a 4-digit PIN.'); return }
-  const btn=document.getElementById('btnCreate');
-  btn.disabled=true; btn.textContent='Creating...';
-  S = {name, nickname:genNick(name), pinHash:hashPin(pin),
-       year:yr, cls:cl, acadYear:ay, teacher:tc,
-       totalAnswered:0, totalCorrect:0, streak:0, maxStreak:0,
-       categoryStats:{}, termStats:{}, lastSeen:Date.now()};
+
+  if(!yr||!cl||!ay||!tc){ 
+    showErr('newErr','Please fill in all fields.'); 
+    return;
+  }
+
+  if(pin.length<4){ 
+    showErr('newErr','Please enter a 4-digit PIN.'); 
+    return;
+  }
+
+  const btn = document.getElementById('btnCreate');
+  btn.disabled = true;
+  btn.textContent = 'Creating...';
+
+  // ✅ ✅ ✅ DUPLICATE NAME CHECK (ADD THIS BLOCK)
+  try {
+    const existing = await api('GET_STUDENT', { name });
+
+    if (existing.student) {
+      showErr('newErr', '⚠️ This name already exists. Please choose a different name.');
+      btn.disabled = false;
+      btn.textContent = 'Create Account';
+      return;
+    }
+  } catch(e) {
+    showErr('newErr', 'Could not check name. Try again.');
+    btn.disabled = false;
+    btn.textContent = 'Create Account';
+    return;
+  }
+  // ✅ ✅ ✅ END BLOCK
+
+  // ✅ only runs if name is NOT duplicate
+  S = {
+    name,
+    nickname: genNick(name),
+    pinHash: hashPin(pin),
+    year: yr,
+    cls: cl,
+    acadYear: ay,
+    teacher: tc,
+    totalAnswered: 0,
+    totalCorrect: 0,
+    streak: 0,
+    maxStreak: 0,
+    categoryStats: {},
+    termStats: {},
+    lastSeen: Date.now()
+  };
+
   try{
-    await api('PUT_STUDENT',{student:S}); cloudOk=true;
-    document.querySelector('.lcard').innerHTML=`<div style="text-align:center;padding:16px 0">
-      <div style="font-size:2.8rem;margin-bottom:12px">&#x1F3AD;</div>
-      <div style="font-size:.76rem;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px">Your quiz identity is</div>
-      <div style="font-family:'DM Serif Display',serif;font-size:1.9rem;color:var(--ac2);margin-bottom:9px">${S.nickname}</div>
-      <div style="font-size:.78rem;color:var(--mu);margin-bottom:22px">This is how you appear on the leaderboard.<br>Your real name is only visible to your teacher.</div>
-      <button class="btn" onclick="showHome()">Let's Go! &#x1F680;</button>
-    </div>`;
-  } catch(e){ showErr('newErr','Could not save &mdash; check connection.'); btn.disabled=false; btn.textContent='Create Account'; }
+    await api('PUT_STUDENT',{student:S});
+    cloudOk = true;
+
+    document.querySelector('.lcard').innerHTML = `
+      <div style="text-align:center;padding:16px 0">
+        <div style="font-size:2.8rem;margin-bottom:12px">🎭</div>
+        <div style="font-size:.76rem;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px">
+          Your quiz identity is
+        </div>
+        <div style="font-family:'DM Serif Display',serif;font-size:1.9rem;color:var(--ac2);margin-bottom:9px">
+          ${S.nickname}
+        </div>
+        <div style="font-size:.78rem;color:var(--mu);margin-bottom:22px">
+          This is how you appear on the leaderboard.<br>Your real name is only visible to your teacher.
+        </div>
+        <button class="btn" onclick="showHome()">Let's Go! 🚀</button>
+      </div>
+    `;
+  } catch(e){ 
+    showErr('newErr','Could not save — check connection.'); 
+    btn.disabled=false; 
+    btn.textContent='Create Account'; 
+  }
 }
 
 function goTeacher(){ showStep('sTeach'); setTimeout(()=>document.getElementById('tPin').focus(),80) }
