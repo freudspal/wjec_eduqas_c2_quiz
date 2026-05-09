@@ -910,35 +910,73 @@ async function aiCheck(concept, definition, studentAnswer, questionType){
     };
   }
 
-  // ✅ STEP 2 — fallback to AI
-  const appd = APPROVED[concept] || [];
+  // ✅ STEP 2 — AI attempt (with timeout protection)
+  let aiResult = null;
 
-  const r = await api('AI_CHECK',{
-    concept,
-    definition,
-    studentAnswer,
-    questionType,
-    approved: appd
-  });
-
-  // ✅ STEP 3 — learn new answers
-  if (r.correct && studentAnswer.length > 10) {
-
-    if (!APPROVED[concept]) APPROVED[concept] = [];
-
-    if (!APPROVED[concept].includes(studentAnswer)) {
-      APPROVED[concept].push(studentAnswer);
-    }
-
-    // ✅ save to bin
-    try {
-      await api('PUT_QUESTIONS', {
-        approvedAnswers: APPROVED
-      });
-    } catch {}
+  try {
+    aiResult = await Promise.race([
+      api('AI_CHECK',{
+        concept,
+        definition,
+        studentAnswer,
+        questionType
+      }),
+      new Promise(resolve =>
+        setTimeout(() => resolve(null), 3000) // ⏱ 3 sec timeout
+      )
+    ]);
+  } catch(e) {
+    aiResult = null;
   }
 
-  return r;
+  // ✅ STEP 3 — if AI worked, use it
+  if (aiResult && typeof aiResult.correct !== 'undefined') {
+
+    // ✅ learn good answers
+    if (aiResult.correct && studentAnswer.length > 10) {
+      if (!APPROVED[concept]) APPROVED[concept] = [];
+
+      if (!APPROVED[concept].includes(studentAnswer)) {
+        APPROVED[concept].push(studentAnswer);
+      }
+
+      try {
+        await api('PUT_QUESTIONS',{ approvedAnswers: APPROVED });
+      } catch {}
+    }
+
+    return aiResult;
+  }
+
+  // ✅ ✅ ✅ STEP 4 — FALLBACK SYSTEM (your improved one)
+
+  const keywords = definition
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(w => w.length > 4);
+
+  const answer = studentAnswer.toLowerCase();
+
+  const matches = keywords.filter(k => answer.includes(k));
+
+  const phrases = [
+    "natural environment",
+    "real world",
+    "normal environment",
+    "no interference",
+    "no manipulation"
+  ];
+
+  const phraseMatch = phrases.some(p => answer.includes(p));
+
+  const correct = phraseMatch || matches.length >= 2;
+
+  return {
+    correct,
+    feedback: correct
+      ? "Good answer — matches key ideas"
+      : "Try including key ideas like: " + keywords.slice(0,3).join(", ")
+  };
 }
 
 async function checkDef(qid){
