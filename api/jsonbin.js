@@ -59,7 +59,7 @@ console.log("METHOD:", method);
             "Content-Type": "application/json",
             "X-Master-Key": MASTER_KEY
           },
-          body: JSON.stringify()
+          body: JSON.stringify(body)
         }
       );
 
@@ -98,10 +98,7 @@ console.log("METHOD:", method);
             "X-Master-Key": MASTER_KEY
           },
           
-body: JSON.stringify({
-  method: method,
-  ...body
-})
+body: JSON.stringify(body)
 
         }
       );
