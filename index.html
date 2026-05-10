@@ -811,92 +811,207 @@ async function resetProgress(){
 }
 function signOut(){ S=null; location.reload() }
 
+
 // ================================================================
-// QUIZ ENGINE
+// QUIZ ENGINE (CLEAN, EXPLICIT, FIXED)
 // ================================================================
-function selectQ(cat,used){
-  let pool=QUESTIONS.filter(q=>q.definition&&q.mc);
-  if(cat&&cat!=='all')pool=pool.filter(q=>q.tag===cat);
-  pool=pool.filter(q=>!used.has(q.id));
-  if(!pool.length)return null;
-  const w=pool.map(q=>{const st=S.termStats?.[q.concept];if(!st||!st.answered)return 4;const p=st.correct/st.answered;return p>=.75?1:p>=.5?3:5});
-  const tot=w.reduce((a,b)=>a+b,0);let r=Math.random()*tot;
-  for(let i=0;i<pool.length;i++){r-=w[i];if(r<=0)return pool[i]}
-  return pool[pool.length-1];
-}
-function selectType(q){
-  const st=S.termStats?.[q.concept],an=st?st.answered:0;
-  const r=an>0?rag(st.correct,an):'unset';
-  if(q.concept?.includes('Evaluation')&&(q.scenario_strength||q.scenario_weakness))return Math.random()<.5?'eval_s':'eval_w';
-  if(an===0)return Math.random()<.4?'def':'mc';
-  let t=['mc','mc','rev'];
-  if(q.tf)t.push('tf');
-  if(q.scenario&&!q.scenario_strength)t.push('scen');
-  if(r==='red'||r==='amber'){if(q.scenario&&!q.scenario_strength)t.push('scen','scen');t.push('def','def')}
-  return t[Math.floor(Math.random()*t.length)];
-}
-function startQuiz(cat,size){
-  QZ={cat,questions:[],idx:0,correct:0,used:new Set(),results:[]};
-  for(let i=0;i<size;i++){const q=selectQ(cat,QZ.used);if(!q)break;QZ.used.add(q.id);QZ.questions.push({q,type:selectType(q)})}
-  if(!QZ.questions.length){alert('No questions available!');return}
-  showScreen('quizScreen');renderQ();
-}
-const LL=['A','B','C','D'];
-function renderQ(){
-  if(QZ.idx>=QZ.questions.length){showResult();return}
-  const{q,type}=QZ.questions[QZ.idx];
-  document.getElementById('qpf').style.width=((QZ.idx/QZ.questions.length)*100)+'%';
-  document.getElementById('qcnt').textContent=(QZ.idx+1)+'/'+QZ.questions.length;
-  document.getElementById('qtag').textContent=q.tag;
-  let h='';
-  if(type==='mc'){
-    h='<div class="qbadge bmc">Multiple Choice</div><div class="qcon">'+q.concept+'</div><div class="qhint">Choose the best answer:</div><div class="qtxt" style="font-style:italic;color:var(--mu)">'+q.mc.question+'</div><div class="mopts">'+q.mc.options.map((o,i)=>'<div class="mopt" onclick="subMC('+i+','+q.mc.correct+','+q.id+')" id="o'+i+'"><div class="oltr">'+LL[i]+'</div><div>'+o+'</div></div>').join('')+'</div>';
-  } else if(type==='rev'){
-    const pool=QUESTIONS.filter(x=>x.tag===q.tag&&x.concept!==q.concept&&x.mc);
-    const dist=pool.sort(()=>Math.random()-.5).slice(0,3).map(x=>x.concept);
-    while(dist.length<3)dist.push('None of the above');
-    const opts=[q.concept,...dist].sort(()=>Math.random()-.5),ci=opts.indexOf(q.concept);
-    h='<div class="qbadge brv">Identify the Term</div><div class="qhint">Which term matches this definition?</div><div class="qtxt" style="background:var(--sf);border:1px solid var(--bd);border-radius:11px;padding:13px;font-style:italic">&ldquo;'+q.definition+'&rdquo;</div><div class="mopts">'+opts.map((o,i)=>'<div class="mopt" onclick="subMC('+i+','+ci+','+q.id+')" id="o'+i+'"><div class="oltr">'+LL[i]+'</div><div>'+o+'</div></div>').join('')+'</div>';
-  } else if(type==='tf'){
-    h='<div class="qbadge btf">True or False?</div><div class="qcon">'+q.concept+'</div><div class="qhint">Is this statement true or false?</div><div class="qtxt">&ldquo;'+q.tf.statement+'&rdquo;</div><div class="tfrow"><button class="tfbtn tbtn" onclick="subTF(true,'+q.tf.answer+','+q.id+')" id="tft">&#10003; True</button><button class="tfbtn fbtn" onclick="subTF(false,'+q.tf.answer+','+q.id+')" id="tff">&#10007; False</button></div>';
-  } else if(type==='def'){
-    h='<div class="qbadge bdf">Define the Term</div><div class="qcon">'+q.concept+'</div><div class="qhint">Type the definition in your own words:</div><textarea class="tarea" id="tans" placeholder="Write the definition here..."></textarea><button class="ckbtn" onclick="checkDef('+q.id+')">Check Answer &#10003;</button>';
-  } else if(type==='scen'){
-    h='<div class="qbadge bsc">Scenario</div><div class="qcon">'+q.concept+'</div><div class="qhint">Apply your knowledge:</div><div class="qtxt">'+q.scenario+'</div><textarea class="tarea" id="tans" placeholder="Write your answer here..."></textarea><button class="ckbtn" onclick="checkScen('+q.id+')">Check Answer &#10003;</button>';
-  } else if(type==='eval_s'||type==='eval_w'){
-    const v=type==='eval_s'?'strength':'weakness';
-    const txt=v==='strength'?q.scenario_strength:q.scenario_weakness;
-    const hint=v==='strength'?'What does this method do WELL? e.g. validity, reliability, ethics':'What is a PROBLEM with this method? e.g. low validity, demand characteristics';
-  h = `<div class="qbadge bsc">Evaluation: ${v === 'strength' ? 'Strength' : 'Weakness'}</div>
-<div class="qcon">${q.concept.replace(' (Evaluation)', '')}</div>
-<div class="qhint">${hint}</div>
-<div class="qtxt">${txt || q.scenario}</div>
-<textarea class="tarea" id="tans" placeholder="Write one ${v} here..."></textarea>
-<button class="ckbtn" onclick="checkEval(${q.id}, '${v}')">Check Answer ✔</button>`;  
+
+// ------------------------------------------------
+// Select a concept (unchanged weighting logic)
+// ------------------------------------------------
+function selectQ(cat, used) {
+  let pool = QUESTIONS.filter(q => q.definition || q.type === 'evaluation');
+
+  if (cat && cat !== 'all') {
+    pool = pool.filter(q => q.tag === cat);
   }
-  h+='<div class="fbox" id="fbox"></div><button class="nxtbtn" id="nxtbtn" onclick="nextQ()">Next Question &#8594;</button>';
-  document.getElementById('quizContent').innerHTML=h;
-  document.getElementById('quizContent').scrollTop=0;
+
+  pool = pool.filter(q => !used.has(q.id));
+  if (!pool.length) return null;
+
+  const w = pool.map(q => {
+    const st = S.termStats?.[q.concept];
+    if (!st || !st.answered) return 4;
+    const p = st.correct / st.answered;
+    return p >= .75 ? 1 : p >= .5 ? 3 : 5;
+  });
+
+  const tot = w.reduce((a, b) => a + b, 0);
+  let r = Math.random() * tot;
+
+  for (let i = 0; i < pool.length; i++) {
+    r -= w[i];
+    if (r <= 0) return pool[i];
+  }
+
+  return pool[pool.length - 1];
 }
 
-function lockMC(ch,ok){
-  document.querySelectorAll('.mopt').forEach((e,i)=>{e.classList.add('dis');if(i===ok)e.classList.add('ok');if(i===ch&&ch!==ok)e.classList.add('ng')});
-  document.getElementById('nxtbtn').style.display='block';
-}
-function subMC(ch,ok,qid){const q=QUESTIONS.find(q=>q.id===qid);lockMC(ch,ok);showFb(ch===ok,q.definition);rec(q,ch===ok)}
-function subTF(ch,ok,qid){
-  const q=QUESTIONS.find(q=>q.id===qid);
-  document.getElementById('tft').classList.add('dis');document.getElementById('tff').classList.add('dis');
-  if(ok)document.getElementById('tft').classList.add('ok');else document.getElementById('tff').classList.add('ok');
-  if(ch!==ok)(ch?document.getElementById('tft'):document.getElementById('tff')).classList.add('ng');
-  showFb(ch===ok,q.definition);rec(q,ch===ok);document.getElementById('nxtbtn').style.display='block';
+// ------------------------------------------------
+// Select interaction TYPE (never evaluation)
+// ------------------------------------------------
+function selectType(q) {
+  const types = [];
+
+  if (q.mc) types.push('mc');
+  if (q.tf) types.push('tf');
+  if (q.scenario) types.push('scen');
+
+  // typed response always available
+  types.push('def');
+
+  return types[Math.floor(Math.random() * types.length)];
 }
 
-// AI CHECK — routes through Vercel proxy using ANTHROPIC_API_KEY
+// ------------------------------------------------
+// Select MODE (what counts as correct)
+// ------------------------------------------------
+function selectMode(q) {
+  if (q.type === 'evaluation') {
+    return Math.random() < 0.5 ? 'eval_s' : 'eval_w';
+  }
+  return 'standard';
+}
+
+// ------------------------------------------------
+// Start quiz
+// ------------------------------------------------
+function startQuiz(cat, size) {
+  QZ = {
+    cat,
+    questions: [],
+    idx: 0,
+    correct: 0,
+    used: new Set(),
+    results: []
+  };
+
+  for (let i = 0; i < size; i++) {
+    const q = selectQ(cat, QZ.used);
+    if (!q) break;
+
+    QZ.used.add(q.id);
+
+    QZ.questions.push({
+      q,
+      type: selectType(q),
+      mode: selectMode(q)
+    });
+  }
+
+  if (!QZ.questions.length) {
+    alert('No questions available!');
+    return;
+  }
+
+  showScreen('quizScreen');
+  renderQ();
+}
+
+const LL = ['A','B','C','D'];
+
+// ------------------------------------------------
+// Render question
+// ------------------------------------------------
+function renderQ() {
+  if (QZ.idx >= QZ.questions.length) {
+    showResult();
+    return;
+  }
+
+  const { q, type, mode } = QZ.questions[QZ.idx];
+
+  document.getElementById('qpf').style.width =
+    ((QZ.idx / QZ.questions.length) * 100) + '%';
+  document.getElementById('qcnt').textContent =
+    (QZ.idx + 1) + '/' + QZ.questions.length;
+  document.getElementById('qtag').textContent = q.tag;
+
+  let h = '';
+
+  // ---------------- MC ----------------
+  if (type === 'mc') {
+    h = `
+      <div class="qbadge bmc">Multiple Choice</div>
+      <div class="qcon">${q.concept}</div>
+      <div class="qhint">Choose the best answer:</div>
+      <div class="qtxt">${q.mc.question}</div>
+      <div class="mopts">
+        ${q.mc.options.map((o,i) =>
+          `<div class="mopt" onclick="subMC(${i},${q.mc.correct},${q.id})">
+            <div class="oltr">${LL[i]}</div><div>${o}</div>
+          </div>`
+        ).join('')}
+      </div>`;
+  }
+
+  // ---------------- TRUE / FALSE ----------------
+  else if (type === 'tf') {
+    h = `
+      <div class="qbadge btf">True or False?</div>
+      <div class="qcon">${q.concept}</div>
+      <div class="qtxt">“${q.tf.statement}”</div>
+      <div class="tfrow">
+        <button onclick="subTF(true,${q.tf.answer},${q.id})">✔ True</button>
+        <button onclick="subTF(false,${q.tf.answer},${q.id})">✘ False</button>
+      </div>`;
+  }
+
+  // ---------------- DEFINE ----------------
+  else if (type === 'def') {
+    const prompt =
+      mode === 'eval_s'
+        ? 'Give ONE strength of this method:'
+        : mode === 'eval_w'
+        ? 'Give ONE weakness of this method:'
+        : 'Define the term in your own words:';
+
+    h = `
+      <div class="qbadge bdf">Typed Answer</div>
+      <div class="qcon">${q.concept}</div>
+      <div class="qhint">${prompt}</div>
+      <textarea class="tarea" id="tans"></textarea>
+      <button class="ckbtn" onclick="${
+        mode === 'standard'
+          ? `checkDef(${q.id})`
+          : `checkEval(${q.id},'${mode === 'eval_s' ? 'strength' : 'weakness'}')`
+      }">Check Answer ✔</button>`;
+  }
+
+  // ---------------- SCENARIO ----------------
+  else if (type === 'scen') {
+    const prompt =
+      mode === 'eval_s'
+        ? 'Identify the method AND give ONE strength:'
+        : mode === 'eval_w'
+        ? 'Identify the method AND give ONE weakness:'
+        : 'Identify the term shown in the scenario:';
+
+    h = `
+      <div class="qbadge bsc">Scenario</div>
+      <div class="qcon">${q.concept}</div>
+      <div class="qhint">${prompt}</div>
+      <div class="qtxt">${q.scenario}</div>
+      <textarea class="tarea" id="tans"></textarea>
+      <button class="ckbtn" onclick="checkScen(${q.id},'${mode}')">
+        Check Answer ✔
+      </button>`;
+  }
+
+  h += `
+    <div class="fbox" id="fbox"></div>
+    <button class="nxtbtn" onclick="nextQ()">Next →</button>`;
+
+  document.getElementById('quizContent').innerHTML = h;
+  document.getElementById('quizContent').scrollTop = 0;
+}
+
+// ------------------------------------------------
+// Approved answers helper (NOT Anthropic)
+// ------------------------------------------------
 function checkApprovedFirst(concept, answer) {
   const list = APPROVED[concept] || [];
   const a = answer.toLowerCase();
-
   return list.some(x => a.includes(x.toLowerCase()));
 }
 
