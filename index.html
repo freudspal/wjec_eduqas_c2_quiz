@@ -990,12 +990,15 @@ else if (type === 'scen') {
   `;
 }
 
-  h += `
-    <div class="fbox" id="fbox"></div>
-    <button class="nxtbtn" onclick="nextQ()">Next →</button>`;
+h += `
+  <div class="fbox" id="fbox"></div>
+  <button class="nxtbtn" id="nxtbtn" onclick="nextQ()">
+    Next →
+  </button>
+`;
 
-  document.getElementById('quizContent').innerHTML = h;
-  document.getElementById('quizContent').scrollTop = 0;
+document.getElementById('quizContent').innerHTML = h;
+document.getElementById('quizContent').scrollTop = 0;
 }
 
 // ------------------------------------------------
