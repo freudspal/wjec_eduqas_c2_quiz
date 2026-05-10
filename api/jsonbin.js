@@ -219,12 +219,25 @@ Respond ONLY with JSON:
 
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
-    // ✅ Extract JSON safely from Gemini output
-    let parsed = null;
-    try {
-      const match = text.match(/\{[\s\S]*\}/);
-      if (match) parsed = JSON.parse(match[0]);
-    } catch {}
+    // ✅ NEW SAFE PARSE (handles messy Gemini output)
+let parsed = null;
+
+try {
+  // remove markdown code blocks if present
+  let clean = text.replace(/```json|```/g, "").trim();
+
+  // find JSON boundaries
+  const start = clean.indexOf("{");
+  const end = clean.lastIndexOf("}");
+
+  if (start !== -1 && end !== -1) {
+    const jsonString = clean.substring(start, end + 1);
+    parsed = JSON.parse(jsonString);
+  }
+
+} catch (e) {
+  console.log("❌ JSON parse failed:", text);
+}
 
     // ✅ If Gemini returned usable result
     if (parsed && typeof parsed.correct !== "undefined") {
