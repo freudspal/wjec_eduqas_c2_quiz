@@ -178,24 +178,24 @@ if (method === "AI_CHECK") {
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
     const prompt = `
-You are marking an EDUQAS exam board A-level psychology answer.
+You are marking an A-level psychology answer.
 
 Concept: ${concept}
-
-Correct definition: ${definition}
-
+Definition: ${definition}
 Student answer: ${studentAnswer}
 
-Task:
-- Decide if the student answer is conceptually correct (even if phrased differently)
-- Accept paraphrased answers if they show correct understanding
-- Be slightly lenient with wording
+Decide if the answer is conceptually correct.
+Accept paraphrasing if meaning is correct.
 
-Respond ONLY with JSON:
-{
-  "correct": true or false,
-  "feedback": "short explanation for the student"
-}
+IMPORTANT RULES:
+- Output ONLY valid JSON
+- NO text before JSON
+- NO text after JSON
+- NO markdown
+- NO explanations outside JSON
+
+Correct format:
+{"correct": true, "feedback": "short explanation"}
 `;
 
     const r = await fetch(
@@ -215,51 +215,53 @@ Respond ONLY with JSON:
       }
     );
 
-    const data = await r.json();
+const data = await r.json();
 
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
     // ✅ NEW SAFE PARSE (handles messy Gemini output)
+
+// ✅ ADD THIS (new debugging)
+console.log("🔍 Gemini raw response:", text);
+
+// ✅ REPLACE EVERYTHING BELOW THIS WITH NEW PARSER
 let parsed = null;
 
 try {
-  // remove markdown code blocks if present
-  let clean = text.replace(/```json|```/g, "").trim();
+  let clean = text
+    .replace(/```json/g, "")
+    .replace(/```/g, "")
+    .trim();
 
-  // find JSON boundaries
-  const start = clean.indexOf("{");
-  const end = clean.lastIndexOf("}");
+  const jsonStart = clean.indexOf("{");
+  const jsonEnd = clean.lastIndexOf("}");
 
-  if (start !== -1 && end !== -1) {
-    const jsonString = clean.substring(start, end + 1);
-    parsed = JSON.parse(jsonString);
+  if (jsonStart !== -1 && jsonEnd !== -1) {
+    clean = clean.substring(jsonStart, jsonEnd + 1);
+
+    // ✅ Fix common issues
+    clean = clean
+      .replace(/(\w+):/g, '"$1":')  // fix unquoted keys
+      .replace(/'/g, '"');         // fix single quotes
+
+    parsed = JSON.parse(clean);
   }
 
 } catch (e) {
-  console.log("❌ JSON parse failed:", text);
+  console.log("❌ JSON parse failed:", e);
+  console.log("❌ Raw text was:", text);
 }
 
-    // ✅ If Gemini returned usable result
-    if (parsed && typeof parsed.correct !== "undefined") {
-      return res.status(200).json(parsed);
-    }
-
-    // ❌ fallback if Gemini response unusable
-    return res.status(200).json({
-      correct: false,
-      feedback: "AI could not evaluate answer"
-    });
-
-  } catch (err) {
-    console.error("GEMINI ERROR:", err);
-
-    // ✅ NEVER hang — always return something
-    return res.status(200).json({
-      correct: false,
-      feedback: "AI failed — using fallback"
-    });
-  }
+// ✅ FINAL CHECK
+if (parsed && typeof parsed.correct !== "undefined") {
+  return res.status(200).json(parsed);
 }
+
+// ✅ FALLBACK IF PARSE FAILS
+return res.status(200).json({
+  correct: false,
+  feedback: "AI response format issue — using fallback"
+});
 
     // =========================
     // FALLBACK
