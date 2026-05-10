@@ -902,7 +902,7 @@ function checkApprovedFirst(concept, answer) {
 
 async function aiCheck(concept, definition, studentAnswer, questionType){
 
-  // ✅ STEP 1 — check approved answers first
+  // ✅ 1. CHECK SAVED (APPROVED) ANSWERS FIRST
   if (checkApprovedFirst(concept, studentAnswer)) {
     return {
       correct: true,
@@ -910,52 +910,58 @@ async function aiCheck(concept, definition, studentAnswer, questionType){
     };
   }
 
-  // ✅ STEP 2 — AI attempt (with timeout protection)
+  // ✅ 2. CALL GEMINI (via backend)
   let aiResult = null;
 
   try {
     aiResult = await Promise.race([
-      api('AI_CHECK',{
+      api('AI_CHECK', {
         concept,
         definition,
         studentAnswer,
         questionType
       }),
       new Promise(resolve =>
-        setTimeout(() => resolve(null), 3000) // ⏱ 3 sec timeout
+        setTimeout(() => resolve(null), 3000) // ⏱ stop hanging
       )
     ]);
   } catch(e) {
     aiResult = null;
   }
 
-  // ✅ STEP 3 — if AI worked, use it
+  // ✅ 3. IF AI WORKED → USE IT
   if (aiResult && typeof aiResult.correct !== 'undefined') {
 
-    // ✅ learn good answers
+    // ✅ learn good answers (self-improving system)
     if (aiResult.correct && studentAnswer.length > 10) {
-      if (!APPROVED[concept]) APPROVED[concept] = [];
+
+      if (!APPROVED[concept]) {
+        APPROVED[concept] = [];
+      }
 
       if (!APPROVED[concept].includes(studentAnswer)) {
         APPROVED[concept].push(studentAnswer);
       }
 
+      // ✅ save to JSONBin
       try {
-        await api('PUT_QUESTIONS',{ approvedAnswers: APPROVED });
+        await api('PUT_QUESTIONS', {
+          approvedAnswers: APPROVED
+        });
       } catch {}
     }
 
     return aiResult;
   }
 
-  // ✅ ✅ ✅ STEP 4 — FALLBACK SYSTEM (your improved one)
+  // ✅ 4. FALLBACK SYSTEM (keyword + phrase match)
+
+  const answer = studentAnswer.toLowerCase();
 
   const keywords = definition
     .toLowerCase()
     .split(/\s+/)
     .filter(w => w.length > 4);
-
-  const answer = studentAnswer.toLowerCase();
 
   const matches = keywords.filter(k => answer.includes(k));
 
@@ -964,7 +970,10 @@ async function aiCheck(concept, definition, studentAnswer, questionType){
     "real world",
     "normal environment",
     "no interference",
-    "no manipulation"
+    "no manipulation",
+    "all information",
+    "agreed to take part",
+    "informed choice"
   ];
 
   const phraseMatch = phrases.some(p => answer.includes(p));
