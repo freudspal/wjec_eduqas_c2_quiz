@@ -215,12 +215,12 @@ FORMAT EXACTLY:
     })
   }
 );
-console.log("📦 Full Gemini response:", JSON.stringify(data, null, 2));
+
 
     const data = await r.json();
 
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-
+    console.log("📦 Full Gemini response:", JSON.stringify(data, null, 2));
     // ✅ debugging (keep while testing)
     console.log("🔍 Gemini raw response:", text);
 
