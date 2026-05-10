@@ -268,6 +268,20 @@ FORMAT EXACTLY:
   }
 }
 
+// =========================
+// AUTH TEACHER
+// =========================
+if (method === "AUTH") {
+  const { pin } = body;
+
+  const TEACHER_PIN = process.env.TEACHER_PIN;
+
+  // optional safety: ensure both are strings
+  const ok = String(pin) === String(TEACHER_PIN);
+
+  return res.status(200).json({ ok });
+}
+
     // =========================
     // FALLBACK
     // =========================
