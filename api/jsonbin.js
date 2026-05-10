@@ -198,24 +198,24 @@ FORMAT EXACTLY:
 `;
 
     const r = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [{ text: prompt }]
-            }
-          ],
-          generationConfig: {
-            response_mime_type: "application/json"  // ✅ forces clean JSON
-          }
-        })
-      }
-    );
+  `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      contents: [
+        {
+          role: "user",   // ✅ CRITICAL FIX
+          parts: [{ text: prompt }]
+        }
+      ]
+      // ❌ REMOVE generationConfig (it was breaking output)
+    })
+  }
+);
+console.log("📦 Full Gemini response:", JSON.stringify(data, null, 2));
 
     const data = await r.json();
 
