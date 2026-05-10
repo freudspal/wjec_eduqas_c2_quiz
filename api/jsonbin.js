@@ -167,10 +167,106 @@ body: JSON.stringify(body)
 
       return res.status(200).json(await r.json());
     }
-// =========================
-// AI CHECK (GEMINI)
-// =========================
 
+// =========================
+// AI CHECK (GEMINI SAFE)
+// =========================
+if (method === "AI_CHECK") {
+  try {
+    const { concept, definition, studentAnswer } = body;
+
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
+    const prompt = `
+You are marking an A-level psychology answer.
+
+Concept: ${concept}
+Definition: ${definition}
+Student answer: ${studentAnswer}
+
+Decide if the answer is conceptually correct.
+Accept paraphrasing if meaning is correct.
+
+STRICT RULES:
+- Output ONLY valid JSON
+- NO text before JSON
+- NO text after JSON
+- NO markdown formatting
+
+FORMAT EXACTLY:
+{"correct": true, "feedback": "short explanation"}
+`;
+
+    const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [{ text: prompt }]
+            }
+          ],
+          generationConfig: {
+            response_mime_type: "application/json"  // ✅ forces clean JSON
+          }
+        })
+      }
+    );
+
+    const data = await r.json();
+
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+    // ✅ debugging (keep while testing)
+    console.log("🔍 Gemini raw response:", text);
+
+    // ✅ SAFE PARSING (NO risky replacements)
+    let parsed = null;
+
+    try {
+      let clean = text
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+
+      const start = clean.indexOf("{");
+      const end = clean.lastIndexOf("}");
+
+      if (start !== -1 && end !== -1) {
+        const jsonString = clean.substring(start, end + 1);
+        parsed = JSON.parse(jsonString);
+      }
+
+    } catch (e) {
+      console.log("❌ JSON parse failed:", e.message);
+      console.log("❌ Raw text:", text);
+    }
+
+    // ✅ SUCCESS
+    if (parsed && typeof parsed.correct !== "undefined") {
+      return res.status(200).json(parsed);
+    }
+
+    // ✅ FALLBACK RESPONSE (never crashes)
+    return res.status(200).json({
+      correct: false,
+      feedback: "AI response unreadable — fallback used"
+    });
+
+  } catch (err) {
+    console.error("🚨 AI ERROR:", err);
+
+    // ✅ NEVER break the API
+    return res.status(200).json({
+      correct: false,
+      feedback: "AI failed — fallback used"
+    });
+  }
+}
 
     // =========================
     // FALLBACK
