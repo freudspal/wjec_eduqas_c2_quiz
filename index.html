@@ -813,17 +813,14 @@ function signOut(){ S=null; location.reload() }
 
 
 // ================================================================
-// QUIZ ENGINE (FINAL STABLE VERSION)
+// QUIZ ENGINE (FINAL CLEAN + CONSISTENT UI)
 // ================================================================
 
 // ---------------- SELECT QUESTION ----------------
 function selectQ(cat, used) {
   let pool = QUESTIONS.filter(q => q.definition || q.type === 'evaluation');
 
-  if (cat && cat !== 'all') {
-    pool = pool.filter(q => q.tag === cat);
-  }
-
+  if (cat && cat !== 'all') pool = pool.filter(q => q.tag === cat);
   pool = pool.filter(q => !used.has(q.id));
   if (!pool.length) return null;
 
@@ -834,54 +831,44 @@ function selectQ(cat, used) {
     return p >= .75 ? 1 : p >= .5 ? 3 : 5;
   });
 
-  const tot = w.reduce((a, b) => a + b, 0);
-  let r = Math.random() * tot;
-
-  for (let i = 0; i < pool.length; i++) {
+  let r = Math.random() * w.reduce((a,b)=>a+b,0);
+  for (let i=0;i<pool.length;i++){
     r -= w[i];
     if (r <= 0) return pool[i];
   }
 
-  return pool[pool.length - 1];
+  return pool[pool.length-1];
 }
 
 // ---------------- SELECT TYPE ----------------
-function selectType(q) {
-  const types = [];
+function selectType(q){
+  const t=[];
 
-  if (q.mc) types.push('mc');
-  if (q.tf) types.push('tf');
-  if (q.scenario) types.push('scen');
+  if(q.mc) t.push('mc');
+  if(q.tf) t.push('tf');
+  if(q.scenario) t.push('scen');
 
-  if (q.type !== 'evaluation') {
-    types.push('def'); // ✅ no definition for eval
-  }
+  // ✅ NO DEFINE FOR EVALUATION
+  if(q.type !== 'evaluation') t.push('def');
 
-  return types[Math.floor(Math.random() * types.length)];
+  return t[Math.floor(Math.random()*t.length)];
 }
 
-// ---------------- SELECT MODE ----------------
-function selectMode(q) {
-  if (q.type === 'evaluation') {
+// ---------------- MODE ----------------
+function selectMode(q){
+  if(q.type === 'evaluation'){
     return Math.random() < 0.5 ? 'eval_s' : 'eval_w';
   }
   return 'standard';
 }
 
 // ---------------- START QUIZ ----------------
-function startQuiz(cat, size) {
-  QZ = {
-    cat,
-    questions: [],
-    idx: 0,
-    correct: 0,
-    used: new Set(),
-    results: []
-  };
+function startQuiz(cat,size){
+  QZ={cat,questions:[],idx:0,correct:0,used:new Set(),results:[]};
 
-  for (let i = 0; i < size; i++) {
-    const q = selectQ(cat, QZ.used);
-    if (!q) break;
+  for(let i=0;i<size;i++){
+    const q=selectQ(cat,QZ.used);
+    if(!q)break;
 
     QZ.used.add(q.id);
 
@@ -896,166 +883,167 @@ function startQuiz(cat, size) {
   renderQ();
 }
 
-const LL = ['A','B','C','D'];
+const LL=['A','B','C','D'];
 
 // ---------------- RENDER ----------------
-function renderQ() {
-  if (QZ.idx >= QZ.questions.length) return showResult();
+function renderQ(){
+  if(QZ.idx>=QZ.questions.length)return showResult();
 
-  const { q, type, mode } = QZ.questions[QZ.idx];
+  const{q,type,mode}=QZ.questions[QZ.idx];
 
-  let h = '';
+  let h='';
 
-  // ✅ MC
-  if (type === 'mc') {
-    h = `
-      <div class="qbadge bmc">Multiple Choice</div>
-      <div class="qcon">${q.concept}</div>
-      <div class="qtxt">${q.mc.question}</div>
-      <div class="mopts">
-        ${q.mc.options.map((o,i)=>
-          `<div class="mopt" onclick="subMC(${i},${q.mc.correct},${q.id})">
-            <div class="oltr">${LL[i]}</div>
-            <div>${o}</div>
-          </div>`
-        ).join('')}
-      </div>`;
+  // ===== MC =====
+  if(type==='mc'){
+    h=`
+    <div class="qbadge bmc">Multiple Choice</div>
+    <div class="qcon">${q.concept}</div>
+    <div class="qtxt">${q.mc.question}</div>
+
+    <div class="mopts">
+      ${q.mc.options.map((o,i)=>
+        `<div class="mopt" onclick="subMC(${i},${q.mc.correct},${q.id})">
+          <div class="oltr">${LL[i]}</div>
+          <div>${o}</div>
+        </div>`
+      ).join('')}
+    </div>`;
   }
 
-  // ✅ TF
-  else if (type === 'tf') {
-    h = `
-      <div class="qbadge btf">True or False?</div>
-      <div class="qcon">${q.concept}</div>
-      <div class="qtxt">“${q.tf.statement}”</div>
+  // ===== TF =====
+  else if(type==='tf'){
+    h=`
+    <div class="qbadge btf">True or False</div>
+    <div class="qcon">${q.concept}</div>
 
-      <div class="tfrow">
-        <button id="tft" onclick="subTF(true, ${q.tf.answer}, ${q.id})">
-          ✔ True
-        </button>
-        <button id="tff" onclick="subTF(false, ${q.tf.answer}, ${q.id})">
-          ✘ False
-        </button>
-      </div>`;
+    <div class="qtxt">“${q.tf.statement}”</div>
+
+    <div class="tfrow">
+      <button class="ckbtn" onclick="subTF(true,${q.tf.answer},${q.id})">✔ True</button>
+      <button class="ckbtn" onclick="subTF(false,${q.tf.answer},${q.id})">✘ False</button>
+    </div>`;
   }
 
-  // ✅ DEF
-  else if (type === 'def') {
-
-    const prompt =
-      mode === 'eval_s'
+  // ===== DEF / EVAL =====
+  else if(type==='def'){
+    const prompt=
+      mode==='eval_s'
         ? 'Give ONE strength:'
-        : mode === 'eval_w'
+        : mode==='eval_w'
         ? 'Give ONE weakness:'
         : 'Define the term:';
 
-    h = `
-      <div class="qbadge bdf">Typed Answer</div>
-      <div class="qcon">${q.concept}</div>
-      <div class="qhint">${prompt}</div>
+    const handler=
+      mode==='standard'
+        ? `checkDef(${q.id})`
+        : `checkEval(${q.id},'${mode==='eval_s'?'strength':'weakness'}')`;
 
-      <textarea id="tans"></textarea>
+    h=`
+    <div class="qbadge bdf">Typed Answer</div>
+    <div class="qcon">${q.concept}</div>
+    <div class="qhint">${prompt}</div>
 
-      <button class="ckbtn" onclick="${
-        mode === 'standard'
-          ? `checkDef(${q.id})`
-          : `checkEval(${q.id}, '${mode === 'eval_s' ? 'strength' : 'weakness'}')`
-      }">Check Answer ✔</button>`;
+    <textarea class="tarea" id="tans"></textarea>
+
+    <button class="ckbtn" onclick="${handler}">
+      Check Answer ✔
+    </button>`;
   }
 
-  // ✅ SCENARIO
-  else if (type === 'scen') {
-    h = `
-      <div class="qbadge bsc">Scenario</div>
-      <div class="qtxt">${q.scenario}</div>
+  // ===== SCENARIO =====
+  else if(type==='scen'){
+    h=`
+    <div class="qbadge bsc">Scenario</div>
 
-      <textarea id="tans"></textarea>
+    <div class="qtxt">${q.scenario}</div>
 
-      <button class="ckbtn" onclick="checkScen(${q.id})">
-        Check Answer ✔
-      </button>`;
+    <textarea class="tarea" id="tans"></textarea>
+
+    <button class="ckbtn" onclick="checkScen(${q.id})">
+      Check Answer ✔
+    </button>`;
   }
 
-  // ✅ FOOTER
-  h += `
-    <div class="fbox" id="fbox"></div>
+  // ===== FOOTER =====
+  h+=`
+  <div class="fbox" id="fbox"></div>
 
-    <div style="display:flex; gap:10px;">
-      <button onclick="skipQ()">Skip</button>
-      <button id="nxtbtn" onclick="nextQ()">Next →</button>
-    </div>
+  <div style="display:flex; gap:10px; margin-top:12px;">
+    <button class="ckbtn" onclick="skipQ()">Skip</button>
+    <button class="ckbtn" id="nxtbtn" onclick="nextQ()">Next →</button>
+  </div>
   `;
 
-  document.getElementById('quizContent').innerHTML = h;
+  document.getElementById('quizContent').innerHTML=h;
 
-  document.getElementById('nxtbtn').style.display = 'none';
+  document.getElementById('nxtbtn').style.display='none';
 }
 
 // ================================================================
-// MC HANDLER
+// HANDLERS
 // ================================================================
-function subMC(ch, ok, qid){
-  const q = QUESTIONS.find(q => q.id === qid);
+
+// ✅ MC
+function subMC(ch,ok,qid){
+  const q=QUESTIONS.find(q=>q.id===qid);
 
   document.querySelectorAll('.mopt').forEach((e,i)=>{
-    if (i===ok) e.classList.add('ok');
-    if (i===ch && ch!==ok) e.classList.add('ng');
+    if(i===ok)e.classList.add('ok');
+    if(i===ch&&ch!==ok)e.classList.add('ng');
   });
 
-  const correct = ch === ok;
+  const correct=(ch===ok);
 
-  showFb(correct, q.definition);
-  rec(q, correct);
+  showFb(correct,q.definition);
+  rec(q,correct);
 
-  document.getElementById('nxtbtn').style.display = 'block';
+  document.getElementById('nxtbtn').style.display='block';
 }
 
-// ================================================================
-// TF HANDLER (✅ FIXED)
-// ================================================================
-function subTF(ch, ok, qid){
-  const q = QUESTIONS.find(q => q.id === qid);
+// ✅ ✅ ✅ TF (FIXED + GLOBAL)
+function subTF(ch,ok,qid){
+  const q=QUESTIONS.find(q=>q.id===qid);
 
-  const correct = (ch === ok);
+  const correct=(ch===ok);
 
-  showFb(correct, q.definition,
-    correct ? "Correct judgement" : "Check the definition");
+  showFb(
+    correct,
+    q.definition,
+    correct ? "Correct judgement" : "Check the definition"
+  );
 
-  rec(q, correct);
+  rec(q,correct);
 
-  document.getElementById('nxtbtn').style.display = 'block';
+  document.getElementById('nxtbtn').style.display='block';
 }
 
-// ================================================================
-// SCENARIO (✅ FIXED)
-// ================================================================
+// ✅ SCENARIO (AI FIXED)
 async function checkScen(qid){
-  const q = QUESTIONS.find(q => q.id === qid);
+  const q=QUESTIONS.find(q=>q.id===qid);
 
-  const ans = document.getElementById('tans').value.trim();
-  if (!ans) return alert('Write something');
+  const ans=document.getElementById('tans').value.trim();
+  if(!ans)return alert('Write something');
 
   showCk();
 
-  const r = await aiCheck(q.concept, q.definition, ans, 'scenario');
+  const r=await aiCheck(q.concept,q.definition,ans,'scenario');
 
-  showFb(r.correct, q.definition, r.feedback);
-  rec(q, r.correct);
+  showFb(r.correct,q.definition,r.feedback);
+  rec(q,r.correct);
 
-  document.getElementById('nxtbtn').style.display = 'block';
+  document.getElementById('nxtbtn').style.display='block';
 }
 
-// ================================================================
-// SKIP
-// ================================================================
+// ✅ SKIP
 function skipQ(){
-  const { q } = QZ.questions[QZ.idx];
+  const {q}=QZ.questions[QZ.idx];
 
-  showFb(false, q.definition, "Skipped");
-  rec(q, false);
+  showFb(false,q.definition,"Skipped");
+  rec(q,false);
 
-  document.getElementById('nxtbtn').style.display = 'block';
+  document.getElementById('nxtbtn').style.display='block';
 }
+
 // ------------------------------------------------
 // Approved answers helper (NOT Anthropic)
 // ------------------------------------------------
@@ -1064,7 +1052,7 @@ function checkApprovedFirst(concept, answer) {
   const a = answer.toLowerCase();
   return list.some(x => a.includes(x.toLowerCase()));
 }
-
+//// question checker and AI checker /////
 async function aiCheck(concept, definition, studentAnswer, questionType){
 
   // ✅ 1. APPROVED ANSWERS
@@ -1085,7 +1073,7 @@ async function aiCheck(concept, definition, studentAnswer, questionType){
 
   const matches = keywords.filter(k => answer.includes(k));
 
-  if (matches.length >= 2) {
+  if (matches.length >= 1) {
     return {
       correct: true,
       feedback: "Good answer — matches key ideas"
