@@ -946,16 +946,27 @@ function renderQ() {
   }
 
   // ---------------- TRUE / FALSE ----------------
-  else if (type === 'tf') {
-    h = `
-      <div class="qbadge btf">True or False?</div>
-      <div class="qcon">${q.concept}</div>
-      <div class="qtxt">“${q.tf.statement}”</div>
-      <div class="tfrow">
-        <button onclick="subTF(true,${q.tf.answer},${q.id})">✔ True</button>
-        <button onclick="subTF(false,${q.tf.answer},${q.id})">✘ False</button>
-      </div>`;
-  }
+ else if (type === 'tf') {
+  h = `
+    <div class="qbadge btf">True or False?</div>
+
+    <div class="qcon">${q.concept}</div>
+
+    <div class="qtxt">“${q.tf.statement}”</div>
+
+    <div class="tfrow">
+      <button class="tfbtn tbtn" id="tft"
+        onclick="subTF(true, ${q.tf.answer}, ${q.id})">
+        ✔ True
+      </button>
+
+      <button class="tfbtn fbtn" id="tff"
+        onclick="subTF(false, ${q.tf.answer}, ${q.id})">
+        ✘ False
+      </button>
+    </div>
+  `;
+}
 
   // ---------------- DEFINE ----------------
   else if (type === 'def') {
@@ -998,9 +1009,11 @@ h += `
 `;
 
 document.getElementById('quizContent').innerHTML = h;
+
+// ✅ hide Next button initially
+document.getElementById('nxtbtn').style.display = 'none';
+
 document.getElementById('quizContent').scrollTop = 0;
-document.getElementById('nxtbtn').style.display = 'block';
-  
 }
 // ------------------------------------------------
 // Approved answers helper (NOT Anthropic)
@@ -1103,19 +1116,46 @@ async function checkDef(qid){
   }
   document.getElementById('nxtbtn').style.display='block';
 }
-async function checkScen(qid){
-  const q=QUESTIONS.find(q=>q.id===qid);
-  const ans=document.getElementById('tans').value.trim();
-  if(!ans){alert('Please write something first!');return}
-  document.querySelector('.ckbtn').disabled=true; showCk();
-  try{
-    const r=await aiCheck(q.scenario,q.concept+': '+q.definition,ans,'scenario');
-    showFb(r.correct,q.concept+': '+q.definition,r.feedback); rec(q,r.correct);
-  } catch(e){
-    const ok=ans.toLowerCase().includes(q.concept.toLowerCase().split(' ')[0]);
-    showFb(ok,q.concept+': '+q.definition); rec(q,ok);
+async function checkScen(qid, mode){
+  const q = QUESTIONS.find(q => q.id === qid);
+
+  const ans = document.getElementById('tans').value.trim();
+  if(!ans){
+    alert('Please write something first!');
+    return;
   }
-  document.getElementById('nxtbtn').style.display='block';
+
+  document.querySelector('.ckbtn').disabled = true;
+  showCk();
+
+  try {
+    // ✅ FIXED INPUT
+    const r = await aiCheck(
+      q.concept,      // ✅ correct concept
+      q.definition,   // ✅ clean definition
+      ans,
+      'scenario'
+    );
+
+    showFb(r.correct, q.definition, r.feedback);
+    rec(q, r.correct);
+
+  } catch(e){
+
+    // ✅ simple fallback
+    const ok = ans.toLowerCase().includes(q.concept.toLowerCase());
+
+    showFb(
+      ok,
+      q.definition,
+      ok ? "Correct" : "Try including the correct term"
+    );
+
+    rec(q, ok);
+  }
+
+  // ✅ show next button
+  document.getElementById('nxtbtn').style.display = 'block';
 }
 async function checkEval(qid,variant){
   const q=QUESTIONS.find(q=>q.id===qid);
