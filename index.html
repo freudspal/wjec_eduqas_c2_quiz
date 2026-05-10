@@ -853,15 +853,12 @@ function selectQ(cat, used) {
 function selectType(q) {
   const types = [];
 
-  
-if (q.mc) types.push('mc');
-if (q.tf) types.push('tf');
-if (q.scenario) types.push('scen');
+  if (q.mc) types.push('mc');
+  if (q.tf) types.push('tf');
+  if (q.scenario) types.push('scen');
 
-// ✅ ONLY allow definition for standard concepts
-if (q.type !== 'evaluation') {
+  // typed response always available
   types.push('def');
-
 
   return types[Math.floor(Math.random() * types.length)];
 }
