@@ -168,29 +168,84 @@ body: JSON.stringify(body)
       return res.status(200).json(await r.json());
     }
 // =========================
-// AI CHECK
+// AI CHECK (GEMINI)
 // =========================
+
 if (method === "AI_CHECK") {
-  const { concept, definition, studentAnswer } = body;
+  try {
+    const { concept, definition, studentAnswer } = body;
 
-  // ✅ simple fallback logic (no external AI)
-  const keywords = (definition || "")
-    .toLowerCase()
-    .split(/\s+/)
-    .filter(w => w.length > 4);
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-  const answer = (studentAnswer || "").toLowerCase();
+    const prompt = `
+You are marking an EDUQAS exam board A-level psychology answer.
 
-  const matches = keywords.filter(k => answer.includes(k));
+Concept: ${concept}
 
-  const correct = matches.length >= Math.ceil(keywords.length * 0.3);
+Correct definition: ${definition}
 
-  return res.status(200).json({
-    correct,
-    feedback: correct
-      ? "Good match to definition"
-      : "Try including key terms from the definition"
-  });
+Student answer: ${studentAnswer}
+
+Task:
+- Decide if the student answer is conceptually correct (even if phrased differently)
+- Accept paraphrased answers if they show correct understanding
+- Be slightly lenient with wording
+
+Respond ONLY with JSON:
+{
+  "correct": true or false,
+  "feedback": "short explanation for the student"
+}
+`;
+
+    const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [{ text: prompt }]
+            }
+          ]
+        })
+      }
+    );
+
+    const data = await r.json();
+
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+    // ✅ Extract JSON safely from Gemini output
+    let parsed = null;
+    try {
+      const match = text.match(/\{[\s\S]*\}/);
+      if (match) parsed = JSON.parse(match[0]);
+    } catch {}
+
+    // ✅ If Gemini returned usable result
+    if (parsed && typeof parsed.correct !== "undefined") {
+      return res.status(200).json(parsed);
+    }
+
+    // ❌ fallback if Gemini response unusable
+    return res.status(200).json({
+      correct: false,
+      feedback: "AI could not evaluate answer"
+    });
+
+  } catch (err) {
+    console.error("GEMINI ERROR:", err);
+
+    // ✅ NEVER hang — always return something
+    return res.status(200).json({
+      correct: false,
+      feedback: "AI failed — using fallback"
+    });
+  }
 }
 
     // =========================
