@@ -979,24 +979,16 @@ function renderQ() {
   }
 
   // ---------------- SCENARIO ----------------
-  else if (type === 'scen') {
-    const prompt =
-      mode === 'eval_s'
-        ? 'Identify the method AND give ONE strength:'
-        : mode === 'eval_w'
-        ? 'Identify the method AND give ONE weakness:'
-        : 'Identify the term shown in the scenario:';
-
-    h = `
-      <div class="qbadge bsc">Scenario</div>
-      <div class="qcon">${q.concept}</div>
-      <div class="qhint">${prompt}</div>
-      <div class="qtxt">${q.scenario}</div>
-      <textarea class="tarea" id="tans"></textarea>
-      <button class="ckbtn" onclick="checkScen(${q.id},'${mode}')">
-        Check Answer ✔
-      </button>`;
-  }
+else if (type === 'scen') {
+  h = `
+    <div class="qbadge bsc">Scenario</div>
+    <div class="qtxt">${q.scenario}</div>
+    <textarea class="tarea" id="tans"></textarea>
+    <button class="ckbtn" onclick="checkScen(${q.id}, '${mode}')">
+      Check Answer ✔
+    </button>
+  `;
+}
 
   h += `
     <div class="fbox" id="fbox"></div>
