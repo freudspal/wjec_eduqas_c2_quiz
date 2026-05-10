@@ -902,7 +902,7 @@ function checkApprovedFirst(concept, answer) {
 
 async function aiCheck(concept, definition, studentAnswer, questionType){
 
-  // ✅ 1. CHECK SAVED (APPROVED) ANSWERS FIRST
+  // ✅ 1. APPROVED ANSWERS
   if (checkApprovedFirst(concept, studentAnswer)) {
     return {
       correct: true,
@@ -910,7 +910,24 @@ async function aiCheck(concept, definition, studentAnswer, questionType){
     };
   }
 
-  // ✅ 2. CALL GEMINI (via backend)
+  // ✅ 2. KEYWORD MATCH (simple + dynamic)
+  const answer = studentAnswer.toLowerCase();
+
+  const keywords = definition
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(w => w.length > 4);
+
+  const matches = keywords.filter(k => answer.includes(k));
+
+  if (matches.length >= 2) {
+    return {
+      correct: true,
+      feedback: "Good answer — matches key ideas"
+    };
+  }
+
+  // ✅ 3. GEMINI AI (only if needed)
   let aiResult = null;
 
   try {
@@ -922,17 +939,16 @@ async function aiCheck(concept, definition, studentAnswer, questionType){
         questionType
       }),
       new Promise(resolve =>
-        setTimeout(() => resolve(null), 3000) // ⏱ stop hanging
+        setTimeout(() => resolve(null), 3000)
       )
     ]);
   } catch(e) {
     aiResult = null;
   }
 
-  // ✅ 3. IF AI WORKED → USE IT
   if (aiResult && typeof aiResult.correct !== 'undefined') {
 
-    // ✅ learn good answers (self-improving system)
+    // ✅ SAVE GOOD ANSWERS (learning system)
     if (aiResult.correct && studentAnswer.length > 10) {
 
       if (!APPROVED[concept]) {
@@ -943,7 +959,6 @@ async function aiCheck(concept, definition, studentAnswer, questionType){
         APPROVED[concept].push(studentAnswer);
       }
 
-      // ✅ save to JSONBin
       try {
         await api('PUT_QUESTIONS', {
           approvedAnswers: APPROVED
@@ -954,37 +969,10 @@ async function aiCheck(concept, definition, studentAnswer, questionType){
     return aiResult;
   }
 
-  // ✅ 4. FALLBACK SYSTEM (keyword + phrase match)
-
-  const answer = studentAnswer.toLowerCase();
-
-  const keywords = definition
-    .toLowerCase()
-    .split(/\s+/)
-    .filter(w => w.length > 4);
-
-  const matches = keywords.filter(k => answer.includes(k));
-
-  const phrases = [
-    "natural environment",
-    "real world",
-    "normal environment",
-    "no interference",
-    "no manipulation",
-    "all information",
-    "agreed to take part",
-    "informed choice"
-  ];
-
-  const phraseMatch = phrases.some(p => answer.includes(p));
-
-  const correct = phraseMatch || matches.length >= 2;
-
+  // ✅ 4. FINAL FALLBACK
   return {
-    correct,
-    feedback: correct
-      ? "Good answer — matches key ideas"
-      : "Try including key ideas like: " + keywords.slice(0,3).join(", ")
+    correct: false,
+    feedback: "Try including key ideas like: " + keywords.slice(0,3).join(", ")
   };
 }
 
