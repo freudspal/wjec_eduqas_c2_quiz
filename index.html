@@ -103,6 +103,14 @@ select.finput option{background:#1c1c28}
 .nxtbtn:hover{background:var(--ac2)}
 .ckbtn{width:100%;padding:13px;background:var(--sf2);border:1px solid var(--ac);border-radius:11px;color:var(--ac2);font-family:inherit;font-size:.93rem;font-weight:600;cursor:pointer;transition:all .2s}
 .ckbtn:hover{background:rgba(124,106,247,.15)}.ckbtn:disabled{opacity:.5;cursor:not-allowed}
+.qactions .ckbtn + .ckbtn {
+  margin-top: 6px;
+}
+.ckbtn.ghost {
+  background: transparent;
+  border-color: var(--bd);
+  color: var(--mu);
+}
 .flgbtn{background:none;border:1px solid var(--bd);border-radius:20px;padding:5px 11px;color:var(--mu);font-family:inherit;font-size:.7rem;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:4px;margin-top:9px}
 .flgbtn:hover{border-color:var(--am);color:var(--am)}
 .lbcnt{flex:1;padding:18px;overflow-y:auto}
