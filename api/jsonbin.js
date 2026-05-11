@@ -198,7 +198,7 @@ FORMAT EXACTLY:
 `;
 
     const r = await fetch(
-  `https://generativelanguage.googleapis.com/v1beta/models/gemma-3-1b-it:generateContent?key=${GEMINI_API_KEY}`,
+  `https://generativelanguage.googleapis.com/v1beta/models/gemma-3-1b:generateContent?key=${GEMINI_API_KEY}`,
   {
     method: "POST",
     headers: {
