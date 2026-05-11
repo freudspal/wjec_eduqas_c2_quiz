@@ -1037,6 +1037,11 @@ function startQuiz(cat, size){
   showScreen('quizScreen');
   renderQ();
 }
+function nextQ(){
+  QZ.idx++;
+  renderQ();
+}
+
 
 // ---------------- RENDER ----------------
 function renderQ(){
@@ -1044,6 +1049,7 @@ function renderQ(){
 
   const { q, type } = QZ.questions[QZ.idx];
   let h = '';
+  let checkHandler = '';
 
   // ===== DEFINE =====
   if (type === 'def') {
@@ -1051,8 +1057,8 @@ function renderQ(){
       <div class="qbadge bdf">Define</div>
       <div class="qcon">${q.concept}</div>
       <textarea id="tans" class="tarea"></textarea>
-      <button class="ckbtn" onclick="checkDef(${q.id})">Check ✔</button>
     `;
+    checkHandler = `checkDef(${q.id})`;
   }
 
   // ===== REVERSE DEFINE =====
@@ -1061,8 +1067,8 @@ function renderQ(){
       <div class="qbadge bdf">Identify the concept</div>
       <div class="qtxt">${q.definition}</div>
       <textarea id="tans" class="tarea"></textarea>
-      <button class="ckbtn" onclick="checkRev(${q.id})">Check ✔</button>
     `;
+    checkHandler = `checkRev(${q.id})`;
   }
 
   // ===== MC =====
@@ -1075,9 +1081,11 @@ function renderQ(){
         ${q.mc.options.map((o,i)=>`
           <div class="mopt" onclick="subMC(${i},${q.mc.correct},${q.id})">
             <strong>${['A','B','C','D'][i]}</strong> ${o}
-          </div>`).join('')}
+          </div>
+        `).join('')}
       </div>
     `;
+    checkHandler = ''; // MC handles itself
   }
 
   // ===== TF =====
@@ -1089,16 +1097,17 @@ function renderQ(){
       <button class="ckbtn" onclick="subTF(true,${q.tf.answer},${q.id})">True</button>
       <button class="ckbtn" onclick="subTF(false,${q.tf.answer},${q.id})">False</button>
     `;
+    checkHandler = '';
   }
 
-  // ===== SCENARIO (AO2 ONLY) =====
+  // ===== SCENARIO =====
   else if (type === 'scen') {
     h = `
       <div class="qbadge bsc">Scenario</div>
       <div class="qtxt">${q.scenario}</div>
       <textarea id="tans" class="tarea"></textarea>
-      <button class="ckbtn" onclick="checkScen(${q.id})">Check ✔</button>
     `;
+    checkHandler = `checkScen(${q.id})`;
   }
 
   // ===== STRENGTH =====
@@ -1107,8 +1116,8 @@ function renderQ(){
       <div class="qbadge bev">Strength</div>
       <div class="qcon">${q.concept}</div>
       <textarea id="tans" class="tarea"></textarea>
-      <button class="ckbtn" onclick="checkEval(${q.id}, 'strength')">Check ✔</button>
     `;
+    checkHandler = `checkEval(${q.id}, 'strength')`;
   }
 
   // ===== WEAKNESS =====
@@ -1117,28 +1126,31 @@ function renderQ(){
       <div class="qbadge bev">Weakness</div>
       <div class="qcon">${q.concept}</div>
       <textarea id="tans" class="tarea"></textarea>
-      <button class="ckbtn" onclick="checkEval(${q.id}, 'weakness')">Check ✔</button>
     `;
+    checkHandler = `checkEval(${q.id}, 'weakness')`;
   }
 
-// ===== FOOTER (shared by all question types) =====
-h += `
-  <div class="fbox" id="fbox"></div>
+  // ===== FOOTER =====
+  h += `
+    <div class="fbox" id="fbox"></div>
 
-  <div class="qactions">
-    <button class="ckbtn ghost" onclick="skipQ()">
-      Skip
-    </button>
+    <div class="qactions">
+      ${checkHandler ? `
+        <button class="ckbtn primary" onclick="${checkHandler}">
+          Check ✓
+        </button>
+      ` : ''}
 
-    <button class="ckbtn" id="nxtbtn" onclick="nextQ()" style="display:none">
-      Next →
-    </button>
-  </div>
-`;
+      <button class="ckbtn ghost" onclick="skipQ()">Skip</button>
 
-document.getElementById('quizContent').innerHTML = h;
+      <button class="ckbtn" id="nxtbtn" onclick="nextQ()" style="display:none">
+        Next →
+      </button>
+    </div>
+  `;
 
-
+  document.getElementById('quizContent').innerHTML = h;
+}
 // ================================================================
 // CHECKERS / ANSWER HANDLERS (FINAL – NEW DATA MODEL)
 // ================================================================
