@@ -901,21 +901,23 @@ const LL=['A','B','C','D'];
 // ---------------- RENDER ----------------
 function renderQ(){
   if(QZ.idx>=QZ.questions.length)return showResult();
-
+  
   const{q,type,mode}=QZ.questions[QZ.idx];
 
   let h='';
 
-  // ===== MC =====
-  if(type==='mc'){
+// ===== MC =====
+if(type==='mc'){
 
-  let options = fixOptions(q.mc.options);
+  // ✅ Ensure 4 options ALWAYS
+  let options = [...q.mc.options];
 
-  // ✅ ensure always 4
-  while (options.length < 4) {
+  // If fewer than 4, pad safely
+  while(options.length < 4){
     options.push("None of the above");
   }
 
+  // Trim to exactly 4 (in case of messy data)
   options = options.slice(0,4);
 
   h=`
@@ -932,6 +934,7 @@ function renderQ(){
     ).join('')}
   </div>`;
 }
+
 
   // ===== TF =====
   else if(type==='tf'){
@@ -1006,34 +1009,6 @@ function renderQ(){
 // HANDLERS
 // ================================================================
 
-// ===== MC =====
-if(type==='mc'){
-
-  // ✅ Ensure 4 options ALWAYS
-  let options = [...q.mc.options];
-
-  // If fewer than 4, pad safely
-  while(options.length < 4){
-    options.push("None of the above");
-  }
-
-  // Trim to exactly 4 (in case of messy data)
-  options = options.slice(0,4);
-
-  h=`
-  <div class="qbadge bmc">Multiple Choice</div>
-  <div class="qcon">${q.concept}</div>
-  <div class="qtxt">${q.mc.question}</div>
-
-  <div class="mopts">
-    ${options.map((o,i)=>
-      `<div class="mopt" onclick="subMC(${i},${q.mc.correct},${q.id})">
-        <div class="oltr">${LL[i]}</div>
-        <div>${o}</div>
-      </div>`
-    ).join('')}
-  </div>`;
-}
 
 function subMC(ch, ok, qid){
 
