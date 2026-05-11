@@ -1238,45 +1238,55 @@ async function checkDef(qid){
   }
   document.getElementById('nxtbtn').style.display='block';
 }
-async function checkScen(qid, mode){
+async function checkScen(qid){
   const q = QUESTIONS.find(q => q.id === qid);
 
   const ans = document.getElementById('tans').value.trim();
-  if(!ans){
+  if (!ans){
     alert('Please write something first!');
     return;
   }
 
+  const a = ans.toLowerCase();
+  const concept = q.concept.toLowerCase();
+
   document.querySelector('.ckbtn').disabled = true;
   showCk();
 
-  try {
-    // ✅ FIXED INPUT
-    const r = await aiCheck(
-      q.concept,      // ✅ correct concept
-      q.definition,   // ✅ clean definition
-      ans,
-      'scenario'
-    );
+  // ✅ detect concept
+  const hasConcept = a.includes(concept);
 
-    showFb(r.correct, q.definition, r.feedback);
-    rec(q, r.correct);
+  // ✅ detect evaluation
+  const isEval =
+    q.type === 'evaluation' ||
+    (q.concept && q.concept.includes('(Evaluation)'));
 
-  } catch(e){
+  let correct = false;
+  let feedback = '';
 
-    // ✅ simple fallback
-    const ok = ans.toLowerCase().includes(q.concept.toLowerCase());
+  if (!isEval) {
+    // ✅ SCENARIO → concept only
+    correct = hasConcept;
+    feedback = correct
+      ? "Correct — identified the design"
+      : "Include the correct term";
+  } else {
+    // ✅ EVALUATION SCENARIO → concept + evaluation
+    try {
+      const r = await aiCheck(q.concept, q.definition, ans, 'scenario');
+      correct = hasConcept && r.correct;
+    } catch {
+      correct = hasConcept;
+    }
 
-    showFb(
-      ok,
-      q.definition,
-      ok ? "Correct" : "Try including the correct term"
-    );
-
-    rec(q, ok);
+    feedback = correct
+      ? "Correct — includes term and evaluation"
+      : "Include BOTH the correct term AND a strength/weakness";
   }
 
-  // ✅ show next button
+  showFb(correct, q.definition, feedback);
+  rec(q, correct);
+
   document.getElementById('nxtbtn').style.display = 'block';
 }
 async function checkEval(qid,variant){
