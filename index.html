@@ -965,7 +965,30 @@ function signOut(){ S=null; location.reload() }
 // ================================================================
 // QUIZ ENGINE (FINAL CLEAN + CONSISTENT UI)
 // ================================================================
+function showFb(ok, def, extra){
+  const fb = document.getElementById('fbox');
+  if (!fb) return;
 
+  fb.style.display = 'block';
+  fb.className = 'fbox ' + (ok ? 'ok' : 'ng');
+
+  fb.innerHTML = `
+    <div class="${ok ? 'fok' : 'fng'}">
+      <div class="ftit">
+        ${ok ? '✔ Correct!' : '✗ Not quite!'}
+        ${extra ? ' — ' + extra : ''}
+      </div>
+      ${def ? `<div class="fdef"><strong>Definition:</strong> ${def}</div>` : ''}
+    </div>
+  `;
+}
+  //ai check function //
+async function aiCheck(concept, expected, answer, type){
+  return {
+    correct: answer && answer.length > 0,
+    feedback: 'Checked'
+  };
+}
 // ---------------- SELECT QUESTION ----------------
 function selectQ(cat){
   let pool = QUESTIONS.filter(q => q.concept);
@@ -1097,16 +1120,22 @@ function renderQ(){
   }
 
   // ===== TF =====
-  else if (type === 'tf') {
-    h = `
-      <div class="qbadge btf">True / False</div>
-      <div class="qcon">${q.concept}</div>
-      <div class="qtxt">${q.tf.statement}</div>
-      <button class="ckbtn" onclick="subTF(true,${q.tf.answer},${q.id})">True</button>
-      <button class="ckbtn" onclick="subTF(false,${q.tf.answer},${q.id})">False</button>
-    `;
-    checkHandler = '';
-  }
+else if (type === 'tf') {
+  h = `
+    <div class="qbadge btf">True / False</div>
+    <div class="qcon">${q.concept}</div>
+    <div class="qtxt">${q.tf.statement}</div>
+
+    <div class="qactions">
+      <button class="ckbtn" onclick="subTF(true,${q.tf.answer},${q.id})">
+        True
+      </button>
+      <button class="ckbtn" onclick="subTF(false,${q.tf.answer},${q.id})">
+        False
+      </button>
+    </div>
+  `;
+}
 
   // ===== SCENARIO =====
   else if (type === 'scen') {
