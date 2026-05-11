@@ -878,7 +878,15 @@ function selectMode(q){
 
   return 'standard';
 }
+  function skipQ(){
+  const { q } = QZ.questions[QZ.idx];
 
+  // ✅ mark incorrect (red)
+  rec(q, false);
+
+  // ✅ move straight to next question (NO feedback)
+  nextQ();
+}
 
 // ---------------- START QUIZ ----------------
 function startQuiz(cat,size){
@@ -994,15 +1002,7 @@ if(type==='mc'){
       Check Answer ✔
     </button>`;
   }
-function skipQ(){
-  const { q } = QZ.questions[QZ.idx];
 
-  // ✅ mark incorrect (red)
-  rec(q, false);
-
-  // ✅ move straight to next question (NO feedback)
-  nextQ();
-}
 
   // ===== FOOTER =====
   h+=`
