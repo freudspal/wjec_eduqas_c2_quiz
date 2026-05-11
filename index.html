@@ -1017,31 +1017,64 @@ function subTF(ch,ok,qid){
   document.getElementById('nxtbtn').style.display='block';
 }
 
-// ✅ SCENARIO (AI FIXED)
+// ✅ SCENARIO (STRICT: concept + explanation required)
 async function checkScen(qid){
-  const q=QUESTIONS.find(q=>q.id===qid);
+  const q = QUESTIONS.find(q => q.id === qid);
 
-  const ans=document.getElementById('tans').value.trim();
-  if(!ans)return alert('Write something');
+  const ansRaw = document.getElementById('tans').value.trim();
+  if (!ansRaw) return alert('Write something');
+
+  const ans = ansRaw.toLowerCase();
 
   showCk();
 
-  const r=await aiCheck(q.concept,q.definition,ans,'scenario');
+  // ✅ must include concept
+  const hasConcept = ans.includes(q.concept.toLowerCase());
 
-  showFb(r.correct,q.definition,r.feedback);
-  rec(q,r.correct);
+  try {
+    const r = await aiCheck(q.concept, q.definition, ansRaw, 'scenario');
 
-  document.getElementById('nxtbtn').style.display='block';
+    // ✅ final condition = concept + meaningful explanation
+    const correct = hasConcept && r.correct;
+
+    showFb(
+      correct,
+      q.definition,
+      correct
+        ? "Correct — includes both the key term and explanation"
+        : "You must include BOTH the correct term AND a valid explanation"
+    );
+
+    rec(q, correct);
+
+  } catch(e) {
+
+    // ✅ fallback = still require concept minimum
+    const fallback = hasConcept;
+
+    showFb(
+      fallback,
+      q.definition,
+      fallback
+        ? "Correct term identified (missing explanation)"
+        : "Include the correct key term"
+    );
+
+    rec(q, fallback);
+  }
+
+  document.getElementById('nxtbtn').style.display = 'block';
 }
 
-// ✅ SKIP
+
+// ✅ SKIP (unchanged — but slightly improved message)
 function skipQ(){
-  const {q}=QZ.questions[QZ.idx];
+  const { q } = QZ.questions[QZ.idx];
 
-  showFb(false,q.definition,"Skipped");
-  rec(q,false);
+  showFb(false, q.definition, "Skipped — marked incorrect");
+  rec(q, false);
 
-  document.getElementById('nxtbtn').style.display='block';
+  document.getElementById('nxtbtn').style.display = 'block';
 }
 
 // ------------------------------------------------
