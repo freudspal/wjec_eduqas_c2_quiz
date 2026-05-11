@@ -880,10 +880,6 @@ function selectMode(q){
 }
   function skipQ(){
   const { q } = QZ.questions[QZ.idx];
-
-  // ✅ mark incorrect (red)
-  rec(q, false);
-
   // ✅ move straight to next question (NO feedback)
   nextQ();
 }
