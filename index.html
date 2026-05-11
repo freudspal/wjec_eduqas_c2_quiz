@@ -165,6 +165,19 @@ select.finput option{background:#1c1c28}
 .cpill{display:inline-flex;align-items:center;gap:4px;font-size:.67rem;padding:3px 8px;border-radius:20px;border:1px solid var(--bd);color:var(--mu);background:var(--sf2)}
 .cpill.ok{border-color:rgba(34,197,94,.4);color:var(--gr);background:var(--gd)}
 .cpill.er{border-color:rgba(239,68,68,.4);color:var(--re);background:var(--rd)}
+.qactions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 18px;}
+.ckbtn.ghost {
+  background: transparent;
+  color: var(--mu);}
+.ckbtn.ghost:hover {
+  background: var(--sf2);}
+.ckbtn.primary {
+  background: var(--ac2);
+  color: white;}
 </style>
 </head>
 <body>
@@ -1108,18 +1121,24 @@ function renderQ(){
     `;
   }
 
-  h += `
-    <div class="fbox" id="fbox"></div>
-    <button class="ckbtn" onclick="skipQ()">Skip</button>
-    <button class="ckbtn" onclick="nextQ()">Next →</button>
-  `;
+// ===== FOOTER (shared by all question types) =====
+h += `
+  <div class="fbox" id="fbox"></div>
 
-  document.getElementById('quizContent').innerHTML = h;
-}
+  <div class="qactions">
+    <button class="ckbtn ghost" onclick="skipQ()">
+      Skip
+    </button>
 
-// ================================================================
-// HANDLERS / CHECKERS (FINAL, CLEAN)
-// ================================================================
+    <button class="ckbtn" id="nxtbtn" onclick="nextQ()" style="display:none">
+      Next →
+    </button>
+  </div>
+`;
+
+document.getElementById('quizContent').innerHTML = h;
+
+
 // ================================================================
 // CHECKERS / ANSWER HANDLERS (FINAL – NEW DATA MODEL)
 // ================================================================
@@ -1272,7 +1291,17 @@ function skipQ(){
   QZ.skipped++;
   nextQ();
 }
+function showCk(){
+  const fb = document.getElementById('fbox');
+  if (!fb) return;
 
+  fb.style.display = 'block';
+  fb.className = 'fbox ck';
+  fb.innerHTML = `
+    <span class="spnr"></span>
+    Checking…
+  `;
+}
 // ================================================================
 // RESULT
 // ================================================================
