@@ -965,7 +965,7 @@ function signOut(){ S=null; location.reload() }
 // ================================================================
 // QUIZ ENGINE (FINAL CLEAN + CONSISTENT UI)
 // ================================================================
-function showFb(ok, def, extra){
+function showFb(ok, concept, definition, extra){
   const fb = document.getElementById('fbox');
   if (!fb) return;
 
@@ -973,12 +973,19 @@ function showFb(ok, def, extra){
   fb.className = 'fbox ' + (ok ? 'ok' : 'ng');
 
   fb.innerHTML = `
-    <div class="${ok ? 'fok' : 'fng'}">
-      <div class="ftit">
-        ${ok ? '✔ Correct!' : '✗ Not quite!'}
-        ${extra ? ' — ' + extra : ''}
+    <div class="ftit">
+      ${ok ? '✔ Correct!' : '✗ Not quite!'}
+      ${extra ? ' — ' + extra : ''}
+    </div>
+
+    ${!ok ? `
+      <div class="fcon">
+        <strong>Correct term:</strong> ${concept}
       </div>
-      ${def ? `<div class="fdef"><strong>Definition:</strong> ${def}</div>` : ''}
+    ` : ''}
+
+    <div class="fdef">
+      <strong>Definition:</strong> ${definition}
     </div>
   `;
 }
@@ -988,6 +995,13 @@ async function aiCheck(concept, expected, answer, type){
     correct: answer && answer.length > 0,
     feedback: 'Checked'
   };
+}
+
+// other fucntion//
+  function rec(q, ok){
+  // minimal safe recorder
+  QZ.results.push({ q, ok });
+  if (ok) QZ.correct++;
 }
 // ---------------- SELECT QUESTION ----------------
 function selectQ(cat){
@@ -1207,6 +1221,7 @@ function subMC(ch, ok, qid){
 
   showFb(
     correct,
+    q.concept,
     q.definition,
     correct ? "Correct" : "Not quite"
   );
@@ -1223,6 +1238,7 @@ function subTF(ch, ok, qid){
 
   showFb(
     correct,
+    q.concept,
     q.definition,
     correct ? "Correct judgement" : "Check the definition"
   );
@@ -1267,6 +1283,7 @@ function checkRev(qid){
 
   showFb(
     correct,
+    q.concept,
     q.definition,
     correct ? "Correct" : "Check the definition again"
   );
@@ -1276,29 +1293,56 @@ function checkRev(qid){
 }
 
 
-// ================= SCENARIO → IDENTIFY CONCEPT (AO2 ONLY) =================
-function checkScen(qid){
-  const q = QUESTIONS.find(q => q.id === qid);
-  const ans = document.getElementById('tans').value.trim();
 
-  if (!ans){
+// ================= SCENARIO → IDENTIFY CONCEPT (AO2 + AI HELP) =================
+async function checkScen(qid){
+  const q = QUESTIONS.find(q => q.id === qid);
+  const ansRaw = document.getElementById('tans').value.trim();
+
+  if (!ansRaw){
     alert('Please write something first!');
     return;
   }
 
-  const a = ans.toLowerCase().replace(/[^a-z0-9 ]/g, '');
+  const a = ansRaw.toLowerCase().replace(/[^a-z0-9 ]/g, '');
   const concept = q.concept.toLowerCase().replace(/[^a-z0-9 ]/g, '');
 
-  const correct =
+  // ✅ 1. DIRECT CONCEPT MATCH
+  let correct =
     a.includes(concept) ||
     concept.includes(a);
 
+  let feedback = correct
+    ? "Correct — identified the concept"
+    : "Include the correct term";
+
+  // ✅ 2. AI SUPPORT (ONLY IF NOT ALREADY CORRECT)
+  if (!correct) {
+    try {
+      showCk();
+
+      const r = await aiCheck(
+        q.concept,        // concept label
+        q.definition,     // definition for context
+        ansRaw,
+        'scenario'
+      );
+
+      // ✅ AI can only upgrade if it recognises the CONCEPT
+      if (r.correct) {
+        correct = true;
+        feedback = "Correct — recognised as the correct method";
+      }
+    } catch {
+      // silent fallback — keep original marking
+    }
+  }
+
   showFb(
     correct,
+    q.concept,
     q.definition,
-    correct
-      ? "Correct — identified the concept"
-      : "Include the correct term"
+    feedback
   );
 
   rec(q, correct);
@@ -1326,6 +1370,7 @@ async function checkEval(qid, variant){
 
   showFb(
     r.correct,
+    q.concept
     expected,
     r.feedback
   );
