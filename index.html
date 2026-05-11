@@ -1027,6 +1027,32 @@ if(type==='mc'){
     ).join('')}
   </div>`;
 }
+
+function subMC(ch, ok, qid){
+
+  const q = QUESTIONS.find(q => q.id === qid);
+  if (!q) return;
+
+  // ✅ highlight answers
+  document.querySelectorAll('.mopt').forEach((e,i)=>{
+    if (i === ok) e.classList.add('ok');
+    if (i === ch && ch !== ok) e.classList.add('ng');
+  });
+
+  const correct = (ch === ok);
+
+  showFb(
+    correct,
+    q.definition,
+    correct ? "Correct" : "Not quite"
+  );
+
+  rec(q, correct);
+
+  // ✅ show next
+  const btn = document.getElementById('nxtbtn');
+  if (btn) btn.style.display = 'block';
+}
 // opion fixed for MC///
 
 function fixOptions(options) {
