@@ -1100,7 +1100,12 @@ async function checkScen(qid){
     return;
   }
 
-  const correct = ans.toLowerCase().includes(q.concept.toLowerCase());
+const a = ans.toLowerCase().replace(/[^a-z0-9 ]/g, '');
+const concept = q.concept.toLowerCase().replace(/[^a-z0-9 ]/g, '');
+
+const correct =
+  a.includes(concept) ||
+  concept.includes(a);
 
   showFb(
     correct,
