@@ -983,21 +983,33 @@ function renderQ(){
 // HANDLERS
 // ================================================================
 
-// ✅ MC
-function subMC(ch,ok,qid){
-  const q=QUESTIONS.find(q=>q.id===qid);
+// ===== MC =====
+if(type==='mc'){
 
-  document.querySelectorAll('.mopt').forEach((e,i)=>{
-    if(i===ok)e.classList.add('ok');
-    if(i===ch&&ch!==ok)e.classList.add('ng');
-  });
+  // ✅ Ensure 4 options ALWAYS
+  let options = [...q.mc.options];
 
-  const correct=(ch===ok);
+  // If fewer than 4, pad safely
+  while(options.length < 4){
+    options.push("None of the above");
+  }
 
-  showFb(correct,q.definition);
-  rec(q,correct);
+  // Trim to exactly 4 (in case of messy data)
+  options = options.slice(0,4);
 
-  document.getElementById('nxtbtn').style.display='block';
+  h=`
+  <div class="qbadge bmc">Multiple Choice</div>
+  <div class="qcon">${q.concept}</div>
+  <div class="qtxt">${q.mc.question}</div>
+
+  <div class="mopts">
+    ${options.map((o,i)=>
+      `<div class="mopt" onclick="subMC(${i},${q.mc.correct},${q.id})">
+        <div class="oltr">${LL[i]}</div>
+        <div>${o}</div>
+      </div>`
+    ).join('')}
+  </div>`;
 }
 
 // ✅ ✅ ✅ TF (FIXED + GLOBAL)
