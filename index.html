@@ -1148,10 +1148,11 @@ async function checkScen(qid){
 function skipQ(){
   const { q } = QZ.questions[QZ.idx];
 
-  showFb(false, q.definition, "Skipped — marked incorrect");
+  // ✅ mark incorrect (red)
   rec(q, false);
 
-  document.getElementById('nxtbtn').style.display = 'block';
+  // ✅ move straight to next question (NO feedback)
+  nextQ();
 }
 
 // ------------------------------------------------
