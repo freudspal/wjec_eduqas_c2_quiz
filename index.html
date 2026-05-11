@@ -846,13 +846,18 @@ function selectType(q){
 
   if(q.mc) t.push('mc');
   if(q.tf) t.push('tf');
-  if(q.scenario) t.push('scen');
 
+  // ✅ define ONCE
   const isEval =
     q.type === 'evaluation' ||
-    q.concept.includes('(Evaluation)');
+    (q.concept && q.concept.includes('(Evaluation)'));
 
-  // ✅ prevent definition questions for evaluation concepts
+  // ✅ scenario ONLY for non-evaluation
+  if (q.scenario && !isEval) {
+    t.push('scen');
+  }
+
+  // ✅ definition ONLY for non-evaluation
   if (!isEval) {
     t.push('def');
   }
@@ -1080,63 +1085,26 @@ function subTF(ch,ok,qid){
 async function checkScen(qid){
   const q = QUESTIONS.find(q => q.id === qid);
 
-  const ansRaw = document.getElementById('tans').value.trim();
-  if (!ansRaw) return alert('Write something');
-
-  const ans = ansRaw.toLowerCase();
-
-  showCk();
-
-  // ✅ must include concept
-  const hasConcept = ans.includes(q.concept.toLowerCase());
-
-  try {
-    const r = await aiCheck(q.concept, q.definition, ansRaw, 'scenario');
-
-    // ✅ final condition = concept + meaningful explanation
-    const correct = hasConcept && r.correct;
-
-    showFb(
-      correct,
-      q.definition,
-      correct
-        ? "Correct — includes both the key term and explanation"
-        : "You must include BOTH the correct term AND a valid explanation"
-    );
-
-    rec(q, correct);
-
-  } catch(e) {
-
-    // ✅ fallback = still require concept minimum
-    const fallback = hasConcept;
-
-    showFb(
-      fallback,
-      q.definition,
-      fallback
-        ? "Correct term identified (missing explanation)"
-        : "Include the correct key term"
-    );
-
-    rec(q, fallback);
+  const ans = document.getElementById('tans').value.trim();
+  if (!ans){
+    alert('Please write something first!');
+    return;
   }
+
+  const correct = ans.toLowerCase().includes(q.concept.toLowerCase());
+
+  showFb(
+    correct,
+    q.definition,
+    correct
+      ? "Correct — identified the design"
+      : "Include the correct term"
+  );
+
+  rec(q, correct);
 
   document.getElementById('nxtbtn').style.display = 'block';
 }
-
-
-// ✅ SKIP (unchanged — but slightly improved message)
-function skipQ(){
-  const { q } = QZ.questions[QZ.idx];
-
-  // ✅ mark incorrect (red)
-  rec(q, false);
-
-  // ✅ move straight to next question (NO feedback)
-  nextQ();
-}
-
 // ------------------------------------------------
 // Approved answers helper (NOT Anthropic)
 // ------------------------------------------------
