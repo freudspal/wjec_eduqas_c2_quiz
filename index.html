@@ -901,20 +901,30 @@ function renderQ(){
 
   // ===== MC =====
   if(type==='mc'){
-    h=`
-    <div class="qbadge bmc">Multiple Choice</div>
-    <div class="qcon">${q.concept}</div>
-    <div class="qtxt">${q.mc.question}</div>
 
-    <div class="mopts">
-      ${q.mc.options.map((o,i)=>
-        `<div class="mopt" onclick="subMC(${i},${q.mc.correct},${q.id})">
-          <div class="oltr">${LL[i]}</div>
-          <div>${o}</div>
-        </div>`
-      ).join('')}
-    </div>`;
+  let options = fixOptions(q.mc.options);
+
+  // ✅ ensure always 4
+  while (options.length < 4) {
+    options.push("None of the above");
   }
+
+  options = options.slice(0,4);
+
+  h=`
+  <div class="qbadge bmc">Multiple Choice</div>
+  <div class="qcon">${q.concept}</div>
+  <div class="qtxt">${q.mc.question}</div>
+
+  <div class="mopts">
+    ${options.map((o,i)=>
+      `<div class="mopt" onclick="subMC(${i},${q.mc.correct},${q.id})">
+        <div class="oltr">${LL[i]}</div>
+        <div>${o}</div>
+      </div>`
+    ).join('')}
+  </div>`;
+}
 
   // ===== TF =====
   else if(type==='tf'){
@@ -1017,7 +1027,30 @@ if(type==='mc'){
     ).join('')}
   </div>`;
 }
+// opion fixed for MC///
 
+function fixOptions(options) {
+  const fixed = [];
+
+  options.forEach(opt => {
+
+    // split patterns like "B. something"
+    let parts = opt.split(/\b[A-D]\.\s*/);
+
+    if (parts.length > 1) {
+      parts.forEach(p => {
+        if (p.trim()) fixed.push(p.trim());
+      });
+    } else {
+      fixed.push(opt.trim());
+    }
+
+  });
+
+  return fixed;
+}
+
+  
 // ✅ ✅ ✅ TF (FIXED + GLOBAL)
 function subTF(ch,ok,qid){
   const q=QUESTIONS.find(q=>q.id===qid);
