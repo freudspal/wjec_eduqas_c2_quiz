@@ -862,11 +862,18 @@ function selectType(q){
 
 // ---------------- MODE ----------------
 function selectMode(q){
-  if(q.type === 'evaluation'){
+
+  const isEval =
+    q.type === 'evaluation' ||
+    (q.concept && q.concept.includes('(Evaluation)'));
+
+  if (isEval){
     return Math.random() < 0.5 ? 'eval_s' : 'eval_w';
   }
+
   return 'standard';
 }
+
 
 // ---------------- START QUIZ ----------------
 function startQuiz(cat,size){
