@@ -842,14 +842,20 @@ function selectQ(cat, used) {
 
 // ---------------- SELECT TYPE ----------------
 function selectType(q){
-  const t=[];
+  const t = [];
 
   if(q.mc) t.push('mc');
   if(q.tf) t.push('tf');
   if(q.scenario) t.push('scen');
 
-  // ✅ NO DEFINE FOR EVALUATION
-  if(q.type !== 'evaluation') t.push('def');
+  const isEval =
+    q.type === 'evaluation' ||
+    q.concept.includes('(Evaluation)');
+
+  // ✅ prevent definition questions for evaluation concepts
+  if (!isEval) {
+    t.push('def');
+  }
 
   return t[Math.floor(Math.random()*t.length)];
 }
