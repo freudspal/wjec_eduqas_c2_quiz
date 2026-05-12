@@ -1,191 +1,89 @@
 export default async function handler(req, res) {
-  // 1. Environment Variables (Set these in Vercel Dashboard)
-  const MASTER_KEY = process.env.MASTER_KEY;
-  const BIN_ID = process.env.BIN_ID; // Your Student DB Bin
-  const QUESTIONS_BIN_ID = process.env.QUESTIONS_BIN_ID; // Your Questions/Approved Answers Bin
-  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-  const TEACHER_PIN = process.env.TEACHER_PIN;
+  const { MASTER_KEY, BIN_ID, QUESTIONS_BIN_ID, GEMINI_API_KEY, TEACHER_PIN } = process.env;
 
-  // 2. Safe Body Parsing
   let body = {};
-  try {
-    body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
-  } catch (e) {
-    body = {};
-  }
-
+  try { body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {}); } catch (e) { body = {}; }
   const method = body.method || req.query.method;
 
   try {
-    if (!method) return res.status(400).json({ error: "No method provided" });
+    if (!method) return res.status(400).json({ error: "No method" });
 
-    // ==========================================
-    // METHOD: GET_QUESTIONS
-    // Fetches the questions array and the library of approved answers
-    // ==========================================
+    // --- 1. FETCH QUESTIONS & APPROVED LIST ---
     if (method === "GET_QUESTIONS") {
-      const r = await fetch(`https://api.jsonbin.io/v3/b/${QUESTIONS_BIN_ID}/latest`, {
-        headers: { "X-Master-Key": MASTER_KEY }
-      });
+      const r = await fetch(`https://api.jsonbin.io/v3/b/${QUESTIONS_BIN_ID}/latest`, { headers: { "X-Master-Key": MASTER_KEY } });
       const j = await r.json();
       return res.status(200).json(j.record || {});
     }
 
-    // ==========================================
-    // METHOD: ADD_APPROVED
-    // Adds a student's answer to the "Auto-Correct" list if AI approved it
-    // ==========================================
+    // --- 2. ADD AI-VERIFIED ANSWER TO DATABASE (SMART LEARNING) ---
     if (method === "ADD_APPROVED") {
       const { concept, answer } = body;
-      const r = await fetch(`https://api.jsonbin.io/v3/b/${QUESTIONS_BIN_ID}/latest`, {
-        headers: { "X-Master-Key": MASTER_KEY }
-      });
+      const r = await fetch(`https://api.jsonbin.io/v3/b/${QUESTIONS_BIN_ID}/latest`, { headers: { "X-Master-Key": MASTER_KEY } });
       const j = await r.json();
       const data = j.record;
-
       if (!data.approvedAnswers) data.approvedAnswers = {};
       if (!data.approvedAnswers[concept]) data.approvedAnswers[concept] = [];
       
-      // Normalize and check for duplicates
       const cleanAns = answer.trim().toLowerCase();
       if (!data.approvedAnswers[concept].some(a => a.toLowerCase() === cleanAns)) {
         data.approvedAnswers[concept].push(answer.trim());
-        
-        await fetch(`https://api.jsonbin.io/v3/b/${QUESTIONS_BIN_ID}`, {
-          method: "PUT",
-          headers: { 
-            "Content-Type": "application/json", 
-            "X-Master-Key": MASTER_KEY 
-          },
-          body: JSON.stringify(data)
+        await fetch(`https://api.jsonbin.io/v3/b/${QUESTIONS_BIN_ID}`, { 
+          method: "PUT", 
+          headers: { "Content-Type": "application/json", "X-Master-Key": MASTER_KEY }, 
+          body: JSON.stringify(data) 
         });
       }
       return res.status(200).json({ ok: true });
     }
 
-    // ==========================================
-    // METHOD: GET_STUDENT
-    // Fetches a specific student's profile by name
-    // ==========================================
+    // --- 3. STUDENT PROFILE MANAGEMENT ---
     if (method === "GET_STUDENT") {
-      const { name } = body;
-      const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-        headers: { "X-Master-Key": MASTER_KEY }
-      });
-      const j = await r.json();
-      const students = j.record.students || {};
-      const student = students[name.toLowerCase()] || null;
-      return res.status(200).json({ student });
+      const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { "X-Master-Key": MASTER_KEY } });
+      const students = (await r.json()).record.students || {};
+      return res.status(200).json({ student: students[body.name.toLowerCase()] || null });
     }
 
-    // ==========================================
-    // METHOD: PUT_STUDENT
-    // Saves or updates a student profile (preserves other students)
-    // ==========================================
     if (method === "PUT_STUDENT") {
-      const { student } = body;
-      const r1 = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-        headers: { "X-Master-Key": MASTER_KEY }
-      });
-      const j = await r1.json();
-      const data = j.record || { students: {}, flags: [] };
-      
-      if (!data.students) data.students = {};
-      data.students[student.name.toLowerCase()] = student;
-
-      await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-        method: "PUT",
-        headers: { 
-          "Content-Type": "application/json", 
-          "X-Master-Key": MASTER_KEY 
-        },
-        body: JSON.stringify(data)
-      });
+      const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { "X-Master-Key": MASTER_KEY } });
+      const data = (await r.json()).record || { students: {}, flags: [] };
+      data.students[body.student.name.toLowerCase()] = body.student;
+      await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, { method: "PUT", headers: { "Content-Type": "application/json", "X-Master-Key": MASTER_KEY }, body: JSON.stringify(data) });
       return res.status(200).json({ ok: true });
     }
 
-    // ==========================================
-    // METHOD: SUBMIT_FLAG
-    // Records an error report from a student for the teacher to review
-    // ==========================================
-    if (method === "SUBMIT_FLAG") {
-      const { flag } = body;
-      const r1 = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-        headers: { "X-Master-Key": MASTER_KEY }
-      });
-      const j = await r1.json();
-      const data = j.record || { students: {}, flags: [] };
-      
-      if (!data.flags) data.flags = [];
-      data.flags.push({ 
-        ...flag, 
-        id: Date.now(), 
-        status: "pending",
-        timestamp: new Date().toISOString()
-      });
-
-      await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-        method: "PUT",
-        headers: { 
-          "Content-Type": "application/json", 
-          "X-Master-Key": MASTER_KEY 
-        },
-        body: JSON.stringify(data)
-      });
-      return res.status(200).json({ ok: true });
+    // --- 4. TEACHER ACCESS ---
+    if (method === "GET_ALL") {
+      const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { "X-Master-Key": MASTER_KEY } });
+      return res.status(200).json((await r.json()).record || {});
     }
 
-    // ==========================================
-    // METHOD: AI_CHECK
-    // Uses Google Gemini 1.5 Flash to mark open-ended answers
-    // ==========================================
+    if (method === "AUTH") {
+      return res.status(200).json({ ok: String(body.pin) === String(TEACHER_PIN) });
+    }
+
+    // --- 5. RIGOROUS AI MARKING ENGINE ---
     if (method === "AI_CHECK") {
-      const { concept, definition, studentAnswer } = body;
+      const prompt = `You are a strict Psychology examiner. 
+      The student was given a definition and asked to name the concept.
+      Target Concept: "${body.concept}"
+      Student Answer: "${body.studentAnswer}"
       
-      const prompt = `You are an A-Level Psychology examiner.
-      Topic: "${concept}"
-      Correct Definition: "${definition}"
-      Student's Answer: "${studentAnswer}"
-
-      Rule: If the student describes the core meaning correctly (even with poor spelling or different words), mark it true.
+      Instructions: 
+      - If they named the concept correctly (even with minor typos), set correct to true.
+      - If they named the WRONG concept, set correct to false.
+      Respond ONLY in JSON: {"correct": boolean, "feedback": "Short reason"}`;
       
-      Respond ONLY in this JSON format:
-      {"correct": true, "feedback": "Brief explanation of why"}
-      OR
-      {"correct": false, "feedback": "Explain what they missed"}`;
-
       const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: { response_mime_type: "application/json" }
         })
       });
-      
       const data = await r.json();
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '{"correct": false, "feedback": "AI Service Unavailable"}';
-      
-      return res.status(200).json(JSON.parse(text));
+      return res.status(200).json(JSON.parse(data.candidates[0].content.parts[0].text));
     }
 
-    // ==========================================
-    // METHOD: AUTH
-    // Verifies the teacher's secret PIN
-    // ==========================================
-    if (method === "AUTH") {
-      const ok = String(body.pin) === String(TEACHER_PIN);
-      return res.status(200).json({ ok });
-    }
-
-    // Default Fallback
-    return res.status(400).json({ error: "Method not recognized" });
-
-  } catch (err) {
-    console.error("Server Crash:", err);
-    return res.status(500).json({ 
-      error: "Critical Server Error", 
-      message: err.message 
-    });
-  }
+    return res.status(400).json({ error: "Invalid method" });
+  } catch (err) { return res.status(500).json({ error: err.message }); }
 }
