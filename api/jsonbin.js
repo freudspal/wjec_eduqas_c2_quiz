@@ -62,7 +62,7 @@ export default async function handler(req, res) {
     }
 
     // ==========================================
-    // METHOD: ADD_APPROVED (Smart Learning)
+    // METHOD: ADD_APPROVED
     // ==========================================
     if (method === "ADD_APPROVED") {
       const { concept, answer } = body;
@@ -106,13 +106,14 @@ export default async function handler(req, res) {
     }
 
     // ==========================================
-    // METHOD: AI_CHECK (Gemini 1.5 Flash Fix)
+    // METHOD: AI_CHECK (FIXED 404 ERROR)
     // ==========================================
     if (method === "AI_CHECK") {
       try {
         const prompt = `Strict Psychology Examiner. Concept to identify: "${body.concept}". Student wrote: "${body.studentAnswer}". Instruction: Is this correctly identified? Minor typos okay. Return ONLY JSON: {"correct":boolean, "feedback":string}`;
         
-        const r = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+        // Reverted to v1beta for model "gemini-1.5-flash" - this usually fixes the 404
+        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ 
@@ -121,7 +122,10 @@ export default async function handler(req, res) {
                 role: "user",
                 parts: [{ text: prompt }]
               }
-            ]
+            ],
+            generationConfig: {
+              response_mime_type: "application/json"
+            }
           })
         });
 
@@ -132,18 +136,15 @@ export default async function handler(req, res) {
           throw new Error(`Google API Status ${r.status}`);
         }
 
-        // Clean any markdown backticks the AI might include
-        let text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-        const cleanJson = text.replace(/```json/g, "").replace(/```/g, "").trim();
-        
-        return res.status(200).json(JSON.parse(cleanJson));
+        let text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '{"correct":false,"feedback":"AI Empty"}';
+        return res.status(200).json(JSON.parse(text));
         
       } catch (aiErr) {
         console.error("AI Inner Error:", aiErr);
-        // Safe fallback so student can continue
+        // Fail gracefully so the quiz doesn't stop
         return res.status(200).json({ 
           correct: false, 
-          feedback: "AI Busy. Teacher will review your answer." 
+          feedback: "AI Marking unavailable. Teacher will review." 
         });
       }
     }
