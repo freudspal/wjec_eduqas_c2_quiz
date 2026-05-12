@@ -49,37 +49,36 @@ body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: v
   <div style="font-family:'DM Serif Display',serif;font-size:2rem;color:var(--ac);">PsychCat</div>
 </div>
 
-<!-- LOGIN -->
 <div class="screen active" id="loginScreen">
   <div style="padding:40px 20px; text-align:center;">
     <div style="font-size:4rem;">😺</div>
     <div style="font-family:'DM Serif Display',serif; font-size:2.5rem; margin-bottom:30px;">PsychCat</div>
     <div id="loginStep1" class="card" style="text-align:left;">
-      <label style="font-size:0.65rem; font-weight:800; color:var(--mu);">ENTER REAL FULL NAME</label>
+      <label style="font-size:0.65rem; font-weight:800; color:var(--mu);">REAL FULL NAME</label>
       <input type="text" id="iName" class="tarea" style="min-height:50px; margin-top:5px;" placeholder="e.g. Emma Clarke">
       <button class="btn btn-p" onclick="handleLookup()">Continue 🐾</button>
-      <button class="btn btn-o" onclick="goTeacher()" style="margin-top:15px; border:none; font-size:0.75rem;">Teacher Access</button>
+      <button class="btn btn-o" onclick="goTeacherAdmin()" style="margin-top:15px; border:none; font-size:0.75rem;">Teacher Access</button>
     </div>
     <div id="loginNew" class="card" style="display:none; text-align:left;">
-      <div style="font-weight:700; color:var(--ac); margin-bottom:15px;">New student detected!</div>
+      <div style="font-weight:700; color:var(--ac); margin-bottom:15px;">New student! Fill details:</div>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
         <div><label style="font-size:0.6rem;">YEAR</label><select id="sYear" class="f-input"><option value="1">Year 1</option><option value="2">Year 2</option></select></div>
         <div><label style="font-size:0.6rem;">GROUP</label><select id="sGroup" class="f-input"><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option></select></div>
         <div><label style="font-size:0.6rem;">TEACHER</label><select id="sTeacher" class="f-input"><option>S</option><option>J</option></select></div>
+        <div><label style="font-size:0.6rem;">ACAD YEAR</label><select id="sAcad" class="f-input"><option>2024/25</option><option>2025/26</option></select></div>
       </div>
       <label style="font-size:0.6rem; margin-top:10px; display:block;">4-DIGIT PIN</label>
       <input type="password" id="nPin" class="f-input" maxlength="4" style="text-align:center; letter-spacing:10px;">
-      <button class="btn btn-p" onclick="createAccount()">Create Account 😼</button>
+      <button class="btn btn-p" onclick="createAccount()">Sign Up 😼</button>
     </div>
     <div id="loginPin" class="card" style="display:none; text-align:left;">
       <div id="pinMsg" style="font-weight:700; color:var(--ac); margin-bottom:10px;"></div>
-      <input type="password" id="iPin" class="tarea" style="text-align:center; letter-spacing:10px;" maxlength="4" placeholder="PIN">
+      <input type="password" id="iPin" class="tarea" style="text-align:center; letter-spacing:10px;" maxlength="4" inputmode="numeric">
       <button class="btn btn-p" onclick="verifyPin()">Sign In 😼</button>
     </div>
   </div>
 </div>
 
-<!-- HOME -->
 <div class="screen" id="homeScreen">
   <div class="hdr"><div class="logo">🐾 PsychCat</div><div id="uBadge" style="font-size:1.5rem;">🌱</div></div>
   <div class="hcontent">
@@ -91,21 +90,20 @@ body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: v
         <span id="uAccuracy">Accuracy: 0%</span><span id="uAnswered">0 Answered</span>
       </div>
     </div>
-    <div id="topicGrid"></div>
+    <div id="topicGrid" style="display:grid; grid-template-columns:1fr; gap:8px;"></div>
   </div>
   <div class="nav">
     <button class="ntab on" onclick="showHome()">🏠<br>Home</button>
-    <button class="ntab" onclick="goTeacher()">🏆<br>Rank</button>
+    <button class="ntab" onclick="goRank()">🏆<br>Rank</button>
     <button class="ntab" onclick="showProfile()">😼<br>Me</button>
   </div>
 </div>
 
-<!-- PROFILE -->
 <div class="screen" id="profileScreen">
   <div class="hdr"><div class="logo">😼 Profile</div><button class="btn btn-o btn-s" onclick="location.reload()">Logout</button></div>
   <div class="hcontent">
     <div class="card">
-        <h3 style="font-family:'DM Serif Display'; margin-bottom:15px;">Summary</h3>
+        <h3 style="font-family:'DM Serif Display'; margin-bottom:15px;">Stats</h3>
         <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--bd);"><span>Correct</span><b id="pCorrect">0</b></div>
         <div style="display:flex; justify-content:space-between; padding:8px 0;"><span>Skipped</span><b id="pSkipped">0</b></div>
     </div>
@@ -114,10 +112,9 @@ body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: v
         <button class="btn btn-p btn-s" onclick="updatePin()">Update PIN</button>
     </div>
   </div>
-  <div class="nav"><button class="ntab" onclick="showHome()">🏠<br>Home</button><button class="ntab" onclick="goTeacher()">🏆<br>Rank</button><button class="ntab on" onclick="showProfile()">😼<br>Me</button></div>
+  <div class="nav"><button class="ntab" onclick="showHome()">🏠<br>Home</button><button class="ntab" onclick="goRank()">🏆<br>Rank</button><button class="ntab on" onclick="showProfile()">😼<br>Me</button></div>
 </div>
 
-<!-- QUIZ -->
 <div class="screen" id="quizScreen">
   <div class="hdr">
     <button onclick="exitQuiz()" style="background:none; border:none; color:var(--mu); font-weight:700;">✕ EXIT</button>
@@ -134,103 +131,85 @@ body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: v
   </div>
 </div>
 
-<!-- RANKS -->
 <div class="screen" id="rankScreen">
-  <div class="hdr"><div class="logo">🏆 Ranks</div><button onclick="showHome()" style="background:none; border:none; color:var(--ac);">✕</button></div>
+  <div class="hdr"><div id="rankTitle" class="logo">🏆 Ranks</div><button onclick="showHome()" style="background:none; border:none; color:var(--ac);">✕</button></div>
   <div class="hcontent" id="rankContent"></div>
 </div>
 
 <script>
-// --- UTILS ---
+const QUESTIONS_BACKUP = [
+  { concept: "Mean", definition: "Average shown by all scores divided by n.", tag: "Descriptives", scenario: "A manager calculates the total sales for the month and divides it by 30 days." },
+  { concept: "Independent groups design", definition: "An experimental design where participants take part in only one experimental condition.", tag: "Research Designs", scenario: "A researcher splits 100 people into two separate rooms." }
+];
+
 const ADJ=['Bold','Brave','Clever','Daring','Epic','Fierce','Golden','Happy','Jolly','Mighty','Noble','Quick','Rapid','Swift','Wise'];
 const CAT=['Lion','Tiger','Panther','Cougar','Leopard','Lynx','Cheetah','Jaguar','Wildcat','Tomcat'];
+let S=null, QUESTIONS=[], QZ=null, APPROVED={}, IS_TEACHER=false;
+
 function genNick(name){ let h=0; for(let i=0;i<name.length;i++) h=((h<<5)-h)+name.charCodeAt(i); const a=Math.abs(h); return ADJ[a%ADJ.length]+' '+CAT[Math.floor(a/ADJ.length)%CAT.length]; }
 function calcAcc(c, a, s) { const tw = (a||0) + ((s||0)*0.5); return tw===0 ? 0 : Math.round((c/tw)*100); }
 
-let S = null; let QUESTIONS = []; let QZ = null; let APPROVED = {};
-
-async function api(method, data = {}) {
-  const res = await fetch("/api/jsonbin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ method, ...data }) });
-  return res.json();
+async function api(m, d={}) {
+  const r = await fetch("/api/jsonbin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ method: m, ...d }) });
+  return r.json();
 }
 
 window.addEventListener('load', async () => {
-  // 1. Set a "Maximum Wait" timer
-  // If the server doesn't respond in 4 seconds, hide the splash anyway
-  const safetyTimer = setTimeout(() => {
-    console.log("Server taking too long... using fallback.");
-    hideSplash();
-  }, 4000);
-
+  const t = setTimeout(() => hideSplash(), 4000);
   try {
-    const qData = await api('GET_QUESTIONS');
-    
-    // Check if we actually got questions from the cloud
-    if (qData && qData.questions && qData.questions.length > 0) {
-      QUESTIONS = qData.questions.filter(q => q && q.concept);
-      APPROVED = qData.approvedAnswers || {};
-      console.log("Cloud questions loaded.");
-    } else {
-      console.log("Cloud empty, using fallback questions.");
-      QUESTIONS = QUESTIONS_FALLBACK;
-    }
-  } catch (e) {
-    console.error("Connection failed. Using local questions.", e);
-    QUESTIONS = QUESTIONS_FALLBACK;
-  } finally {
-    // 2. Hide the splash screen NO MATTER WHAT
-    clearTimeout(safetyTimer);
-    hideSplash();
-  }
+    const d = await api('GET_QUESTIONS');
+    QUESTIONS = (d.questions && d.questions.length) ? d.questions.filter(q => q && q.concept) : QUESTIONS_BACKUP;
+    APPROVED = d.approvedAnswers || {};
+  } catch(e) { QUESTIONS = QUESTIONS_BACKUP; }
+  finally { clearTimeout(t); hideSplash(); }
 });
 
-function hideSplash() {
-  const splash = document.getElementById('splash');
-  if (splash) splash.style.display = 'none';
-}
+function hideSplash() { document.getElementById('splash').style.display='none'; }
 
-// --- AUTH ---
 async function handleLookup() {
-  const name = document.getElementById('iName').value.trim(); if (!name) return;
-  const d = await api('GET_STUDENT', { name });
-  document.getElementById('loginStep1').style.display = 'none';
-  if (d.student) { S = d.student; document.getElementById('loginPin').style.display = 'block'; document.getElementById('pinMsg').textContent = `Hi, ${S.nickname}! Enter PIN:`; }
-  else { document.getElementById('loginNew').style.display = 'block'; }
+  const n = document.getElementById('iName').value.trim(); if(!n) return;
+  const d = await api('GET_STUDENT', { name: n });
+  document.getElementById('loginStep1').style.display='none';
+  if(d.student) { S=d.student; document.getElementById('loginPin').style.display='block'; document.getElementById('pinMsg').textContent=`Hi, ${S.nickname}! PIN:`; }
+  else { document.getElementById('loginNew').style.display='block'; }
 }
-async function verifyPin() { if (S.pin === document.getElementById('iPin').value) showHome(); else alert("Wrong PIN!"); }
+async function verifyPin() { if(S.pin === document.getElementById('iPin').value) showHome(); else alert("No."); }
 async function createAccount() {
-  const name = document.getElementById('iName').value.trim();
-  S = { name, pin: document.getElementById('nPin').value, nickname: genNick(name), year: document.getElementById('sYear').value, group: document.getElementById('sGroup').value, teacher: document.getElementById('sTeacher').value, totalAnswered: 0, totalCorrect: 0, totalSkipped: 0, termStats: {} };
+  const n = document.getElementById('iName').value.trim();
+  S = { name: n, pin: document.getElementById('nPin').value, nickname: genNick(n), year: document.getElementById('sYear').value, group: document.getElementById('sGroup').value, teacher: document.getElementById('sTeacher').value, totalAnswered: 0, totalCorrect: 0, totalSkipped: 0, termStats: {} };
   await api('PUT_STUDENT', { student: S }); showHome();
 }
 
-// --- HOME ---
-function showHome() { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById('homeScreen').classList.add('active'); renderHome(); }
-function showProfile() { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById('profileScreen').classList.add('active'); document.getElementById('pCorrect').textContent = S.totalCorrect; document.getElementById('pSkipped').textContent = S.totalSkipped; }
-async function updatePin() { S.pin = document.getElementById('changePin').value; await api('PUT_STUDENT', { student: S }); alert("Updated!"); }
+function showHome() { 
+  IS_TEACHER = false;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
+  document.getElementById('homeScreen').classList.add('active'); 
+  renderHome(); 
+}
 
 function renderHome() {
   const acc = calcAcc(S.totalCorrect, S.totalAnswered, S.totalSkipped);
   document.getElementById('uNick').textContent = S.nickname;
   document.getElementById('uMeta').textContent = `Y${S.year} · Grp ${S.group} · T:${S.teacher}`;
   document.getElementById('totalPbar').style.width = acc + "%";
-  document.getElementById('uAnswered').textContent = `${S.totalAnswered} Ans`;
-  document.getElementById('uAccuracy').textContent = `${acc}%`;
-  
+  document.getElementById('uAnswered').textContent = `${S.totalAnswered} Answered`;
+  document.getElementById('uAccuracy').textContent = `Accuracy: ${acc}%`;
   const tags = [...new Set(QUESTIONS.map(q => q.tag))];
   const grid = document.getElementById('topicGrid'); grid.innerHTML = "";
+  let g=0, a=0, r=0;
   tags.forEach(tag => {
     const qs = QUESTIONS.filter(q => q.tag === tag);
-    let c=0, a=0, sk=0; qs.forEach(q => { const st = S.termStats[q.concept] || {correct:0, answered:0, skipped:0}; c+=st.correct; a+=st.answered; sk+=st.skipped; });
-    const pct = calcAcc(c,a,sk);
-    grid.innerHTML += `<div class="card clickable" onclick="startQuiz('${tag}')"><b>${tag}</b><div style="font-size:0.7rem; color:var(--mu);">${pct}% Accuracy</div><div class="pbar-container" style="height:4px;"><div class="pbar-fill" style="width:${pct}%; background:${pct>=75?'var(--gr)':pct>=50?'var(--am)':'var(--re)'}"></div></div></div>`;
+    let c=0, an=0, sk=0; qs.forEach(q => { const st = S.termStats[q.concept] || {correct:0, answered:0, skipped:0}; c+=st.correct; an+=st.answered; sk+=st.skipped; });
+    const pct = calcAcc(c, an, sk);
+    if(an > 0) { if(pct >= 75) g++; else if(pct >= 50) a++; else r++; }
+    grid.innerHTML += `<div class="card clickable" onclick="startQuiz('${tag}')"><b>${tag}</b><div style="font-size:0.7rem;">${qs.length} terms · ${pct}% Acc</div><div class="pbar-container" style="height:4px;"><div class="pbar-fill" style="width:${pct}%; background:${pct>=75?'var(--gr)':pct>=50?'var(--am)':'var(--re)'}"></div></div></div>`;
   });
+  document.getElementById('statG').textContent = g; document.getElementById('statA').textContent = a; document.getElementById('statR').textContent = r;
 }
 
-// --- QUIZ ---
-function startQuiz(tag) {
-  let pool = QUESTIONS.filter(q => q.tag === tag);
-  QZ = { questions: pool.sort(() => 0.5 - Math.random()).slice(0, 10), currentIdx: 0, score: 0, results: [] };
+function startQuiz(t) {
+  let p = QUESTIONS.filter(q => q.tag === t);
+  QZ = { questions: p.sort(() => 0.5-Math.random()).slice(0,10), currentIdx: 0, score: 0, results: [] };
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById('quizScreen').classList.add('active'); renderQuestion();
 }
 
@@ -247,14 +226,15 @@ function renderQuestion() {
     <input type="text" id="qAns" class="tarea" placeholder="Identify concept..." autocomplete="off">
     <div id="qFeedback" class="fb-box"></div>`;
   document.getElementById('btnCheck').style.display="flex"; document.getElementById('btnSkip').style.display="flex"; document.getElementById('btnNext').style.display="none";
+  document.getElementById('qAns').focus();
 }
 
 async function handleCheck() {
-  const q = QZ.questions[QZ.currentIdx]; const ans = document.getElementById('qAns').value.trim(); if(!ans) return;
+  const q = QZ.questions[QZ.currentIdx], ans = document.getElementById('qAns').value.trim(); if(!ans) return;
   document.getElementById('btnCheck').innerHTML = '<span class="spinner"></span>';
   const clean = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
-  const target = clean(q.concept); const input = clean(ans);
-  let ok = (input === target) || (APPROVED[q.concept]?.some(a => clean(a) === input));
+  const tar = clean(q.concept), inp = clean(ans);
+  let ok = (inp === tar) || (APPROVED[q.concept]?.some(a => clean(a) === inp));
   if(!ok) {
     const ai = await api('AI_CHECK', { concept: q.concept, studentAnswer: ans, type: QZ.currentTask });
     if(ai.correct) { ok = true; api('ADD_APPROVED', { concept: q.concept, answer: ans }); }
@@ -277,25 +257,40 @@ async function finishQuiz() {
   await api('PUT_STUDENT', { student: S }); showHome();
 }
 
-// --- TEACHER ---
-async function goTeacher() {
-  const pin = prompt("PIN:"); const d = await api('AUTH', { pin });
+async function goRank() {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('rankScreen').classList.add('active');
+    document.getElementById('rankTitle').textContent = "🏆 Top Kittens";
+    const d = await api('GET_ALL');
+    const sorted = Object.values(d.students).sort((a,b) => calcAcc(b.totalCorrect, b.totalAnswered, b.totalSkipped) - calcAcc(a.totalCorrect, a.totalAnswered, a.totalSkipped));
+    document.getElementById('rankContent').innerHTML = sorted.map((s,i) => `<div class="card">#${i+1} ${s.nickname} &middot; ${calcAcc(s.totalCorrect, s.totalAnswered, s.totalSkipped)}%</div>`).join('');
+}
+
+async function goTeacherAdmin() {
+  const p = prompt("PIN:"); const d = await api('AUTH', { pin: p });
   if (d.ok) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById('rankScreen').classList.add('active');
-    const data = await api('GET_ALL');
-    document.getElementById('rankContent').innerHTML = Object.values(data.students).sort((a,b)=>calcAcc(b.totalCorrect,b.totalAnswered,b.totalSkipped)-calcAcc(a.totalCorrect,a.totalAnswered,a.totalSkipped)).map((s,i)=>`<div class="card clickable" onclick="drillStudent('${s.name}')">#${i+1} ${s.name} (${s.nickname}) - ${calcAcc(s.totalCorrect,s.totalAnswered,s.totalSkipped)}%</div>`).join('');
+    IS_TEACHER = true;
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('rankScreen').classList.add('active');
+    document.getElementById('rankTitle').textContent = "🦁 Teacher Admin";
+    const all = await api('GET_ALL');
+    document.getElementById('rankContent').innerHTML = Object.values(all.students).map(s => `<div class="card clickable" onclick="drillStudent('${s.name}')"><b>${s.name}</b> (${s.nickname}) &middot; ${calcAcc(s.totalCorrect, s.totalAnswered, s.totalSkipped)}%</div>`).join('');
   } else alert("No.");
 }
+
 async function drillStudent(name) {
     const d = await api('GET_STUDENT', { name }); const st = d.student;
-    let h = `<div style="padding:15px; border:1px solid var(--ac); border-radius:20px; margin-bottom:15px;"><h3>${st.nickname}'s Topic Report</h3>`;
+    let h = `<div style="padding:15px; border:2px solid var(--ac); border-radius:20px; margin-bottom:15px;"><h3>${st.name} Report</h3><br>`;
     [...new Set(QUESTIONS.map(q=>q.tag))].forEach(t=>{
-        let c=0, a=0, sk=0; QUESTIONS.filter(q=>q.tag===t).forEach(q=>{ const s=st.termStats[q.concept]||{correct:0,answered:0,skipped:0}; c+=s.correct; a+=s.answered; sk+=s.skipped; });
-        h += `<div style="display:flex; justify-content:space-between;"><span>${t}</span><b>${calcAcc(c,a,sk)}%</b></div>`;
+        let c=0, an=0, sk=0; QUESTIONS.filter(q=>q.tag===t).forEach(q=>{ const s=st.termStats[q.concept]||{correct:0,answered:0,skipped:0}; c+=s.correct; an+=s.answered; sk+=s.skipped; });
+        h += `<div style="display:flex; justify-content:space-between;"><span>${t}</span><b>${calcAcc(c,an,sk)}%</b></div>`;
     });
     h += `<button class="btn btn-o btn-s" style="margin-top:10px;" onclick="this.parentElement.remove()">Close</button></div>`;
     document.getElementById('rankContent').insertAdjacentHTML('afterbegin', h);
 }
+
+function showProfile() { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById('profileScreen').classList.add('active'); document.getElementById('pCorrect').textContent=S.totalCorrect; document.getElementById('pSkipped').textContent=S.totalSkipped; }
+async function updatePin() { S.pin=document.getElementById('changePin').value; await api('PUT_STUDENT',{student:S}); alert("OK"); }
 function exitQuiz() { if(confirm("Exit?")) showHome(); }
 </script>
 </body>
