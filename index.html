@@ -13,7 +13,7 @@
   --gd: rgba(29, 209, 161, 0.15); --rd: rgba(238, 82, 83, 0.15);
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: var(--tx); min-height: 100vh; overflow-x: hidden; }
 
 .screen { display: none; min-height: 100vh; flex-direction: column; }
@@ -27,7 +27,7 @@ body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: v
 .ntab.on { color: var(--ac); }
 
 .hcontent { flex: 1; padding: 20px; padding-bottom: 100px; overflow-y: auto; }
-.card { background: var(--sf); border: 1px solid var(--bd); border-radius: 20px; padding: 20px; margin-bottom: 15px; transition: 0.2s; }
+.card { background: var(--sf); border: 1px solid var(--bd); border-radius: 20px; padding: 20px; margin-bottom: 15px; transition: 0.2s; cursor: pointer; }
 .card:hover { border-color: var(--ac); transform: translateY(-2px); }
 
 .pbar-container { width: 100%; height: 8px; background: var(--bd); border-radius: 4px; overflow: hidden; margin: 10px 0; }
@@ -40,28 +40,20 @@ body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: v
 
 .q-tag { display: inline-block; padding: 4px 10px; border-radius: 20px; background: var(--sf2); border: 1px solid var(--bd); color: var(--ac); font-size: 0.75rem; font-weight: 700; margin-bottom: 12px; }
 .q-prompt { font-size: 0.9rem; color: var(--mu); margin-bottom: 8px; }
-.q-main { font-family: 'DM Serif Display', serif; font-size: 1.8rem; line-height: 1.2; margin-bottom: 20px; }
-.q-sub { font-size: 1rem; line-height: 1.5; color: var(--tx); background: var(--sf2); padding: 15px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid var(--ac); }
+.q-main { font-family: 'DM Serif Display', serif; font-size: 1.6rem; line-height: 1.3; margin-bottom: 20px; color: var(--tx); }
+.q-sub { font-size: 0.95rem; line-height: 1.5; color: var(--mu); background: var(--sf2); padding: 15px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid var(--ac); font-style: italic; }
 
-.tarea { width: 100%; min-height: 100px; background: var(--sf2); border: 1px solid var(--bd); border-radius: 12px; padding: 15px; color: var(--tx); font-family: inherit; font-size: 1rem; margin-bottom: 15px; outline: none; }
+.tarea { width: 100%; min-height: 60px; background: var(--sf2); border: 1px solid var(--bd); border-radius: 12px; padding: 15px; color: var(--tx); font-family: inherit; font-size: 1.2rem; margin-bottom: 15px; outline: none; }
 .tarea:focus { border-color: var(--ac); }
 
 .fb-box { border-radius: 15px; padding: 20px; margin-top: 15px; display: none; border: 1px solid transparent; }
 .fb-box.ok { background: var(--gd); border-color: var(--gr); color: var(--gr); }
 .fb-box.ng { background: var(--rd); border-color: var(--re); color: var(--re); }
 .fb-tit { font-weight: 800; font-size: 1.1rem; margin-bottom: 8px; }
-.fb-txt { font-size: 0.9rem; line-height: 1.4; color: var(--tx); }
-
-.scard { text-align: center; flex: 1; padding: 10px; border-radius: 12px; background: var(--sf2); border: 1px solid var(--bd); }
-.s-num { font-size: 1.4rem; font-weight: 800; }
-.s-lbl { font-size: 0.6rem; text-transform: uppercase; color: var(--mu); margin-top: 2px; }
+.fb-txt { font-size: 0.95rem; line-height: 1.4; color: var(--tx); }
 
 .spinner { width: 20px; height: 20px; border: 3px solid rgba(255,159,67,0.3); border-top-color: var(--ac); border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-
-.modal-ovl { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-.modal-ovl.active { display: flex; }
-.modal { background: var(--sf); border: 1px solid var(--bd); border-radius: 20px; padding: 25px; width: 100%; max-width: 400px; position: relative; }
 </style>
 </head>
 <body>
@@ -69,108 +61,66 @@ body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: v
 <div id="splash" style="position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;">
   <div style="font-size:4rem;">😽</div>
   <div style="font-family:'DM Serif Display',serif;font-size:2rem;color:var(--ac);margin-top:10px;">PsychCat</div>
-  <div style="width:100px;height:4px;background:var(--bd);border-radius:2px;margin-top:20px;overflow:hidden;"><div style="width:50%;height:100%;background:var(--ac);animation:load 1.5s infinite;"></div></div>
 </div>
 
+<!-- LOGIN -->
 <div class="screen active" id="loginScreen">
   <div style="padding:40px 20px; text-align:center;">
     <div style="font-size:4rem;">😺</div>
     <div style="font-family:'DM Serif Display',serif;font-size:2.5rem;">Meow! Welcome.</div>
-    <p style="color:var(--mu);margin-bottom:30px;">Psychology A-Level Component 2</p>
-    <div id="loginStep1" class="card" style="text-align:left;">
-      <label class="s-lbl">Student Name</label>
-      <input type="text" id="iName" class="tarea" style="min-height:50px; margin-top:5px;" placeholder="e.g. Felix the Cat">
-      <button class="btn btn-p" onclick="login()">Enter the Litterbox &#8594;</button>
-    </div>
-    <div id="loginStep2" class="card" style="display:none; text-align:left;">
-      <div id="welcomeBack"></div>
-      <label class="s-lbl" style="margin-top:15px; display:block;">4-Digit PIN</label>
-      <input type="password" id="iPin" class="tarea" style="min-height:50px; margin-top:5px; text-align:center; letter-spacing:10px;" maxlength="4" inputmode="numeric">
-      <button class="btn btn-p" id="btnLogin">Sign In 😼</button>
+    <div class="card" style="text-align:left; margin-top:20px;">
+      <label style="font-size:0.7rem; font-weight:700; color:var(--mu);">STUDENT NAME</label>
+      <input type="text" id="iName" class="tarea" style="min-height:50px; margin-top:5px;" placeholder="Enter your name">
+      <button class="btn btn-p" onclick="login()">Start Learning &#8594;</button>
     </div>
   </div>
 </div>
 
+<!-- HOME -->
 <div class="screen" id="homeScreen">
-  <div class="hdr"><div class="logo">🐾 PsychCat</div><div id="homeSync" class="s-lbl" style="color:var(--gr);">● Online</div></div>
+  <div class="hdr"><div class="logo">🐾 PsychCat</div></div>
   <div class="hcontent">
     <div class="card" style="background: linear-gradient(135deg, rgba(255,159,67,0.1), transparent);">
-      <div style="display:flex; justify-content:space-between;">
-        <div><div id="uNick" style="font-family:'DM Serif Display',serif; font-size:1.5rem; color:var(--ac);">...</div><div id="uStats" style="font-size:0.8rem; color:var(--mu);">...</div></div>
-        <div id="uBadge" style="font-size:2rem;">🌱</div>
-      </div>
-      <div class="pbar-container" style="margin-top:20px;"><div id="totalPbar" class="pbar-fill"></div></div>
-      <div style="display:flex; justify-content:space-between; font-size:0.7rem; font-weight:700; color:var(--mu);">
+      <div id="uNick" style="font-family:'DM Serif Display',serif; font-size:1.5rem; color:var(--ac);">...</div>
+      <div class="pbar-container"><div id="totalPbar" class="pbar-fill"></div></div>
+      <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--mu);">
         <span id="uAccuracy">Accuracy: 0%</span><span id="uAnswered">0 Answered</span>
       </div>
     </div>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
-      <button class="btn btn-p" onclick="startQuiz('all')">🎲 Random Quiz</button>
-      <button class="btn btn-o" onclick="startQuiz('tricky')">🔥 Tricky Terms</button>
-    </div>
-    <div style="display:flex; gap:10px; margin-bottom:20px;">
-       <div class="scard"><div class="s-num" id="statG" style="color:var(--gr)">0</div><div class="s-lbl">Mastered</div></div>
-       <div class="scard"><div class="s-num" id="statA" style="color:var(--am)">0</div><div class="s-lbl">Learning</div></div>
-       <div class="scard"><div class="s-num" id="statR" style="color:var(--re)">0</div><div class="s-lbl">Needs Work</div></div>
-    </div>
+    <div style="font-weight:800; font-size:0.7rem; text-transform:uppercase; color:var(--mu); margin-bottom:10px;">Select a Topic:</div>
     <div id="topicGrid"></div>
-  </div>
-  <div class="nav">
-    <button class="ntab on" onclick="goTab('home')">🏠<br>Home</button>
-    <button class="ntab" onclick="goTab('rank')">🏆<br>Ranks</button>
-    <button class="ntab" onclick="renderProfile()">😼<br>Me</button>
   </div>
 </div>
 
+<!-- QUIZ SCREEN -->
 <div class="screen" id="quizScreen">
   <div class="hdr">
-    <button onclick="exitQuiz()" style="background:none; border:none; color:var(--mu); font-size:1.5rem;">✕</button>
+    <button onclick="location.reload()" style="background:none; border:none; color:var(--mu);">✕ Exit</button>
     <div style="flex:1; margin:0 20px;"><div class="pbar-container"><div id="qPbar" class="pbar-fill"></div></div></div>
     <div id="qCount" style="font-size:0.8rem; font-weight:800;">1/10</div>
   </div>
   <div class="hcontent" id="qContent"></div>
   <div id="qActions" style="padding:20px; background:var(--sf); border-top:1px solid var(--bd); display:flex; flex-direction:column; gap:10px;">
-     <button id="btnCheck" class="btn btn-p" onclick="handleCheck()">Check Answer 😼</button>
+     <button id="btnCheck" class="btn btn-p" onclick="handleCheck()">Check Term 😼</button>
      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-        <button id="btnSkip" class="btn btn-o" onclick="handleSkip()">Skip 😿</button>
+        <button id="btnSkip" class="btn btn-o" onclick="handleSkip()">Skip</button>
         <button id="btnNext" class="btn btn-p" style="display:none;" onclick="handleNext()">Next →</button>
      </div>
   </div>
 </div>
 
+<!-- RESULT SCREEN -->
 <div class="screen" id="resultScreen" style="align-items:center; justify-content:center; padding:20px; text-align:center;">
-    <div id="resEmoji" style="font-size:5rem;">🦁</div>
-    <div id="resTitle" style="font-family:'DM Serif Display',serif; font-size:2.5rem;">Expert!</div>
-    <div id="resScore" style="color:var(--mu); margin:10px 0;"></div>
-    <div class="card" style="width:100%; max-width:320px; text-align:left;">
-       <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Overall Accuracy</span><span id="resAcc" style="color:var(--ac);"></span></div>
-       <div style="display:flex; justify-content:space-between;"><span>Total Answered</span><span id="resTotal"></span></div>
-    </div>
-    <button class="btn btn-p" style="max-width:320px;" onclick="goTab('home')">Back to Home 🐈</button>
+    <div style="font-size:5rem;">🦁</div>
+    <div style="font-family:'DM Serif Display',serif; font-size:2.5rem;">Quiz Done!</div>
+    <div id="resScore" style="color:var(--mu); margin:10px 0; font-size:1.5rem;"></div>
+    <button class="btn btn-p" style="max-width:320px; margin-top:20px;" onclick="showHome()">Back to Home 🐈</button>
 </div>
 
-<div class="modal-ovl" id="modalFlag"><div class="modal">
-    <div style="font-family:'DM Serif Display',serif; font-size:1.5rem; margin-bottom:10px;">🚩 Report Issue</div>
-    <div id="flagContext" style="font-size:0.7rem; color:var(--mu); margin-bottom:15px; padding:10px; background:var(--sf2); border-radius:10px;"></div>
-    <select id="flagType" class="tarea" style="min-height:45px; padding:5px;"><option value="AI error">AI Error</option><option value="Typo">Typo</option></select>
-    <textarea id="flagNote" class="tarea" placeholder="Comment..."></textarea>
-    <div style="display:flex; gap:10px;"><button class="btn btn-p" onclick="submitFlag()">Send</button><button class="btn btn-o" onclick="closeFlag()">Cancel</button></div>
-</div></div>
-
 <script>
-// 1. PASTE YOUR ARRAY HERE 
-const LOCAL_QUESTIONS = [
-  {
-    "id": 0,
-    "concept": "Aim of the research",
-    "definition": "A broad statement of the purpose of the research.",
-    "tag": "Hypotheses",
-    "scenario": "A psychologist states their study 'seeks to explore the relationship between sleep and memory.'",
-    "scenario_strength": "Provides a clear focus for the study.",
-    "scenario_weakness": "Can be too broad to be directly testable."
-  },
-  // ... Paste the rest of your 100+ questions here
-  {"id":0,"concept":"Aim of the research","definition":"A broad statement of the purpose of the research.","tag":"Hypotheses","mc":{"question":"Which of the following is correct regarding Aim of the research?","options":["A specific prediction","A statistical outcome","A broad statement of purpose","An experimental error"],"correct":3},"tf":{"statement":"The aim of the research is a specific hypothesis tested by the researcher.","answer":false},"scenario":"A psychologist states their study 'seeks to explore the relationship between sleep and memory.'","scenario_strength":"","scenario_weakness":""},
+// --- YOUR QUESTIONS HERE ---
+const QUESTIONS_FALLBACK = [
+{"id":0,"concept":"Aim of the research","definition":"A broad statement of the purpose of the research.","tag":"Hypotheses","mc":{"question":"Which of the following is correct regarding Aim of the research?","options":["A specific prediction","A statistical outcome","A broad statement of purpose","An experimental error"],"correct":3},"tf":{"statement":"The aim of the research is a specific hypothesis tested by the researcher.","answer":false},"scenario":"A psychologist states their study 'seeks to explore the relationship between sleep and memory.'","scenario_strength":"","scenario_weakness":""},
 {"id":1,"concept":"Alternative hypotheses","definition":"A testable statement that a piece of research attempts to support or reject.","tag":"Hypotheses","mc":{"question":"Which of the following is correct regarding Alternative hypotheses?","options":["A vague idea about research","A testable statement","A method of data collection","An ethical guideline"],"correct":2},"tf":{"statement":"An experimental hypothesis must be testable.","answer":true},"scenario":"Before collecting data, a researcher predicts that 'students who eat breakfast will score higher on a test than those who do not.'","scenario_strength":"","scenario_weakness":""},
 {"id":2,"concept":"Directional hypotheses","definition":"A hypothesis that suggests a specific direction/outcome e.g. alcohol slows reaction time.","tag":"Hypotheses","mc":{"question":"Which of the following is correct regarding Directional hypotheses?","options":["It is not testable","It does not predict change","It specifies the expected direction of results","It avoids assumptions"],"correct":3},"tf":{"statement":"A directional hypothesis does not predict the direction of results.","answer":false},"scenario":"A researcher predicts that 'people who sleep more will perform significantly better on memory tests.'","scenario_strength":"","scenario_weakness":""},
 {"id":3,"concept":"Non-directional hypotheses","definition":"A hypothesis that suggests a difference exists but does not state a specific direction.","tag":"Hypotheses","mc":{"question":"Which of the following is correct regarding Non-directional hypotheses?","options":["It predicts no difference","It predicts the direction of the effect","It predicts a difference without specifying direction","It is untestable"],"correct":3},"tf":{"statement":"A non-directional hypothesis predicts the specific outcome.","answer":false},"scenario":"A researcher claims that 'the temperature of a room will significantly affect test performance.'","scenario_strength":"","scenario_weakness":""},
@@ -279,127 +229,122 @@ const LOCAL_QUESTIONS = [
 {"id":106,"concept":"Sampling frame","definition":"A complete list of the target population used to draw a sample.","tag":"Sampling","mc":{"question":"Which of the following is correct regarding Sampling frame?","options":["Location of study","Subgroup selected","Full list of population","Experiment structure"],"correct":3},"tf":{"statement":"A sampling frame includes only people who have already agreed.","answer":false},"scenario":"A researcher uses a list of all Year 10 students in a school to pick their sample.","scenario_strength":"Essential for random, systematic, and stratified sampling.","scenario_weakness":"If the list is out of date or incomplete, the sample will be biased."}
 
 ];
-let S = null; let QUESTIONS = []; let QZ = null; let APPROVED = {};
+
+let S = null; let QUESTIONS = []; let QZ = null;
 
 async function api(method, data = {}) {
-  const res = await fetch("/api/jsonbin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ method, ...data }) });
-  return res.json();
+  try {
+    const res = await fetch("/api/jsonbin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ method, ...data }) });
+    return res.json();
+  } catch(e) { return { error: true }; }
 }
 
 window.addEventListener('load', async () => {
-  try {
-    const qData = await api('GET_QUESTIONS');
-    // If the cloud has questions, use them
-    if (qData.questions && qData.questions.length > 0) {
-      QUESTIONS = qData.questions.filter(q => q && q.concept);
-    } else {
-      // If cloud is empty, use the LOCAL_QUESTIONS you pasted above
-      QUESTIONS = LOCAL_QUESTIONS;
-    }
-    APPROVED = qData.approvedAnswers || {};
-  } catch (e) {
-    console.error("Cloud fetch failed, using local questions");
-    QUESTIONS = LOCAL_QUESTIONS;
-  }
+  const qData = await api('GET_QUESTIONS');
+  // Clean the data: handle nulls or gaps
+  QUESTIONS = (qData.questions && qData.questions.length > 0) ? qData.questions.filter(q => q && q.concept) : QUESTIONS_FALLBACK;
   document.getElementById('splash').style.display = 'none';
 });
 
 async function login() {
   const name = document.getElementById('iName').value.trim(); if (!name) return;
   const d = await api('GET_STUDENT', { name });
-  document.getElementById('loginStep1').style.display = 'none'; document.getElementById('loginStep2').style.display = 'block';
-  if (d.student) { S = d.student; document.getElementById('welcomeBack').innerHTML = `Hi ${S.name}!`; } 
-  else { S = { name, pin: "", nickname: name + " Cat", totalAnswered: 0, totalCorrect: 0, totalSkipped: 0, termStats: {} }; }
+  if (d.student) S = d.student;
+  else S = { name, nickname: name + " Cat", totalAnswered: 0, totalCorrect: 0, totalSkipped: 0, termStats: {} };
+  showHome();
 }
 
-document.getElementById('btnLogin').onclick = async () => {
-  const pin = document.getElementById('iPin').value;
-  if (!S.pin) S.pin = pin;
-  if (S.pin === pin) { await api('PUT_STUDENT', { student: S }); showHome(); } 
-  else alert("Wrong PIN!");
-};
-
-function showHome() { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById('homeScreen').classList.add('active'); renderHome(); }
-
-function calcAcc(cor, ans, skip) { 
-  if (ans === 0) return 0;
-  return Math.round((cor / (ans + (skip * 0.5))) * 100); 
+function showHome() { 
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
+  document.getElementById('homeScreen').classList.add('active'); 
+  renderHome(); 
 }
 
 function renderHome() {
-  const acc = calcAcc(S.totalCorrect, S.totalAnswered, S.totalSkipped);
+  const acc = S.totalAnswered > 0 ? Math.round((S.totalCorrect / S.totalAnswered) * 100) : 0;
   document.getElementById('uNick').textContent = S.nickname;
-  document.getElementById('uStats').textContent = `Accuracy: ${acc}%`;
   document.getElementById('totalPbar').style.width = acc + "%";
   document.getElementById('uAnswered').textContent = `${S.totalAnswered} Answered`;
+  document.getElementById('uAccuracy').textContent = `Accuracy: ${acc}%`;
   
   const tags = [...new Set(QUESTIONS.map(q => q.tag))];
   const container = document.getElementById('topicGrid'); container.innerHTML = "";
-  let g=0, a=0, r=0;
-
   tags.forEach(tag => {
-    const qInTag = QUESTIONS.filter(q => q.tag === tag);
-    let tC=0, tA=0;
-    qInTag.forEach(q => { const st = S.termStats[q.concept] || {correct:0, answered:0}; tC+=st.correct; tA+=st.answered; });
-    const pct = tA > 0 ? Math.round((tC/tA)*100) : 0;
-    if(pct >= 75) g++; else if(pct >= 50) a++; else if(tA>0) r++;
-    container.innerHTML += `<div class="card" onclick="startQuiz('${tag}')"><b>${tag}</b><br><small>${pct}% Accuracy</small></div>`;
+    container.innerHTML += `<div class="card" onclick="startQuiz('${tag}')"><b>${tag}</b></div>`;
   });
-  document.getElementById('statG').textContent = g; document.getElementById('statA').textContent = a; document.getElementById('statR').textContent = r;
 }
 
 function startQuiz(mode) {
-  let pool = mode === 'all' ? QUESTIONS : mode === 'tricky' ? QUESTIONS.filter(q => (S.termStats[q.concept]?.correct/S.termStats[q.concept]?.answered || 0) < 0.5) : QUESTIONS.filter(q => q.tag === mode);
+  let pool = QUESTIONS.filter(q => q.tag === mode || mode === 'all');
   QZ = { questions: pool.sort(() => 0.5 - Math.random()).slice(0, 10), currentIdx: 0, score: 0, results: [] };
-  document.getElementById('homeScreen').classList.remove('active'); document.getElementById('quizScreen').classList.add('active'); renderQuestion();
+  document.getElementById('homeScreen').classList.remove('active'); 
+  document.getElementById('quizScreen').classList.add('active'); 
+  renderQuestion();
 }
 
 function renderQuestion() {
   const q = QZ.questions[QZ.currentIdx];
   document.getElementById('qPbar').style.width = (QZ.currentIdx / QZ.questions.length * 100) + "%";
-  document.getElementById('qCount').textContent = `${QZ.currentIdx+1}/10`;
+  document.getElementById('qCount').textContent = `${QZ.currentIdx+1}/${QZ.questions.length}`;
+  
   document.getElementById('qContent').innerHTML = `
-    <div class="q-tag">${q.tag}</div>
-    <div class="q-prompt">Based on ${q.tag}, identify:</div>
-    <div class="q-main">${q.concept}</div>
-    ${q.scenario ? `<div class="q-sub">${q.scenario}</div>` : ''}
-    <textarea id="qAns" class="tarea" placeholder="Your answer..."></textarea>
+    <div class="q-tag">🐾 ${q.tag}</div>
+    <div class="q-prompt">Which psychological term is defined as:</div>
+    <div class="q-main">${q.definition}</div>
+    ${q.scenario ? `<div class="q-sub"><b>Context:</b> ${q.scenario}</div>` : ''}
+    <input type="text" id="qAns" class="tarea" placeholder="Type the term here..." autocomplete="off">
     <div id="qFeedback" class="fb-box"></div>
   `;
   document.getElementById('btnCheck').style.display="flex"; document.getElementById('btnSkip').style.display="flex"; document.getElementById('btnNext').style.display="none";
+  document.getElementById('qAns').focus();
 }
 
 async function handleCheck() {
-  const q = QZ.questions[QZ.currentIdx]; const ans = document.getElementById('qAns').value.trim();
+  const q = QZ.questions[QZ.currentIdx]; 
+  const ans = document.getElementById('qAns').value.trim().toLowerCase();
   if(!ans) return;
-  document.getElementById('btnCheck').innerHTML = '<span class="spinner"></span>';
   
-  let ok = q.definition.toLowerCase().split(' ').filter(w=>w.length>4).filter(kw=>ans.toLowerCase().includes(kw)).length >= 2;
-  if(!ok && APPROVED[q.concept]?.some(a=>a.toLowerCase()===ans.toLowerCase())) ok = true;
-  if(!ok) { const ai = await api('AI_CHECK', { concept:q.concept, definition:q.definition, studentAnswer:ans }); if(ai.correct) { ok=true; api('ADD_APPROVED', {concept:q.concept, answer:ans}); } }
+  document.getElementById('btnCheck').innerHTML = '<span class="spinner"></span> Checking...';
+  
+  // Fuzzy match: remove spaces and symbols to check if it's correct
+  const simplify = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const isCorrect = (simplify(ans) === simplify(q.concept));
+
+  // AI Fallback if it's not a perfect match
+  let ok = isCorrect;
+  if(!ok) {
+     const ai = await api('AI_CHECK', { concept: q.concept, definition: q.definition, studentAnswer: ans });
+     if(ai.correct) ok = true;
+  }
 
   const fb = document.getElementById('qFeedback'); fb.style.display="block"; fb.className = `fb-box ${ok?'ok':'ng'}`;
-  fb.innerHTML = `<div class="fb-tit">${ok?'Correct!':'Wrong'}</div><div class="fb-txt">${q.definition}</div>`;
-  if(ok) QZ.score++; QZ.results.push({concept:q.concept, ok});
+  fb.innerHTML = `
+    <div class="fb-tit">${ok ? '😼 Correct!' : '😿 Not quite'}</div>
+    <div class="fb-txt">The term is: <b>${q.concept}</b></div>
+  `;
+  
+  if(ok) QZ.score++; 
+  QZ.results.push({concept:q.concept, ok});
   document.getElementById('btnCheck').style.display="none"; document.getElementById('btnSkip').style.display="none"; document.getElementById('btnNext').style.display="flex";
 }
 
 function handleSkip() { S.totalSkipped++; QZ.results.push({concept:QZ.questions[QZ.currentIdx].concept, ok:false}); handleNext(); }
-function handleNext() { QZ.currentIdx++; if(QZ.currentIdx >= QZ.questions.length) finishQuiz(); else renderQuestion(); }
-
-async function finishQuiz() {
-  QZ.results.forEach(r => { S.totalAnswered++; if(r.ok) S.totalCorrect++; if(!S.termStats[r.concept]) S.termStats[r.concept]={answered:0,correct:0}; S.termStats[r.concept].answered++; if(r.ok) S.termStats[r.concept].correct++; });
-  await api('PUT_STUDENT', { student: S });
-  document.getElementById('quizScreen').classList.remove('active'); document.getElementById('resultScreen').classList.add('active');
-  document.getElementById('resScore').textContent = `${QZ.score}/10 Correct`;
-  document.getElementById('resAcc').textContent = calcAcc(S.totalCorrect, S.totalAnswered, S.totalSkipped) + "%";
+function handleNext() { 
+  QZ.currentIdx++; 
+  if(QZ.currentIdx >= QZ.questions.length) finishQuiz(); 
+  else renderQuestion(); 
 }
 
-function renderProfile() { if(confirm("Reset progress?")) { S.totalAnswered=0; S.totalCorrect=0; S.totalSkipped=0; S.termStats={}; api('PUT_STUDENT', {student:S}); renderHome(); } }
-function exitQuiz() { if(confirm("Exit?")) showHome(); }
-function openFlag() { document.getElementById('flagContext').textContent = QZ.questions[QZ.currentIdx].concept; document.getElementById('modalFlag').classList.add('active'); }
-function closeFlag() { document.getElementById('modalFlag').classList.remove('active'); }
-async function submitFlag() { await api('SUBMIT_FLAG', { flag: { context: document.getElementById('flagContext').textContent, note: document.getElementById('flagNote').value, user: S.name } }); closeFlag(); }
+async function finishQuiz() {
+  QZ.results.forEach(r => { 
+    S.totalAnswered++; if(r.ok) S.totalCorrect++; 
+    if(!S.termStats[r.concept]) S.termStats[r.concept]={answered:0,correct:0};
+    S.termStats[r.concept].answered++; if(r.ok) S.termStats[r.concept].correct++;
+  });
+  await api('PUT_STUDENT', { student: S });
+  document.getElementById('quizScreen').classList.remove('active'); document.getElementById('resultScreen').classList.add('active');
+  document.getElementById('resScore').textContent = `${QZ.score} / ${QZ.questions.length} Correct`;
+}
 </script>
 </body>
 </html>
