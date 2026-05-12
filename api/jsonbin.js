@@ -43,15 +43,6 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
-    if (method === "SUBMIT_FLAG") {
-      const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { "X-Master-Key": MASTER_KEY } });
-      const data = (await r.json()).record;
-      data.flags.push({ ...body.flag, id: Date.now() });
-      await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, { method: "PUT", headers: { "Content-Type": "application/json", "X-Master-Key": MASTER_KEY }, body: JSON.stringify(data) });
-      return res.status(200).json({ ok: true });
-    }
-
-    // --- ANALYTICS ---
     if (method === "GET_ALL") {
       const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { "X-Master-Key": MASTER_KEY } });
       return res.status(200).json((await r.json()).record || {});
@@ -61,16 +52,21 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: String(body.pin) === String(TEACHER_PIN) });
     }
 
-    // --- STICKY/STRICT AI ---
+    // --- STRICT AI EXAMINER ---
     if (method === "AI_CHECK") {
-      const prompt = `Strict Psychology Examiner. 
-      Topic: "${body.concept}". 
+      const prompt = `You are a strict Psychology Examiner. 
+      Task Type: ${body.type}. 
+      Target: "${body.target}". 
       Student wrote: "${body.studentAnswer}". 
-      Instruction: Is this a conceptually correct identification of the term? Reject if they name the wrong concept. 
+      Rule: Reject if conceptually different. Minor typos are okay. 
       Respond ONLY in JSON: {"correct": boolean, "feedback": string}`;
+      
       const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { response_mime_type: "application/json" } })
+        body: JSON.stringify({ 
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { response_mime_type: "application/json" }
+        })
       });
       const data = await r.json();
       return res.status(200).json(JSON.parse(data.candidates[0].content.parts[0].text));
