@@ -3,56 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
-<title>PsychCat Quiz</title>
+<title>PsychCat Component 2</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=DM+Serif+Display&display=swap');
 :root {
-  --bg: #0f0f13; --sf: #1a1a24; --sf2: #242433; --bd: #33334d; --tx: #f0f0f5;
-  --mu: #9494b8; --ac: #ff9f43; --ac2: #f368e0; --gr: #1dd1a1; --am: #ff9f43; --re: #ee5253;
-  --gd: rgba(29, 209, 161, 0.15); --rd: rgba(238, 82, 83, 0.15);
+  --bg: #0a0a0f; --sf: #13131a; --sf2: #1c1c28; --bd: #2a2a3e; --tx: #e8e8f0;
+  --mu: #6b6b85; --ac: #ff9f43; --ac2: #f368e0; --gr: #22c55e; --am: #f59e0b; --re: #ef4444;
 }
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: var(--tx); min-height: 100vh; overflow-x: hidden; }
-
 .screen { display: none; min-height: 100vh; flex-direction: column; }
 .screen.active { display: flex; }
-
 .hdr { padding: 16px; display: flex; justify-content: space-between; align-items: center; background: var(--sf); border-bottom: 1px solid var(--bd); position: sticky; top: 0; z-index: 100; }
-.logo { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: var(--ac); display: flex; align-items: center; gap: 8px; }
-
-.nav { display: flex; background: var(--sf); border-top: 1px solid var(--bd); padding: 10px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); position: fixed; bottom: 0; width: 100%; gap: 5px; }
-.ntab { flex: 1; border: none; background: none; color: var(--mu); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+.logo { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: var(--ac); }
+.nav { display: flex; background: var(--sf); border-top: 1px solid var(--bd); padding: 10px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); position: fixed; bottom: 0; width: 100%; gap: 5px; z-index: 100; }
+.ntab { flex: 1; border: none; background: none; color: var(--mu); font-size: 0.65rem; font-weight: 700; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
 .ntab.on { color: var(--ac); }
-
 .hcontent { flex: 1; padding: 20px; padding-bottom: 100px; overflow-y: auto; }
-.card { background: var(--sf); border: 1px solid var(--bd); border-radius: 20px; padding: 20px; margin-bottom: 15px; transition: 0.2s; cursor: pointer; }
-.card:hover { border-color: var(--ac); transform: translateY(-2px); }
-
+.card { background: var(--sf); border: 1px solid var(--bd); border-radius: 20px; padding: 20px; margin-bottom: 15px; }
+.clickable:hover { border-color: var(--ac); transform: translateY(-2px); cursor: pointer; }
 .pbar-container { width: 100%; height: 8px; background: var(--bd); border-radius: 4px; overflow: hidden; margin: 10px 0; }
 .pbar-fill { height: 100%; background: var(--ac); transition: width 0.4s ease; }
-
-.btn { width: 100%; padding: 14px; border-radius: 12px; border: none; font-family: inherit; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn { width: 100%; padding: 14px; border-radius: 12px; border: none; font-family: inherit; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 1rem; }
 .btn-p { background: var(--ac); color: #000; }
 .btn-o { background: transparent; border: 1px solid var(--bd); color: var(--tx); }
-.btn-o:hover { border-color: var(--ac); background: rgba(255,159,67,0.1); }
-
-.q-tag { display: inline-block; padding: 4px 10px; border-radius: 20px; background: var(--sf2); border: 1px solid var(--bd); color: var(--ac); font-size: 0.75rem; font-weight: 700; margin-bottom: 12px; }
-.q-prompt { font-size: 0.9rem; color: var(--mu); margin-bottom: 8px; }
-.q-main { font-family: 'DM Serif Display', serif; font-size: 1.6rem; line-height: 1.3; margin-bottom: 20px; color: var(--tx); }
-.q-sub { font-size: 0.95rem; line-height: 1.5; color: var(--mu); background: var(--sf2); padding: 15px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid var(--ac); font-style: italic; }
-
+.q-tag { display: inline-block; padding: 4px 10px; border-radius: 20px; background: var(--sf2); color: var(--ac); font-size: 0.7rem; font-weight: 700; margin-bottom: 10px; }
+.q-main { font-family: 'DM Serif Display', serif; font-size: 1.6rem; line-height: 1.2; margin-bottom: 20px; color: var(--tx); }
+.q-sub { font-size: 0.9rem; color: var(--mu); background: var(--sf2); padding: 15px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid var(--ac); }
 .tarea { width: 100%; min-height: 60px; background: var(--sf2); border: 1px solid var(--bd); border-radius: 12px; padding: 15px; color: var(--tx); font-family: inherit; font-size: 1.2rem; margin-bottom: 15px; outline: none; }
-.tarea:focus { border-color: var(--ac); }
-
-.fb-box { border-radius: 15px; padding: 20px; margin-top: 15px; display: none; border: 1px solid transparent; }
-.fb-box.ok { background: var(--gd); border-color: var(--gr); color: var(--gr); }
-.fb-box.ng { background: var(--rd); border-color: var(--re); color: var(--re); }
-.fb-tit { font-weight: 800; font-size: 1.1rem; margin-bottom: 8px; }
-.fb-txt { font-size: 0.95rem; line-height: 1.4; color: var(--tx); }
-
-.spinner { width: 20px; height: 20px; border: 3px solid rgba(255,159,67,0.3); border-top-color: var(--ac); border-radius: 50%; animation: spin 0.8s linear infinite; }
+.fb-box { border-radius: 15px; padding: 15px; margin-top: 10px; display: none; }
+.fb-box.ok { background: rgba(34,197,94,0.15); border: 1px solid var(--gr); color: var(--gr); }
+.fb-box.ng { background: rgba(239,68,68,0.15); border: 1px solid var(--re); color: var(--re); }
+.scard { text-align: center; flex: 1; padding: 10px; border-radius: 12px; background: var(--sf2); border: 1px solid var(--bd); }
+.s-num { font-size: 1.3rem; font-weight: 800; }
+.spinner { width: 18px; height: 18px; border: 3px solid rgba(255,159,67,0.3); border-top-color: var(--ac); border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
@@ -60,239 +44,183 @@ body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: v
 
 <div id="splash" style="position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;">
   <div style="font-size:4rem;">😽</div>
-  <div style="font-family:'DM Serif Display',serif;font-size:2rem;color:var(--ac);margin-top:10px;">PsychCat</div>
+  <div style="font-family:'DM Serif Display',serif;font-size:2rem;color:var(--ac);">PsychCat</div>
 </div>
 
-<!-- LOGIN -->
 <div class="screen active" id="loginScreen">
   <div style="padding:40px 20px; text-align:center;">
     <div style="font-size:4rem;">😺</div>
-    <div style="font-family:'DM Serif Display',serif;font-size:2.5rem;">Meow! Welcome.</div>
-    <div class="card" style="text-align:left; margin-top:20px;">
-      <label style="font-size:0.7rem; font-weight:700; color:var(--mu);">STUDENT NAME</label>
-      <input type="text" id="iName" class="tarea" style="min-height:50px; margin-top:5px;" placeholder="Enter your name">
-      <button class="btn btn-p" onclick="login()">Start Learning &#8594;</button>
+    <div style="font-family:'DM Serif Display',serif; font-size:2.5rem; margin-bottom:30px;">PsychCat</div>
+    <div id="loginStep1" class="card" style="text-align:left;">
+      <label style="font-size:0.65rem; font-weight:800; color:var(--mu);">FULL NAME</label>
+      <input type="text" id="iName" class="tarea" style="min-height:50px; margin-top:5px;" placeholder="e.g. Emma Clarke">
+      <button class="btn btn-p" onclick="handleLookup()">Continue 🐾</button>
+      <button class="btn btn-o" onclick="goTeacher()" style="margin-top:15px; border:none; font-size:0.75rem;">Teacher Access</button>
+    </div>
+    <div id="loginStep2" class="card" style="display:none; text-align:left;">
+      <div id="pinMsg" style="font-weight:700; color:var(--ac); margin-bottom:10px;"></div>
+      <input type="password" id="iPin" class="tarea" style="text-align:center; letter-spacing:10px;" maxlength="4" inputmode="numeric" placeholder="PIN">
+      <button class="btn btn-p" id="btnLogin">Sign In 😼</button>
     </div>
   </div>
 </div>
 
-<!-- HOME -->
 <div class="screen" id="homeScreen">
-  <div class="hdr"><div class="logo">🐾 PsychCat</div></div>
+  <div class="hdr"><div class="logo">🐾 PsychCat</div><div id="uBadge" style="font-size:1.5rem;">🌱</div></div>
   <div class="hcontent">
     <div class="card" style="background: linear-gradient(135deg, rgba(255,159,67,0.1), transparent);">
-      <div id="uNick" style="font-family:'DM Serif Display',serif; font-size:1.5rem; color:var(--ac);">...</div>
+      <div id="uNick" style="font-family:'DM Serif Display',serif; font-size:1.7rem; color:var(--ac);">...</div>
+      <div style="font-size:0.7rem; color:var(--mu); margin-bottom:12px;">Component 2 Dashboard</div>
       <div class="pbar-container"><div id="totalPbar" class="pbar-fill"></div></div>
-      <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--mu);">
+      <div style="display:flex; justify-content:space-between; font-size:0.7rem; font-weight:800; color:var(--mu);">
         <span id="uAccuracy">Accuracy: 0%</span><span id="uAnswered">0 Answered</span>
       </div>
     </div>
-    <div style="font-weight:800; font-size:0.7rem; text-transform:uppercase; color:var(--mu); margin-bottom:10px;">Select a Topic:</div>
-    <div id="topicGrid"></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
+      <button class="btn btn-p" onclick="startQuiz('all')">🎲 Random Quiz</button>
+      <button class="btn btn-o" onclick="startQuiz('tricky')">🔥 Tricky Terms</button>
+    </div>
+    <div style="display:flex; gap:10px; margin-bottom:20px;">
+       <div class="scard"><div class="s-num" id="statG" style="color:var(--gr)">0</div><div style="font-size:0.6rem;">Mastered</div></div>
+       <div class="scard"><div class="s-num" id="statA" style="color:var(--am)">0</div><div style="font-size:0.6rem;">Learning</div></div>
+       <div class="scard"><div class="s-num" id="statR" style="color:var(--re)">0</div><div style="font-size:0.6rem;">Needs Work</div></div>
+    </div>
+    <div id="topicGrid" style="display:grid; grid-template-columns:1fr; gap:8px;"></div>
+  </div>
+  <div class="nav">
+    <button class="ntab on" onclick="showHome()">🏠<br>Home</button>
+    <button class="ntab" onclick="goRank()">🏆<br>Rank</button>
+    <button class="ntab" onclick="handleReset()">😼<br>Reset</button>
   </div>
 </div>
 
-<!-- QUIZ SCREEN -->
 <div class="screen" id="quizScreen">
   <div class="hdr">
-    <button onclick="location.reload()" style="background:none; border:none; color:var(--mu);">✕ Exit</button>
+    <button onclick="exitQuiz()" style="background:none; border:none; color:var(--mu); font-weight:700;">✕ EXIT</button>
     <div style="flex:1; margin:0 20px;"><div class="pbar-container"><div id="qPbar" class="pbar-fill"></div></div></div>
     <div id="qCount" style="font-size:0.8rem; font-weight:800;">1/10</div>
   </div>
   <div class="hcontent" id="qContent"></div>
   <div id="qActions" style="padding:20px; background:var(--sf); border-top:1px solid var(--bd); display:flex; flex-direction:column; gap:10px;">
-     <button id="btnCheck" class="btn btn-p" onclick="handleCheck()">Check Term 😼</button>
+     <button id="btnCheck" class="btn btn-p" onclick="handleCheck()">Check Answer 😼</button>
      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-        <button id="btnSkip" class="btn btn-o" onclick="handleSkip()">Skip</button>
+        <button id="btnSkip" class="btn btn-o" onclick="handleSkip()">Skip 😿</button>
         <button id="btnNext" class="btn btn-p" style="display:none;" onclick="handleNext()">Next →</button>
      </div>
   </div>
 </div>
 
-<!-- RESULT SCREEN -->
 <div class="screen" id="resultScreen" style="align-items:center; justify-content:center; padding:20px; text-align:center;">
     <div style="font-size:5rem;">🦁</div>
-    <div style="font-family:'DM Serif Display',serif; font-size:2.5rem;">Quiz Done!</div>
+    <div id="resTitle" style="font-family:'DM Serif Display',serif; font-size:2.5rem; margin-top:10px;">Great Job!</div>
     <div id="resScore" style="color:var(--mu); margin:10px 0; font-size:1.5rem;"></div>
     <button class="btn btn-p" style="max-width:320px; margin-top:20px;" onclick="showHome()">Back to Home 🐈</button>
 </div>
 
+<div class="screen" id="teacherScreen">
+  <div class="hdr"><div class="logo">🦁 Teacher Admin</div><button onclick="location.reload()" style="background:none; border:none; color:var(--ac);">✕</button></div>
+  <div class="hcontent" id="teacherContent"></div>
+</div>
+
 <script>
-// --- YOUR QUESTIONS HERE ---
-const QUESTIONS_FALLBACK = [
-{"id":0,"concept":"Aim of the research","definition":"A broad statement of the purpose of the research.","tag":"Hypotheses","mc":{"question":"Which of the following is correct regarding Aim of the research?","options":["A specific prediction","A statistical outcome","A broad statement of purpose","An experimental error"],"correct":3},"tf":{"statement":"The aim of the research is a specific hypothesis tested by the researcher.","answer":false},"scenario":"A psychologist states their study 'seeks to explore the relationship between sleep and memory.'","scenario_strength":"","scenario_weakness":""},
-{"id":1,"concept":"Alternative hypotheses","definition":"A testable statement that a piece of research attempts to support or reject.","tag":"Hypotheses","mc":{"question":"Which of the following is correct regarding Alternative hypotheses?","options":["A vague idea about research","A testable statement","A method of data collection","An ethical guideline"],"correct":2},"tf":{"statement":"An experimental hypothesis must be testable.","answer":true},"scenario":"Before collecting data, a researcher predicts that 'students who eat breakfast will score higher on a test than those who do not.'","scenario_strength":"","scenario_weakness":""},
-{"id":2,"concept":"Directional hypotheses","definition":"A hypothesis that suggests a specific direction/outcome e.g. alcohol slows reaction time.","tag":"Hypotheses","mc":{"question":"Which of the following is correct regarding Directional hypotheses?","options":["It is not testable","It does not predict change","It specifies the expected direction of results","It avoids assumptions"],"correct":3},"tf":{"statement":"A directional hypothesis does not predict the direction of results.","answer":false},"scenario":"A researcher predicts that 'people who sleep more will perform significantly better on memory tests.'","scenario_strength":"","scenario_weakness":""},
-{"id":3,"concept":"Non-directional hypotheses","definition":"A hypothesis that suggests a difference exists but does not state a specific direction.","tag":"Hypotheses","mc":{"question":"Which of the following is correct regarding Non-directional hypotheses?","options":["It predicts no difference","It predicts the direction of the effect","It predicts a difference without specifying direction","It is untestable"],"correct":3},"tf":{"statement":"A non-directional hypothesis predicts the specific outcome.","answer":false},"scenario":"A researcher claims that 'the temperature of a room will significantly affect test performance.'","scenario_strength":"","scenario_weakness":""},
-{"id":4,"concept":"Null hypotheses","definition":"A hypothesis that suggests there will be no difference/relationship; results are due to chance.","tag":"Hypotheses","mc":{"question":"Which of the following is correct regarding Null hypotheses?","options":["Significant relationship exists","No effect or relationship exists","The IV causes a change","The DV causes change"],"correct":2},"tf":{"statement":"A null hypothesis claims observed effects are due to the IV.","answer":false},"scenario":"A researcher predicts that 'caffeine will have no measurable effect on a participant's reaction time.'","scenario_strength":"","scenario_weakness":""},
-{"id":5,"concept":"Independent variables","definition":"The variable the psychologist manipulates and controls to see how it affects behaviour.","tag":"Variables","mc":{"question":"Which of the following is correct regarding Independent variables?","options":["Dependent variable","Extraneous variable","Independent variable","Confounding variable"],"correct":3},"tf":{"statement":"The IV is the one the psychologist manipulates.","answer":true},"scenario":"In a study on fitness, a coach ensures one group runs 5 miles while the other group runs 1 mile.","scenario_strength":"","scenario_weakness":""},
-{"id":6,"concept":"Dependant variables","definition":"The variable which is measured (usually the participants’ behaviour) by the psychologist.","tag":"Variables","mc":{"question":"Which of the following is correct regarding Dependant variables?","options":["Independent variable","Dependent variable","Co-variable","Extraneous variable"],"correct":2},"tf":{"statement":"The dependent variable is measured by the psychologist.","answer":true},"scenario":"A researcher records the exact number of seconds it takes for a participant to solve a complex puzzle.","scenario_strength":"","scenario_weakness":""},
-{"id":7,"concept":"Co-variables","definition":"Two or more quantities measured in a correlation that may or may not vary with each other.","tag":"Variables","mc":{"question":"Which of the following is correct regarding Co-variables?","options":["They are always manipulated","They are only used in experiments","They may vary together in a correlation","They are irrelevant"],"correct":3},"tf":{"statement":"Co-variables are used in correlational research.","answer":true},"scenario":"A researcher records both screen time and sleep duration for 50 different students.","scenario_strength":"","scenario_weakness":""},
-{"id":8,"concept":"Operationalisation","definition":"Giving a precise definition of the behaviour being manipulated/observed/measured (IV/DV).","tag":"Variables","mc":{"question":"Which of the following is correct regarding Operationalisation?","options":["It ensures ethical approval","It keeps data anonymous","It allows precision and replication","It improves motivation"],"correct":3},"tf":{"statement":"Operational definitions help improve reliability.","answer":true},"scenario":"A researcher defines aggression as 'the number of times a child hits a doll' during a 10-minute period.","scenario_strength":"","scenario_weakness":""},
-{"id":9,"concept":"Confounding variables","definition":"Variables not being manipulated that affect SOME participants but not others, harming validity.","tag":"Variables","mc":{"question":"Which of the following is correct regarding Confounding variables?","options":["All participants equally","Only the IV","Some participants’ results, harming validity","Only the control group"],"correct":3},"tf":{"statement":"Confounding variables affect some participants and reduce validity.","answer":true},"scenario":"In a memory study, half of the group happens to be professional card players, while the others are not.","scenario_strength":"","scenario_weakness":""},
-{"id":10,"concept":"Extraneous variables","definition":"Variables not being manipulated but affect the results (DV) of ALL participants equally.","tag":"Variables","mc":{"question":"Which of the following is correct regarding Extraneous variables?","options":["They only affect one group","They are part of the hypothesis","They impact all participants equally","They are intentionally manipulated"],"correct":3},"tf":{"statement":"Extraneous variables affect all participants equally.","answer":true},"scenario":"During a concentration test, a loud construction site starts operating outside for the whole duration.","scenario_strength":"","scenario_weakness":""},
-{"id":11,"concept":"Internal validity","definition":"The findings are accurate and the effects on the DV are caused by the IV.","tag":"Validity","mc":{"question":"Which of the following is correct regarding Internal validity?","options":["Generalisability","Ethical guidelines","Accuracy in measuring the intended variable","Participant enjoyment"],"correct":3},"tf":{"statement":"High internal validity means the IV caused the change.","answer":true},"scenario":"A study has controlled every possible factor so that only the drug dosage could have affected symptoms.","scenario_strength":"","scenario_weakness":""},
-{"id":12,"concept":"External validity","definition":"Whether the findings apply to different places, different times, or different people.","tag":"Validity","mc":{"question":"Which of the following is correct regarding External validity?","options":["Internal validity","Construct validity","External validity","Content validity"],"correct":3},"tf":{"statement":"External validity concerns how findings apply to other settings.","answer":true},"scenario":"A psychologist is worried that the results of their office-based study might not apply to rural farmers.","scenario_strength":"","scenario_weakness":""},
-{"id":13,"concept":"Quantitative data","definition":"Data that can be measured numerically so that statistical analysis can be completed.","tag":"Data types","mc":{"question":"Which of the following is correct regarding Quantitative data?","options":["Interview transcripts","IQ scores","Participant drawings","Diary entries"],"correct":2},"tf":{"statement":"Quantitative data is numerical.","answer":true},"scenario":"A researcher tallies the total number of errors made by participants during a driving simulation.","scenario_strength":"","scenario_weakness":""},
-{"id":14,"concept":"Qualitative data","definition":"Data that is observed but not measured numerically; usually words, thoughts and feelings.","tag":"Data types","mc":{"question":"Which of the following is correct regarding Qualitative data?","options":["Can be analysed statistically","Always uses numbers","Is rich in detail and difficult to measure","Must be from a questionnaire"],"correct":3},"tf":{"statement":"Qualitative data is usually in the form of words or themes.","answer":true},"scenario":"A participant writes a long paragraph describing how they felt during a high-stress social interaction.","scenario_strength":"","scenario_weakness":""},
-{"id":15,"concept":"Independent groups design","definition":"An experimental design where participants take part in only one experimental condition.","tag":"Research Designs","mc":{"question":"Which of the following is correct regarding Independent groups design?","options":["Participants take part in all conditions","Participants are matched across groups","Each participant is in one condition only","All participants are related"],"correct":3},"tf":{"statement":"Independent groups design uses different participants in each condition.","answer":true},"scenario":"A researcher splits 100 people into two separate rooms; Room A watches a comedy, Room B watches a horror.","scenario_strength":"Avoids order effects like boredom or practice.","scenario_weakness":"Participant variables (individual differences) may affect the results."},
-{"id":16,"concept":"Repeated measures design","definition":"An experimental design where participants take part in both conditions.","tag":"Research Designs","mc":{"question":"Which of the following is correct regarding Repeated measures design?","options":["Each participant is in one condition","Participants switch roles","Same participants take part in all conditions","Randomly select conditions"],"correct":3},"tf":{"statement":"In repeated measures, participants take part in all conditions.","answer":true},"scenario":"Every volunteer in the study is asked to complete a memory test in the morning and again in the evening.","scenario_strength":"Eliminates participant variables as the same people are used.","scenario_weakness":"Higher risk of order effects (boredom or practice)."},
-{"id":17,"concept":"Matched pairs design","definition":"An independent groups design where participants are deliberately similar (e.g. gender, IQ).","tag":"Research Designs","mc":{"question":"Which of the following is correct regarding Matched pairs design?","options":["Are randomised into groups","Take part in both conditions","Are paired on key characteristics","Choose their groups"],"correct":3},"tf":{"statement":"Matched pairs involves matching participants across groups.","answer":true},"scenario":"A researcher finds two participants with the same IQ and age, then places them in separate groups.","scenario_strength":"Reduces participant variables while avoiding order effects.","scenario_weakness":"Very time-consuming and difficult to match people exactly."},
-{"id":18,"concept":"Natural (quasi) experiments","definition":"Research where the experimenter has NOT deliberately manipulated the IV.","tag":"Research Designs","mc":{"question":"Which of the following is correct regarding Natural (quasi) experiments?","options":["Random allocation","Lab setting","No deliberate manipulation of IV","Blind procedures"],"correct":3},"tf":{"statement":"In quasi-experiments, the IV is not directly manipulated.","answer":true},"scenario":"A study compares the reading levels of children who grew up with pets versus those who grew up without.","scenario_strength":"Allows research where manipulation would be unethical or impractical.","scenario_weakness":"Lack of control over extraneous variables; no random allocation."},
-{"id":19,"concept":"Participant observation","definition":"The researcher takes on the role of a participant whilst observing others.","tag":"Methodologies","mc":{"question":"Which of the following is correct regarding Participant observation?","options":["Is absent from the group","Watches from a distance","Joins the group being observed","Uses only surveys"],"correct":3},"tf":{"statement":"Participant observation involves the researcher joining the group.","answer":true},"scenario":"A psychologist joins a local group of activists to understand their social dynamics from the inside.","scenario_strength":"Provides deep 'insider' insight into hidden behaviours.","scenario_weakness":"Researcher may lose objectivity and become too involved."},
-{"id":20,"concept":"Non-participant observation","definition":"The researcher watches and records behaviour without interfering (from a distance).","tag":"Methodologies","mc":{"question":"Which of the following is correct regarding Non-participant observation?","options":["Researcher joins the group","Behaviour is observed from a distance","The study is unethical","Variables are manipulated"],"correct":2},"tf":{"statement":"In non-participant observation, the researcher does not get involved.","answer":true},"scenario":"A researcher sits on a park bench and tallies how many people use their phones while walking past.","scenario_strength":"More objective as the researcher maintains a professional distance.","scenario_weakness":"May miss subtle 'insider' meanings or reasons for behaviour."},
-{"id":21,"concept":"Content analysis","definition":"Exploration of behaviour to see what themes emerge, tallying material to convert to quantitative data.","tag":"Methodologies","mc":{"question":"Which of the following is correct regarding Content analysis?","options":["Collect surveys","Turn quantitative data into themes","Convert qualitative data into categories","Make random guesses"],"correct":3},"tf":{"statement":"Content analysis involves categorising qualitative data.","answer":true},"scenario":"A researcher watches 50 hours of children's TV and tallies how many characters perform a 'kind act'.","scenario_strength":"Enables conversion of qualitative to quantitative data for comparison.","scenario_weakness":"Researcher bias may affect coding categories; subjective."},
-{"id":22,"concept":"Chi-squared test","definition":"Used for independent groups, nominal data, and a predicted difference.","tag":"Inferential Tests","mc":{"question":"Which of the following is correct regarding Chi-squared test?","options":["Repeated measures, ordinal data","Nominal data, independent groups","Ratio data, matched pairs","Interval data, correlation"],"correct":2},"tf":{"statement":"Chi-squared is for nominal data and independent groups.","answer":false},"scenario":"A researcher compares whether more men or women prefer action movies versus comedies.","scenario_strength":"","scenario_weakness":""},
-{"id":23,"concept":"Mann-Whitney U test","definition":"Used for independent groups, at least ordinal data, and a predicted difference.","tag":"Inferential Tests","mc":{"question":"Which of the following is correct regarding Mann-Whitney U test?","options":["Nominal data, related design","Ordinal data, independent groups","Interval data, correlation","Ratio data, time sampling"],"correct":2},"tf":{"statement":"Mann-Whitney is for ordinal data with independent groups.","answer":true},"scenario":"A study compares the ranked test scores (1st to 20th) of students in two different colleges.","scenario_strength":"","scenario_weakness":""},
-{"id":24,"concept":"Sign test","definition":"Used for repeated measures/matched pairs, nominal data, and a predicted difference.","tag":"Inferential Tests","mc":{"question":"Which of the following is correct regarding Sign test?","options":["Data is ratio, independent","Data is nominal, repeated measures","Data is ordinal, unrelated","Data is interval, correlation"],"correct":2},"tf":{"statement":"The sign test is for repeated measures with nominal data.","answer":true},"scenario":"A researcher notes if a person's mood improved (+) or worsened (-) after a 10-minute meditation.","scenario_strength":"","scenario_weakness":""},
-{"id":25,"concept":"Wilcoxon test","definition":"Used for repeated measures/matched pairs, at least ordinal data, and a predicted difference.","tag":"Inferential Tests","mc":{"question":"Which of the following is correct regarding Wilcoxon test?","options":["Independent groups, nominal data","Matched pairs, ordinal data","Repeated measures, ratio data","Quasi-experiments only"],"correct":2},"tf":{"statement":"Wilcoxon is for related designs with ordinal or higher data.","answer":true},"scenario":"Participants rate anxiety (1-10) before and after a public speaking task; results are compared.","scenario_strength":"","scenario_weakness":""},
-{"id":26,"concept":"Spearman’s rank correlation","definition":"Used for at least ordinal data and a predicted correlation/relationship.","tag":"Inferential Tests","mc":{"question":"Which of the following is correct regarding Spearman’s rank correlation?","options":["A difference between groups","Relationship between variables","Median scores","Group variation"],"correct":2},"tf":{"statement":"Spearman’s test is used for correlations with ordinal or interval data.","answer":true},"scenario":"A researcher calculates the relationship between hours spent studying and the final grade achieved.","scenario_strength":"","scenario_weakness":""},
-{"id":27,"concept":"Probability values (p)","definition":"Numerical value indicating the likelihood that results are due to chance.","tag":"Inferential Tests","mc":{"question":"Which of the following is correct regarding Probability values (p)?","options":["Results are definitely wrong","5% chance results are due to error","Variables are perfectly related","Participants were randomised"],"correct":2},"tf":{"statement":"A p-value of 0.05 means a 5% risk of results being due to chance.","answer":true},"scenario":"A scientist finds a result where there is only a 1 in 20 chance that it happened by accident.","scenario_strength":"","scenario_weakness":""},
-{"id":28,"concept":"Significance levels","definition":"Numerical margin of error (usually 0.05) that could occur in results.","tag":"Inferential Tests","mc":{"question":"Which of the following is correct regarding Significance levels?","options":["1% risk of results due to chance","Results are invalid","Participants were not randomised","Researcher bias is present"],"correct":1},"tf":{"statement":"A significance level of 0.01 suggests a 1% chance results are due to luck.","answer":true},"scenario":"A medical researcher wants to be 99% sure their new drug works before releasing it.","scenario_strength":"","scenario_weakness":""},
-{"id":29,"concept":"Observed values","definition":"Numerical value created by statistical analysis of your data.","tag":"Inferential Tests","mc":{"question":"Which of the following is correct regarding Observed values?","options":["A guess","A number from statistical testing","The number of participants","The hypothesis"],"correct":2},"tf":{"statement":"Observed values come from calculations on data.","answer":true},"scenario":"After running a Wilcoxon test, the researcher calculates a final score of 14.","scenario_strength":"","scenario_weakness":""},
-{"id":30,"concept":"Critical values","definition":"Tabulated numerical values assigned to a particular statistical test.","tag":"Inferential Tests","mc":{"question":"Which of the following is correct regarding Critical values?","options":["Select participants","Set hypotheses","Judge statistical significance","Remove bias"],"correct":3},"tf":{"statement":"Critical values determine whether results are significant.","answer":true},"scenario":"A researcher looks at a math table to see if their test score is high enough to be significant.","scenario_strength":"","scenario_weakness":""},
-{"id":31,"concept":"Maths Symbols","definition":"Equal to, less than or equal to (≤), less than, greater than.","tag":"Maths","mc":{"question":"Which of the following is correct regarding Maths Symbols?","options":["Greater than","Equal to","Less than or equal to","Equal or greater"],"correct":3},"tf":{"statement":"The symbol ≤ means 'less than or equal to'.","answer":true},"scenario":"A result is reported in a paper as 'p ≤ 0.05'.","scenario_strength":"","scenario_weakness":""},
-{"id":32,"concept":"Mean","definition":"Average shown by all scores divided by n.","tag":"Descriptives","mc":{"question":"Which of the following is correct regarding Mean?","options":["Middle value","Most frequent score","Average of all values","Total minus lowest score"],"correct":3},"tf":{"statement":"The mean is the total divided by the number of values.","answer":true},"scenario":"A manager calculates the total sales for the month and divides it by 30 days.","scenario_strength":"The most sensitive measure; includes all data points.","scenario_weakness":"Easily distorted by extreme outlier scores."},
-{"id":33,"concept":"Median","definition":"The mid-point in a set of data that has been placed in order.","tag":"Descriptives","mc":{"question":"Which of the following is correct regarding Median?","options":["Most common score","Average of values","Highest score","Middle score when data is in order"],"correct":4},"tf":{"statement":"The median is the mid-point in an ordered set.","answer":true},"scenario":"A researcher lists all test scores from lowest to highest and picks the middle one.","scenario_strength":"Not affected by extreme outliers.","scenario_weakness":"Less sensitive than the mean as it ignores actual values of most scores."},
-{"id":34,"concept":"Mode","definition":"The most common value within a set of data.","tag":"Descriptives","mc":{"question":"Which of the following is correct regarding Mode?","options":["Middle value","Largest number","Most frequently occurring number","The average"],"correct":3},"tf":{"statement":"The mode is the most frequently occurring score.","answer":true},"scenario":"In a survey about favourite colours, 'Blue' was chosen more than any other colour.","scenario_strength":"Very easy to calculate; can be used for nominal data.","scenario_weakness":"A data set may have no mode or multiple modes, making it unhelpful."},
-{"id":35,"concept":"Range","definition":"Difference between the lowest and highest scores.","tag":"Descriptives","mc":{"question":"Which of the following is correct regarding Range?","options":["Frequency","Spread between scores","Middle value","Sum of all scores"],"correct":2},"tf":{"statement":"The range is the difference between highest and lowest.","answer":true},"scenario":"The highest score on a test was 98 and the lowest was 12.","scenario_strength":"Very easy and quick to calculate.","scenario_weakness":"Does not show how the 'middle' scores are distributed."},
-{"id":36,"concept":"Standard deviation","definition":"Value representing the amount of variation of results from the mean.","tag":"Descriptives","mc":{"question":"Which of the following is correct regarding Standard deviation?","options":["Mean","Mode","Consistency","Spread of scores around the mean"],"correct":4},"tf":{"statement":"Standard deviation shows variation from the mean.","answer":true},"scenario":"A psychologist notes that most people's reaction times were within 0.2 seconds of each other.","scenario_strength":"Much more precise than the range; uses every score in the set.","scenario_weakness":"More complex to calculate and harder to explain to non-experts."},
-{"id":37,"concept":"Frequency tables","definition":"A chart/table showing the rate of occurrence for values/categories.","tag":"Graphical Representaion","mc":{"question":"Which of the following is correct regarding Frequency tables?","options":["Averages","Spread","How often each value occurs","Variability over time"],"correct":3},"tf":{"statement":"A frequency table displays how often each score appears.","answer":true},"scenario":"A researcher makes a list showing exactly how many people scored a 1, 2, 3, 4, or 5.","scenario_strength":"","scenario_weakness":""},
-{"id":38,"concept":"Bar charts","definition":"Diagram representing frequencies of non-continuous data.","tag":"Graphical Representaion","mc":{"question":"Which of the following is correct regarding Bar charts?","options":["Continuous","Non-continuous","Correlational","Skewed"],"correct":2},"tf":{"statement":"Bar charts are used for non-continuous data like categories.","answer":true},"scenario":"A psychologist draws a graph with separate columns for 'introverts' and 'extroverts'.","scenario_strength":"Very clear way to compare different categories visually.","scenario_weakness":"Cannot be used for continuous numerical data."},
-{"id":39,"concept":"Line graphs","definition":"Diagram showing a linear representation of frequencies of data.","tag":"Graphical Representaion","mc":{"question":"Which of the following is correct regarding Line graphs?","options":["Comparing group means","For relationships between categories","For changes over time or conditions","For population totals"],"correct":3},"tf":{"statement":"Line graphs show trends or changes over time.","answer":true},"scenario":"A researcher plots how a participant's heart rate changes every minute during a workout.","scenario_strength":"Excellent for showing trends or changes over time.","scenario_weakness":"Can only be used with continuous data."},
-{"id":40,"concept":"Histograms","definition":"A diagram that represents the distribution of frequencies for discrete or continuous data.","tag":"Graphical Representaion","mc":{"question":"Which of the following is correct regarding Histograms?","options":["Bar chart","Pie chart","Histogram","Scatter diagram"],"correct":3},"tf":{"statement":"Histograms are used for continuous or interval data.","answer":true},"scenario":"A researcher groups test scores into intervals (e.g. 0–10, 11–20) and plots them to see the distribution.","scenario_strength":"Excellent for showing the shape of a data distribution across continuous intervals.","scenario_weakness":"Can become misleading if the interval \"bins\" are not equal in size."},
-{"id":41,"concept":"Pie charts","definition":"A diagram that represents data proportionately, as part of a whole picture of responses.","tag":"Graphical Representaion","mc":{"question":"Which of the following is correct regarding Pie charts?","options":["Trends over time","Spread of scores","Proportions of a whole","Median ranks"],"correct":3},"tf":{"statement":"A pie chart shows categories as proportional segments.","answer":true},"scenario":"A psychologist shows how student preferences are split among 4 course options using segments of a circle.","scenario_strength":"Easy to visually interpret the relative proportions of different categories.","scenario_weakness":"Difficult to compare exact values between segments without data labels."},
-{"id":42,"concept":"Scatter diagrams","definition":"A diagram that represents a relationship/correlation between two or more co-variables.","tag":"Graphical Representaion","mc":{"question":"Which of the following is correct regarding Scatter diagrams?","options":["Line graph","Scatter diagram","Pie chart","Histogram"],"correct":2},"tf":{"statement":"Scatter diagrams show relationships between co-variables.","answer":true},"scenario":"A study plots hours studied on one axis and exam score on the other to look for a link.","scenario_strength":"Allows for the visual identification of patterns or trends between two variables.","scenario_weakness":"Does not show the actual frequency of scores, only the relationship."},
-{"id":43,"concept":"Distribution curves","definition":"Linear representations of data that include a mean, median and modal score to show spread.","tag":"Distibutions","mc":{"question":"Which of the following is correct regarding Distribution curves?","options":["Raw data tables","Causal links","Central tendency and spread","Group assignments"],"correct":3},"tf":{"statement":"Distribution curves show the shape and spread of data.","answer":true},"scenario":"A psychologist plots all test scores and marks where the average, mode and median sit on a line.","scenario_strength":"","scenario_weakness":""},
-{"id":44,"concept":"Normal distribution","definition":"A type of distribution where the mean, median and mode are equal (bell curve).","tag":"Distibutions","mc":{"question":"Which of the following is correct regarding Normal distribution?","options":["Skewed data","Random noise","Mean = median = mode","Flat histogram"],"correct":3},"tf":{"statement":"In a normal distribution, mean, median and mode are equal.","answer":true},"scenario":"A researcher plots IQ scores and finds that most people score in the middle with few at the ends.","scenario_strength":"","scenario_weakness":""},
-{"id":45,"concept":"Positive skewed distribution","definition":"A type of skewed distribution, where the mode is less than the mean.","tag":"Distibutions","mc":{"question":"Which of the following is correct regarding Positive skewed distribution?","options":["Mean < mode","Mode < mean","All scores are equal","It's symmetrical"],"correct":2},"tf":{"statement":"In positive skew, a long tail pulls the mean to the right.","answer":true},"scenario":"A very difficult math test results in mostly low scores, with only a few students getting high marks.","scenario_strength":"","scenario_weakness":""},
-{"id":46,"concept":"Negative skewed distribution","definition":"A type of skewed distribution, where the mode is greater than the mean.","tag":"Distibutions","mc":{"question":"Which of the following is correct regarding Negative skewed distribution?","options":["Mean > mode","Mode > mean","Median = mode = mean","Symmetrical shape"],"correct":2},"tf":{"statement":"In a negative skew, the tail is to the left and the mean is lower.","answer":true},"scenario":"An easy exam results in almost everyone getting high marks, with only two people failing.","scenario_strength":"","scenario_weakness":""},
-{"id":47,"concept":"Confidentiality","definition":"Third parties should not be able to trace information back to individual participants.","tag":"Ethics","mc":{"question":"Which of the following is correct regarding Confidentiality?","options":["Using aliases","Making names public","Assigning participant numbers","Banning questions"],"correct":3},"tf":{"statement":"Confidentiality is often protected through anonymity.","answer":true},"scenario":"A psychologist stores responses using numerical codes like 'Participant 004' instead of using names.","scenario_strength":"","scenario_weakness":""},
-{"id":48,"concept":"Deception","definition":"Deliberately misleading or falsely informing participants about the nature of research.","tag":"Ethics","mc":{"question":"Which of the following is correct regarding Deception?","options":["Clarifying the hypothesis","Misleading participants","Openly sharing data","Giving full disclosure"],"correct":2},"tf":{"statement":"Deception means not revealing the full nature of the study.","answer":true},"scenario":"A person finds out the study was about social pressure, even though they were told it was about vision.","scenario_strength":"","scenario_weakness":""},
-{"id":49,"concept":"Risk of stress/pain","definition":"Research should not induce more than minimal pain or psychological distress.","tag":"Ethics","mc":{"question":"Which of the following is correct regarding Risk of stress/pain?","options":["Asking personal opinions","Minimal discomfort","Causing lasting stress or harm","Allowing withdrawal"],"correct":3},"tf":{"statement":"Causing more than minimal psychological harm is unethical.","answer":true},"scenario":"A memory test is designed so poorly that it makes participants cry and feel ashamed of their intelligence.","scenario_strength":"","scenario_weakness":""},
-{"id":50,"concept":"Risk to values/privacy","definition":"Focuses on socially sensitive topics or data (e.g. sexuality, confidential documents).","tag":"Ethics","mc":{"question":"Which of the following is correct regarding Risk to values/privacy?","options":["In physical experiments","When asking sensitive personal topics","With child participants only","Using questionnaires only"],"correct":2},"tf":{"statement":"Research on sensitive topics can risk privacy and beliefs.","answer":true},"scenario":"A study on illegal drug use asks participants to describe their past criminal behavior in detail.","scenario_strength":"","scenario_weakness":""},
-{"id":51,"concept":"Valid consent","definition":"Giving participants enough information so they can make an informed choice to take part.","tag":"Ethics","mc":{"question":"Which of the following is correct regarding Valid consent?","options":["Signing without explanation","Participant understanding and agreement","Group approval only","Coercion"],"correct":2},"tf":{"statement":"Valid consent involves informed and voluntary agreement.","answer":true},"scenario":"Participants are given a leaflet explaining the study procedure and then sign a form to agree.","scenario_strength":"","scenario_weakness":""},
-{"id":52,"concept":"Vulnerable individuals","definition":"Children, those lacking capacity, prisoners, or those in care/custody.","tag":"Ethics","mc":{"question":"Which of the following is correct regarding Vulnerable individuals?","options":["Teenagers over 18","Prisoners, children, and mentally impaired","Everyone in experiments","Teachers and doctors"],"correct":2},"tf":{"statement":"Children and those with reduced capacity are vulnerable.","answer":true},"scenario":"A researcher applies for special permission to interview young children living in a foster home.","scenario_strength":"","scenario_weakness":""},
-{"id":53,"concept":"Working with animals","definition":"Research with non-human species strictly controlled by guidelines and laws.","tag":"Ethics","mc":{"question":"Which of the following is correct regarding Working with animals?","options":["Institutional policies","Verbal consent","National guidelines and law","Internal review only"],"correct":3},"tf":{"statement":"Research with animals is controlled by law and codes.","answer":true},"scenario":"A psychologist uses rats in a maze and ensures their cages meet the required size and cleanliness laws.","scenario_strength":"","scenario_weakness":""},
-{"id":54,"concept":"Ethics committees","definition":"The board that ensures proposed research meets ethical codes of conduct.","tag":"Ethics","mc":{"question":"Which of the following is correct regarding Ethics committees?","options":["Recruit participants","Approve research plans for safety","Manage funding","Train psychologists"],"correct":2},"tf":{"statement":"Ethics committees review and approve proposed research.","answer":true},"scenario":"A university panel checks if a proposed study on anxiety could cause too much stress for students.","scenario_strength":"","scenario_weakness":""},
-{"id":55,"concept":"Ethical guidelines","definition":"Moral principles that guide research from inception through to publication.","tag":"Ethics","mc":{"question":"Which of the following is correct regarding Ethical guidelines?","options":["For easier publishing","To avoid data loss","To protect participants","To speed up research"],"correct":3},"tf":{"statement":"Ethical guidelines are to ensure protection and fairness.","answer":true},"scenario":"A study is designed to follow the principles of respect, competence, responsibility, and integrity.","scenario_strength":"","scenario_weakness":""},
-{"id":56,"concept":"Inter-rater reliability","definition":"Consistency between two or more psychologists producing results using a coded system.","tag":"Reliability","mc":{"question":"Which of the following is correct regarding Inter-rater reliability?","options":["Same test over time","Consistency between observers","Reliability of the DV","Participant matching"],"correct":2},"tf":{"statement":"Inter-rater reliability checks agreement between observers.","answer":true},"scenario":"Two observers watch a video of a child and both record exactly 12 instances of 'sharing' behavior.","scenario_strength":"","scenario_weakness":""},
-{"id":57,"concept":"Test-retest reliability","definition":"Retesting the same participants over time with the same test to compare scores.","tag":"Reliability","mc":{"question":"Which of the following is correct regarding Test-retest reliability?","options":["Testing different people","Testing once","Testing the same people at two times","Only testing controls"],"correct":3},"tf":{"statement":"Test-retest involves repeating a test with the same people.","answer":true},"scenario":"A researcher gives a mood scale to 20 people on Monday and then again to the same group on Friday.","scenario_strength":"","scenario_weakness":""},
-{"id":58,"concept":"Split-half reliability","definition":"Splitting a test in half to see if scores on the two halves are similar.","tag":"Reliability","mc":{"question":"Which of the following is correct regarding Split-half reliability?","options":["Giving the test twice","Splitting one test into two halves","Using two observers","Changing the DV"],"correct":2},"tf":{"statement":"Split-half tests consistency within a single test.","answer":true},"scenario":"A psychologist checks if scores on the odd-numbered questions match scores on the even-numbered ones.","scenario_strength":"","scenario_weakness":""},
-{"id":59,"concept":"Dealing with reliability","definition":"Improving consistency through standardized procedures or measures.","tag":"Reliability","mc":{"question":"Which of the following is correct regarding Dealing with reliability?","options":["Ignoring variation","Random sampling","Standardised procedures","Asking for feedback"],"correct":3},"tf":{"statement":"Reliability can be improved by making procedures consistent.","answer":true},"scenario":"A study uses an identical script and a stopwatch to ensure every participant has the same experience.","scenario_strength":"","scenario_weakness":""},
-{"id":60,"concept":"Face validity","definition":"Whether the test appears to measure what it claims to at first glance.","tag":"Validity","mc":{"question":"Which of the following is correct regarding Face validity?","options":["Expert statistics","Appearance of relevance","Historical accuracy","Data range"],"correct":2},"tf":{"statement":"Face validity is about whether something appears valid.","answer":true},"scenario":"Participants look at a new memory test and agree that it looks like it measures memory.","scenario_strength":"","scenario_weakness":""},
-{"id":61,"concept":"Content validity","definition":"Objectively checking if a method is an accurate and fair test of the aims.","tag":"Validity","mc":{"question":"Which of the following is correct regarding Content validity?","options":["Participant ratings","Testing the same group twice","Asking an expert to assess the test","Through random sampling"],"correct":3},"tf":{"statement":"Content validity is verified by experts checking the test.","answer":true},"scenario":"A psychologist asks three senior professors to review a new personality scale for accuracy.","scenario_strength":"","scenario_weakness":""},
-{"id":62,"concept":"Construct validity","definition":"Whether the overall results reflect the phenomena as a whole.","tag":"Validity","mc":{"question":"Which of the following is correct regarding Construct validity?","options":["Results reflect the wider concept","All items are easy","Score consistency","Confounding variables"],"correct":1},"tf":{"statement":"Construct validity checks if a test reflects the theory.","answer":true},"scenario":"An aggression test is checked against the psychological definition of 'hostile behavior'.","scenario_strength":"","scenario_weakness":""},
-{"id":63,"concept":"Concurrent validity","definition":"Comparing a measurement with an established, already validated measurement.","tag":"Validity","mc":{"question":"Which of the following is correct regarding Concurrent validity?","options":["Comparing to an older validated test","Comparing to expert opinion","Face-to-face interviews","Using multiple choice"],"correct":1},"tf":{"statement":"Concurrent validity uses comparison with established measures.","answer":true},"scenario":"A researcher gives a new IQ test and a famous, old IQ test to the same group to see if results match.","scenario_strength":"","scenario_weakness":""},
-{"id":64,"concept":"Predictive validity","definition":"The degree to which a test accurately forecasts a future outcome.","tag":"Validity","mc":{"question":"Which of the following is correct regarding Predictive validity?","options":["Whether a test is short","Future outcomes can be predicted","Face value","Score frequency"],"correct":2},"tf":{"statement":"Predictive validity tests if a measure forecasts performance.","answer":true},"scenario":"A Year 7 math test score is used to correctly guess which students will pass their GCSEs.","scenario_strength":"","scenario_weakness":""},
-{"id":65,"concept":"Dealing with validity","definition":"Improving accuracy through blind procedures or realistic research tasks.","tag":"Validity","mc":{"question":"Which of the following is correct regarding Dealing with validity?","options":["Repeat the study","Blind procedures and realistic tasks","Use only quantitative data","Remove the DV"],"correct":2},"tf":{"statement":"Validity is improved by reducing bias and increasing realism.","answer":true},"scenario":"A researcher uses a 'double-blind' design so neither they nor the participant know the true aim.","scenario_strength":"","scenario_weakness":""},
-{"id":66,"concept":"Correlational studies","definition":"Comparing two continuous variables to see if there is an association.","tag":"Methodologies","mc":{"question":"Which of the following is correct regarding Correlational studies?","options":["Causal effects","Relationships between variables","Group averages","Experimental controls"],"correct":2},"tf":{"statement":"Correlational studies look for associations between variables.","answer":true},"scenario":"A study looks at whether the number of hours spent on a phone is related to a person's stress score.","scenario_strength":"Allows researchers to investigate topics that are unethical to manipulate.","scenario_weakness":"Cannot establish cause and effect; a third variable may be responsible."},
-{"id":67,"concept":"Case studies","definition":"An in-depth investigation of a single person, group, or event.","tag":"Methodologies","mc":{"question":"Which of the following is correct regarding Case studies?","options":["A brief survey","In-depth study of one subject over time","A double-blind trial","Experimental manipulation"],"correct":2},"tf":{"statement":"A case study focuses in detail on a single person or event.","answer":true},"scenario":"A psychologist tracks the life of a man who cannot recognize faces after a specific brain infection.","scenario_strength":"Provides rich, detailed qualitative data for unique or rare cases.","scenario_weakness":"Findings usually cannot be generalized to the wider target population."},
-{"id":68,"concept":"Brain scans","definition":"Taking images of the living brain (e.g. PET, fMRI) to investigate function.","tag":"Methodologies","mc":{"question":"Which of the following is correct regarding Brain scans?","options":["Eye movement","Cognitive interviews","Brain structure and function","Self-esteem"],"correct":3},"tf":{"statement":"Brain scans show activity and structure in the brain.","answer":true},"scenario":"A doctor uses an fMRI machine to see which part of the brain lights up when a person feels pain.","scenario_strength":"Provides objective, scientific data about the physical structure of the brain.","scenario_weakness":"Can be very expensive and stressful for participants; doesn't always show cause."},
-{"id":69,"concept":"Longitudinal studies","definition":"Conducting research over a long period to observe long-term effects.","tag":"Methodologies","mc":{"question":"Which of the following is correct regarding Longitudinal studies?","options":["Immediate reaction","Short surveys","Long-term changes and effects","Random allocation"],"correct":3},"tf":{"statement":"Longitudinal studies track changes over time.","answer":true},"scenario":"A researcher studies the same group of 50 people from the age of 5 until they turn 25.","scenario_strength":"Allows for the tracking of developmental changes in the same individuals.","scenario_weakness":"Time-consuming, expensive, and risks participants dropping out (attrition)."},
-{"id":70,"concept":"Cross-sectional studies","definition":"Comparing different groups of participants at the same point in time.","tag":"Methodologies","mc":{"question":"Which of the following is correct regarding Cross-sectional studies?","options":["Follows a group over time","Compares different groups at one time point","Uses repeated measures","Measures brain activity"],"correct":2},"tf":{"statement":"Cross-sectional studies compare groups simultaneously.","answer":true},"scenario":"A researcher compares the memory of a group of 20-year-olds and a group of 60-year-olds today.","scenario_strength":"Much quicker and more practical than following the same people for years.","scenario_weakness":"Cannot track individual change; results may be affected by cohort effects."},
-{"id":71,"concept":"Self-reports","definition":"Participants reporting on their own thoughts/feelings (interviews/questionnaires).","tag":"Methodologies","mc":{"question":"Which of the following is correct regarding Self-reports?","options":["Observational ratings","Participant's own account","Lab results","Peer reviews"],"correct":2},"tf":{"statement":"Self-reports include data from participants’ own descriptions.","answer":true},"scenario":"A student completes a survey about how anxious they feel before their final exams.","scenario_strength":"Allows access to subjective information that cannot be directly observed.","scenario_weakness":"Participants may provide socially desirable answers or lack self-awareness."},
-{"id":72,"concept":"Questionnaires","definition":"A list of written questions generating closed and/or open answers.","tag":"Methodologies","mc":{"question":"Which of the following is correct regarding Questionnaires?","options":["Unstructured interviews","Collecting standardised answers from many","Matching controls","Observational coding"],"correct":2},"tf":{"statement":"Questionnaires collect written responses from participants.","answer":true},"scenario":"A psychologist emails a list of 50 questions to people all over the country about their diet.","scenario_strength":"Efficient way to collect large amounts of data from many people quickly.","scenario_weakness":"Low response rates and participants may misunderstand the questions."},
-{"id":73,"concept":"Structured interviews","definition":"Using standardized, pre-set questions asked face to face.","tag":"Methodologies","mc":{"question":"Which of the following is correct regarding Structured interviews?","options":["Open discussion","Observation notes","Pre-set standardised questions","Follow-up only"],"correct":3},"tf":{"statement":"Structured interviews use identical questions for all.","answer":true},"scenario":"A researcher meets a participant and reads exactly 10 questions from a sheet without changing them.","scenario_strength":"High reliability as the same questions are asked to every participant.","scenario_weakness":"Lacks depth as the researcher cannot follow up on interesting answers."},
-{"id":74,"concept":"Semi-structured interviews","definition":"Asking pre-set questions but allowing for follow-ups to expand on answers.","tag":"Methodologies","mc":{"question":"Which of the following is correct regarding Semi-structured interviews?","options":["No structure","Only closed questions","Mix of standard and follow-up questions","Online only"],"correct":3},"tf":{"statement":"Semi-structured interviews mix set questions and flexibility.","answer":true},"scenario":"An interviewer has 5 main questions but asks \"Why?\" after a participant gives an interesting answer.","scenario_strength":"Combines consistency with the flexibility to explore interesting details.","scenario_weakness":"More difficult to analyze because every interview will be slightly different."},
-{"id":75,"concept":"Pilot studies","definition":"A small-scale trial run used to test and improve research design.","tag":"Methodologies","mc":{"question":"Which of the following is correct regarding Pilot studies?","options":["A final draft","Small-scale version of full study to test","An interview","First participant"],"correct":2},"tf":{"statement":"Pilot studies are trial runs to refine methods.","answer":true},"scenario":"A researcher tries out their new survey on 10 people to see if any questions are confusing.","scenario_strength":"","scenario_weakness":""},
-{"id":76,"concept":"Peer review","definition":"Experts reviewing research before publication to check quality.","tag":"Ethics","mc":{"question":"Which of the following is correct regarding Peer review?","options":["To simplify research","For ethical approval","To ensure quality before publication","To control data"],"correct":3},"tf":{"statement":"Peer review ensures standards and accuracy.","answer":true},"scenario":"A science journal sends a paper to three experts to check the methodology is correct.","scenario_strength":"","scenario_weakness":""},
-{"id":77,"concept":"Primary data","definition":"Information collected first-hand by the researcher.","tag":"Data types","mc":{"question":"Which of the following is correct regarding Primary data?","options":["Data from previous studies","Data from textbooks","First-hand data collected by the researcher","Peer-reviewed summaries"],"correct":3},"tf":{"statement":"Primary data is collected directly by the researcher.","answer":true},"scenario":"A psychologist conducts their own experiment and records the heart rates of participants.","scenario_strength":"Specifically designed to address the specific aims of the study.","scenario_weakness":"Can be expensive and time-consuming to gather."},
-{"id":78,"concept":"Secondary data","definition":"Information collected previously by someone else.","tag":"Data types","mc":{"question":"Which of the following is correct regarding Secondary data?","options":["New survey data","Historical and previously published data","Observations in real time","Results of pilot studies"],"correct":2},"tf":{"statement":"Secondary data comes from previous sources.","answer":true},"scenario":"A researcher looks at government health records from 1995 to see how many people smoked.","scenario_strength":"Cost-effective and provides access to large amounts of existing data.","scenario_weakness":"The data may not fit the researcher's specific needs or may be outdated."},
-{"id":79,"concept":"Laboratory experiment (Evaluation)","definition":"High control over extraneous variables increases internal validity.","tag":"Location","mc":{"question":"Which of the following is correct regarding Laboratory experiment (Evaluation)?","options":["High control","Natural behaviour","Remote access","Low reliability"],"correct":1},"tf":{"statement":"Laboratory experiments have high internal validity.","answer":true},"scenario":"A study on memory is done in a quiet, empty room where every distraction is removed.","scenario_strength":"Standardized procedures make it very easy for others to replicate.","scenario_weakness":"Artificial setting may lead to low ecological validity."},
-{"id":80,"concept":"Field experiment (Evaluation)","definition":"High ecological validity as behavior is observed in a real-world setting.","tag":"Location","mc":{"question":"Which of the following is correct regarding Field experiment (Evaluation)?","options":["Full control","Natural behaviour","Unobtrusive recording","No ethics"],"correct":2},"tf":{"statement":"Field experiments take place in real-world settings.","answer":true},"scenario":"A researcher watches how people react to a loud noise while they are walking in a city park.","scenario_strength":"Participants are more likely to behave naturally as they are in their own environment.","scenario_weakness":"Much harder to control extraneous variables that might affect the DV."},
-{"id":81,"concept":"Online experiment","definition":"A type of study conducted over the internet, often using software or platforms.","tag":"Location","mc":{"question":"Which of the following is correct regarding Online experiment?","options":["Time efficiency","Wider access","Less control over conditions","Cost-effectiveness"],"correct":3},"tf":{"statement":"Online experiments are usually high in ecological validity and control.","answer":false},"scenario":"Participants complete a reaction time test via a web link sent by a researcher to their home email.","scenario_strength":"Access to diverse and large samples quickly; convenient and cost-effective.","scenario_weakness":"Difficult to control the participant’s environment; risk of technical issues affecting data."},
-{"id":82,"concept":"Time sampling","definition":"Observations are made at fixed intervals (e.g., every 30 seconds).","tag":"Methodologies","mc":{"question":"Which of the following is correct regarding Time sampling?","options":["Observing at fixed time intervals","Noting every single behaviour","Watching full interactions","Randomised interviews"],"correct":1},"tf":{"statement":"Time sampling involves observing continuously without breaks.","answer":false},"scenario":"A psychologist observes a student every 15 seconds during a lesson and records on-task behaviour.","scenario_strength":"Reduces the volume of data and increases structure.","scenario_weakness":"May miss important behaviours that occur outside the fixed intervals."},
-{"id":83,"concept":"Event sampling","definition":"Every instance of a specific behaviour is recorded during a set period.","tag":"Methodologies","mc":{"question":"Which of the following is correct regarding Event sampling?","options":["Chatting in a queue","Hitting during playtime","General movement","Group discussion flow"],"correct":2},"tf":{"statement":"Event sampling records all behaviours regardless of relevance.","answer":false},"scenario":"A researcher observes a playground and records every single instance of aggressive pushing.","scenario_strength":"Useful for studying infrequent or clearly defined behaviours.","scenario_weakness":"Can be difficult to record accurately if behaviours happen very frequently."},
-{"id":84,"concept":"Behavioural category","definition":"A clearly defined set of observable behaviours used in an observation.","tag":"Methodologies","mc":{"question":"Which of the following is correct regarding Behavioural category?","options":["To make participants better","To improve reliability and clarity","To reduce behaviour","To test hypotheses"],"correct":2},"tf":{"statement":"Behavioural categories help reduce subjectivity in observations.","answer":true},"scenario":"A researcher studying aggression lists “pushing”, “hitting”, and “shouting” before the study begins.","scenario_strength":"Improves reliability and clarity; reduces subjectivity.","scenario_weakness":"Researchers may overlook behaviours not listed in the coding scheme."},
-{"id":85,"concept":"Internal reliability","definition":"Consistency of a measure within itself (e.g. items on a test).","tag":"Reliability","mc":{"question":"Which of the following is correct regarding Internal reliability?","options":["Test-retest","Inter-rater reliability","Split-half method","Ecological validity"],"correct":3},"tf":{"statement":"Internal reliability refers to consistency across items within a test.","answer":true},"scenario":"A psychologist develops a stress scale and finds that the first half and second half produce the same score.","scenario_strength":"","scenario_weakness":""},
-{"id":86,"concept":"External reliability","definition":"Consistency of results when repeated over time or with different researchers.","tag":"Reliability","mc":{"question":"Which of the following is correct regarding External reliability?","options":["Content analysis","Test-retest","Random sampling","Split-half"],"correct":2},"tf":{"statement":"External reliability is concerned with consistency over time.","answer":true},"scenario":"A group of researchers repeat an experiment with a new sample and obtain nearly identical results.","scenario_strength":"","scenario_weakness":""},
-{"id":87,"concept":"Structured observation","definition":"Observation using a predefined checklist or coding system.","tag":"Methodologies","mc":{"question":"Which of the following is correct regarding Structured observation?","options":["Casual note-taking","Asking questions","Using a fixed behavioural checklist","Drawing conclusions"],"correct":3},"tf":{"statement":"Structured observations are designed to improve consistency.","answer":true},"scenario":"A researcher observes playground play using a grid to tally every incident of “sharing” or “hitting.”","scenario_strength":"Increases reliability through standardised categories; easy to quantify.","scenario_weakness":"May overlook spontaneous behaviours not included in the coding scheme."},
-{"id":88,"concept":"Unstructured observation","definition":"Researcher records all relevant behaviours without a pre-established system.","tag":"Methodologies","mc":{"question":"Which of the following is correct regarding Unstructured observation?","options":["Too much control","Misses unusual behaviours","Lower reliability","Ignores ethics"],"correct":3},"tf":{"statement":"In unstructured observation, researchers record anything they find relevant.","answer":true},"scenario":"A psychologist watches a group discussion and writes open-ended notes on all participant interactions.","scenario_strength":"Provides rich, qualitative data; allows for flexibility.","scenario_weakness":"Harder to replicate and analyse; higher risk of observer bias."},
-{"id":89,"concept":"Naturalistic observation","definition":"Observation carried out in the participants' usual environment.","tag":"Methodologies","mc":{"question":"Which of the following is correct regarding Naturalistic observation?","options":["High internal validity","Use of deception","High ecological validity","Structured checklist"],"correct":3},"tf":{"statement":"Naturalistic observation occurs in artificial, researcher-controlled settings.","answer":false},"scenario":"A study records children’s interactions during free play in a nursery without any interference.","scenario_strength":"High ecological validity as behaviour is studied in a real setting.","scenario_weakness":"Less control over extraneous variables; harder to replicate."},
-{"id":90,"concept":"Controlled observation","definition":"Observation conducted in a structured or artificial setting (e.g. lab).","tag":"Methodologies","mc":{"question":"Which of the following is correct regarding Controlled observation?","options":["A participant’s home","A lab or simulated room","A shopping centre","A forest trail"],"correct":2},"tf":{"statement":"Controlled observations usually have low control over variables.","answer":false},"scenario":"A researcher asks two children to play with toys in a staged room while being recorded through a mirror.","scenario_strength":"Easier to replicate; reduces impact of extraneous variables.","scenario_weakness":"Setting may feel artificial; participants may show demand characteristics."},
-{"id":91,"concept":"Operationalisation","definition":"Defining variables in a way that makes them measurable and testable.","tag":"Variables","mc":{"question":"Which of the following is correct regarding Operationalisation?","options":["Gathers qualitative data","Allows theoretical discussion","Enables accurate measurement","Creates ethical protection"],"correct":3},"tf":{"statement":"Operationalisation ensures variables can be measured consistently.","answer":true},"scenario":"A researcher decides to measure 'stress' by recording the increase in a person's heart rate.","scenario_strength":"","scenario_weakness":""},
-{"id":92,"concept":"Covert observation","definition":"Participants are unaware they are being observed.","tag":"Methodologies","mc":{"question":"Which of the following is correct regarding Covert observation?","options":["Increases bias","May lack informed consent","Too much equipment","Too structured"],"correct":2},"tf":{"statement":"Covert observations reduce demand characteristics.","answer":true},"scenario":"A researcher watches public behavior on a train platform without informing the people there.","scenario_strength":"Reduces demand characteristics and reactivity; behavior is natural.","scenario_weakness":"Raises ethical issues regarding informed consent and privacy."},
-{"id":93,"concept":"Overt observation","definition":"Participants know they are being observed.","tag":"methodologies","mc":{"question":"Which of the following is correct regarding Overt observation?","options":["Less validity","Informed consent is obtained","More deception","Natural behaviour"],"correct":2},"tf":{"statement":"Overt observations eliminate the risk of altered behaviour.","answer":false},"scenario":"A researcher announces to students that they will be watched during their group work activity.","scenario_strength":"Ethically transparent; informed consent is obtained.","scenario_weakness":"May lead to demand characteristics as participants alter behaviour."},
-{"id":94,"concept":"Inter-observer reliability","definition":"Level of agreement between two or more independent observers.","tag":"Reliability","mc":{"question":"Which of the following is correct regarding Inter-observer reliability?","options":["Improves ecological validity","Reduces social desirability","Ensures consistency between observers","Makes coding subjective"],"correct":3},"tf":{"statement":"Inter-observer reliability is high when researchers give different ratings.","answer":false},"scenario":"Two people code aggressive behaviour separately and then compare their scores for agreement.","scenario_strength":"","scenario_weakness":""},
-{"id":95,"concept":"Observer bias","definition":"Expectations or beliefs influence what is recorded or interpreted.","tag":"bias","mc":{"question":"Which of the following is correct regarding Observer bias?","options":["Using categories","Pre-existing expectations","Split-half testing","Test-retest"],"correct":2},"tf":{"statement":"Observer bias improves the accuracy of observational data.","answer":false},"scenario":"A researcher expects girls to be nicer and unconsciously records more of their helpful behaviours.","scenario_strength":"","scenario_weakness":""},
-{"id":96,"concept":"Social desirability bias","definition":"Participants alter answers to appear more socially acceptable.","tag":"bias","mc":{"question":"Which of the following is correct regarding Social desirability bias?","options":["Naturalistic observation","Self-report questionnaire","Field experiment","Matched pairs"],"correct":2},"tf":{"statement":"Social desirability bias involves people trying to look good to others.","answer":true},"scenario":"A participant is asked about alcohol use and reports drinking less than they actually do.","scenario_strength":"","scenario_weakness":""},
-{"id":97,"concept":"Scientific Reporting","definition":"Standard structure: Abstract, Introduction, Method, Results, Discussion, References.","tag":"ethics","mc":{"question":"Which of the following is correct regarding Scientific Reporting?","options":["Results, Abstract, Intro","Intro, Method, Results","Abstract, Intro, Method, Results","Method, Intro, Results"],"correct":3},"tf":{"statement":"The ‘Method’ section includes the background theory of the study.","answer":false},"scenario":"A student writes a report that includes an Abstract, Introduction, Method, Results, and Discussion.","scenario_strength":"","scenario_weakness":""},
-{"id":98,"concept":"Target population","definition":"The larger group the researcher is interested in and intends to generalise to.","tag":"Sampling","mc":{"question":"Which of the following is correct regarding Target population?","options":["Group for generalisation","Group excluded","The sample","The group funding"],"correct":1},"tf":{"statement":"The target population is the exact same as the sample.","answer":false},"scenario":"A researcher studies stress in all 17-year-olds in the UK but only tests 50 of them.","scenario_strength":"","scenario_weakness":""},
-{"id":99,"concept":"Random sampling","definition":"Every member of the population has an equal chance of being selected.","tag":"Sampling","mc":{"question":"Which of the following is correct regarding Random sampling?","options":["Selecting by availability","Volunteer response","Dividing by traits","Everyone has equal chance"],"correct":4},"tf":{"statement":"Random sampling aims to minimise selection bias.","answer":true},"scenario":"A researcher uses a computer program to select 20 participants from the whole school register.","scenario_strength":"Reduces selection bias significantly.","scenario_weakness":"May still produce an unrepresentative sample by chance."},
-{"id":100,"concept":"Opportunity sampling","definition":"Selecting whoever is most easily available at the time.","tag":"Sampling","mc":{"question":"Which of the following is correct regarding Opportunity sampling?","options":["Difficult to collect","Sample not representative","Requires equipment","Too random"],"correct":2},"tf":{"statement":"Opportunity sampling is the most time-consuming method.","answer":false},"scenario":"A psychologist surveys students passing through the library because they are easy to reach.","scenario_strength":"Quick and convenient; requires very little preparation.","scenario_weakness":"Highly likely to produce a biased sample that is not representative."},
-{"id":101,"concept":"Self-selected sampling","definition":"Participants choose to take part, usually after responding to an advert.","tag":"Sampling","mc":{"question":"Which of the following is correct regarding Self-selected sampling?","options":["Low demand","Unbiased results","Willing/motivated participants","High generalisability"],"correct":3},"tf":{"statement":"Self-selected samples are often biased toward certain types of people.","answer":true},"scenario":"An advert is posted on a community board asking for volunteers for a new sleep study.","scenario_strength":"Participants are usually more motivated and willing to participate.","scenario_weakness":"Likely to attract a biased sample of people with specific personality types."},
-{"id":102,"concept":"Systematic sampling","definition":"Every nth person on a list of the population is selected.","tag":"Sampling","mc":{"question":"Which of the following is correct regarding Systematic sampling?","options":["Selecting every 4th person","Using all students","Advertising","Asking friends"],"correct":1},"tf":{"statement":"Systematic sampling involves a fixed interval, like every 5th person.","answer":true},"scenario":"A researcher selects every 10th name from a school database for a health questionnaire.","scenario_strength":"Reduces researcher bias through a objective mathematical system.","scenario_weakness":"Can be unrepresentative if the list has a hidden recurring pattern."},
-{"id":103,"concept":"Stratified sampling","definition":"Population is divided into strata and sampled proportionally.","tag":"Sampling","mc":{"question":"Which of the following is correct regarding Stratified sampling?","options":["Increase volunteers","Find easy participants","Ensure proportional representation","Save time"],"correct":3},"tf":{"statement":"Stratified sampling involves dividing the population into subgroups.","answer":true},"scenario":"A researcher ensures their sample has 60% girls and 40% boys to match the school's actual ratio.","scenario_strength":"Ensures proportional representation of key subgroups.","scenario_weakness":"Extremely time-consuming to identify strata and obtain a full list."},
-{"id":104,"concept":"Quota sampling","definition":"Non-random selection from subgroups until fixed numbers are filled.","tag":"Sampling","mc":{"question":"Which of the following is correct regarding Quota sampling?","options":["Fully random","Using advertisements","Fixed number from each group","Every nth person"],"correct":3},"tf":{"statement":"In quota sampling, participants are selected randomly from each group.","answer":false},"scenario":"A researcher stops people on the street until they have found 20 males and 20 females.","scenario_strength":"Ensures subgroups are included; useful when random sampling is hard.","scenario_weakness":"Selection is not random, allowing for researcher bias."},
-{"id":105,"concept":"Snowball sampling","definition":"Existing participants refer others to the study.","tag":"Sampling","mc":{"question":"Which of the following is correct regarding Snowball sampling?","options":["Studying school children","Surveying shoppers","Hidden/rare populations","Testing language"],"correct":3},"tf":{"statement":"Snowball sampling relies on referrals between participants.","answer":true},"scenario":"A researcher asks a participant with a rare illness to introduce them to others with the same condition.","scenario_strength":"Useful for accessing hard-to-reach or hidden populations.","scenario_weakness":"Sample is likely to be very biased and unrepresentative."},
-{"id":106,"concept":"Sampling frame","definition":"A complete list of the target population used to draw a sample.","tag":"Sampling","mc":{"question":"Which of the following is correct regarding Sampling frame?","options":["Location of study","Subgroup selected","Full list of population","Experiment structure"],"correct":3},"tf":{"statement":"A sampling frame includes only people who have already agreed.","answer":false},"scenario":"A researcher uses a list of all Year 10 students in a school to pick their sample.","scenario_strength":"Essential for random, systematic, and stratified sampling.","scenario_weakness":"If the list is out of date or incomplete, the sample will be biased."}
+// --- NICKNAME GEN ---
+const ADJ=['Bold','Brave','Clever','Daring','Epic','Fierce','Golden','Happy','Jolly','Mighty','Noble','Quick','Rapid','Swift','Wise'];
+const CAT=['Lion','Tiger','Panther','Cougar','Leopard','Lynx','Cheetah','Jaguar','Wildcat','Tomcat'];
+function genNick(name){
+  let h=0; for(let i=0;i<name.length;i++) h=((h<<5)-h)+name.charCodeAt(i);
+  const a=Math.abs(h); return ADJ[a%ADJ.length]+' '+CAT[Math.floor(a/ADJ.length)%CAT.length];
+}
 
-];
-
-let S = null; let QUESTIONS = []; let QZ = null;
+// --- STATE ---
+let S = null; let QUESTIONS = []; let QZ = null; let APPROVED = {};
 
 async function api(method, data = {}) {
-  try {
-    const res = await fetch("/api/jsonbin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ method, ...data }) });
-    return res.json();
-  } catch(e) { return { error: true }; }
+  const res = await fetch("/api/jsonbin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ method, ...data }) });
+  return res.json();
 }
 
 window.addEventListener('load', async () => {
   const qData = await api('GET_QUESTIONS');
-  // Clean the data: handle nulls or gaps
-  QUESTIONS = (qData.questions && qData.questions.length > 0) ? qData.questions.filter(q => q && q.concept) : QUESTIONS_FALLBACK;
+  QUESTIONS = (qData.questions || []).filter(q => q && q.concept);
+  APPROVED = qData.approvedAnswers || {};
   document.getElementById('splash').style.display = 'none';
 });
 
-async function login() {
+async function handleLookup() {
   const name = document.getElementById('iName').value.trim(); if (!name) return;
   const d = await api('GET_STUDENT', { name });
-  if (d.student) S = d.student;
-  else S = { name, nickname: name + " Cat", totalAnswered: 0, totalCorrect: 0, totalSkipped: 0, termStats: {} };
+  document.getElementById('loginStep1').style.display = 'none';
+  document.getElementById('loginStep2').style.display = 'block';
+  if (d.student) {
+    S = d.student; document.getElementById('pinMsg').textContent = `Hi, ${S.nickname}! Enter PIN:`;
+    document.getElementById('btnLogin').onclick = verifyPin;
+  } else {
+    document.getElementById('pinMsg').textContent = `New student! Choose 4-digit PIN:`;
+    document.getElementById('btnLogin').onclick = createAccount;
+  }
+}
+
+async function verifyPin() {
+  if (S.pin === document.getElementById('iPin').value) showHome(); else alert("Wrong PIN!");
+}
+
+async function createAccount() {
+  const name = document.getElementById('iName').value.trim();
+  const pin = document.getElementById('iPin').value;
+  if (pin.length !== 4) return alert("4 digits!");
+  S = { name, pin, nickname: genNick(name), totalAnswered: 0, totalCorrect: 0, totalSkipped: 0, termStats: {} };
+  await api('PUT_STUDENT', { student: S });
   showHome();
 }
 
-function showHome() { 
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
-  document.getElementById('homeScreen').classList.add('active'); 
-  renderHome(); 
+function calcAcc(c, a, s) { return a===0?0:Math.round((c/(a+(s*0.5)))*100); }
+
+function showHome() {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('homeScreen').classList.add('active'); renderHome();
 }
 
 function renderHome() {
-  const acc = S.totalAnswered > 0 ? Math.round((S.totalCorrect / S.totalAnswered) * 100) : 0;
+  const acc = calcAcc(S.totalCorrect, S.totalAnswered, S.totalSkipped);
   document.getElementById('uNick').textContent = S.nickname;
   document.getElementById('totalPbar').style.width = acc + "%";
   document.getElementById('uAnswered').textContent = `${S.totalAnswered} Answered`;
   document.getElementById('uAccuracy').textContent = `Accuracy: ${acc}%`;
   
   const tags = [...new Set(QUESTIONS.map(q => q.tag))];
-  const container = document.getElementById('topicGrid'); container.innerHTML = "";
+  const grid = document.getElementById('topicGrid'); grid.innerHTML = "";
+  let g=0, a=0, r=0;
+
   tags.forEach(tag => {
-    container.innerHTML += `<div class="card" onclick="startQuiz('${tag}')"><b>${tag}</b></div>`;
+    const qs = QUESTIONS.filter(q => q.tag === tag);
+    let tC=0, tA=0;
+    qs.forEach(q => { const st = S.termStats[q.concept] || {correct:0, answered:0}; tC+=st.correct; tA+=st.answered; });
+    const pct = tA > 0 ? Math.round((tC/tA)*100) : 0;
+    if (tA > 0) { if(pct >= 75) g++; else if(pct >= 50) a++; else r++; }
+    grid.innerHTML += `<div class="card clickable" onclick="startQuiz('${tag}')"><b>${tag}</b><div style="font-size:0.7rem; color:var(--mu);">${pct}% Accuracy</div></div>`;
   });
+  document.getElementById('statG').textContent = g; document.getElementById('statA').textContent = a; document.getElementById('statR').textContent = r;
 }
 
 function startQuiz(mode) {
-  let pool = QUESTIONS.filter(q => q.tag === mode || mode === 'all');
+  let pool = QUESTIONS;
+  if (mode === 'tricky') pool = QUESTIONS.filter(q => (S.termStats[q.concept]?.correct/S.termStats[q.concept]?.answered || 0) < 0.5);
+  else if (mode !== 'all') pool = QUESTIONS.filter(q => q.tag === mode);
   QZ = { questions: pool.sort(() => 0.5 - Math.random()).slice(0, 10), currentIdx: 0, score: 0, results: [] };
-  document.getElementById('homeScreen').classList.remove('active'); 
-  document.getElementById('quizScreen').classList.add('active'); 
-  renderQuestion();
+  document.getElementById('homeScreen').classList.remove('active');
+  document.getElementById('quizScreen').classList.add('active'); renderQuestion();
 }
 
 function renderQuestion() {
   const q = QZ.questions[QZ.currentIdx];
   document.getElementById('qPbar').style.width = (QZ.currentIdx / QZ.questions.length * 100) + "%";
-  document.getElementById('qCount').textContent = `${QZ.currentIdx+1}/${QZ.questions.length}`;
-  
+  document.getElementById('qCount').textContent = `${QZ.currentIdx+1}/10`;
   document.getElementById('qContent').innerHTML = `
     <div class="q-tag">🐾 ${q.tag}</div>
-    <div class="q-prompt">Which psychological term is defined as:</div>
+    <div class="q-prompt">Identify the correct psychological term:</div>
     <div class="q-main">${q.definition}</div>
     ${q.scenario ? `<div class="q-sub"><b>Context:</b> ${q.scenario}</div>` : ''}
-    <input type="text" id="qAns" class="tarea" placeholder="Type the term here..." autocomplete="off">
+    <input type="text" id="qAns" class="tarea" placeholder="Type term here..." autocomplete="off">
     <div id="qFeedback" class="fb-box"></div>
   `;
   document.getElementById('btnCheck').style.display="flex"; document.getElementById('btnSkip').style.display="flex"; document.getElementById('btnNext').style.display="none";
@@ -300,51 +228,66 @@ function renderQuestion() {
 }
 
 async function handleCheck() {
-  const q = QZ.questions[QZ.currentIdx]; 
-  const ans = document.getElementById('qAns').value.trim().toLowerCase();
+  const q = QZ.questions[QZ.currentIdx]; const ans = document.getElementById('qAns').value.trim();
   if(!ans) return;
+  document.getElementById('btnCheck').innerHTML = '<span class="spinner"></span> Marking...';
   
-  document.getElementById('btnCheck').innerHTML = '<span class="spinner"></span> Checking...';
-  
-  // Fuzzy match: remove spaces and symbols to check if it's correct
-  const simplify = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
-  const isCorrect = (simplify(ans) === simplify(q.concept));
+  const clean = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const target = clean(q.concept); const input = clean(ans);
 
-  // AI Fallback if it's not a perfect match
-  let ok = isCorrect;
+  // 1. Strict Match
+  let ok = (input === target);
+  
+  // 2. Database/Approved Match
+  if(!ok && APPROVED[q.concept]?.some(a => clean(a) === input)) ok = true;
+  
+  // 3. Rigorous AI Check
   if(!ok) {
-     const ai = await api('AI_CHECK', { concept: q.concept, definition: q.definition, studentAnswer: ans });
-     if(ai.correct) ok = true;
+    const ai = await api('AI_CHECK', { concept: q.concept, definition: q.definition, studentAnswer: ans });
+    if(ai.correct) { 
+        ok = true; 
+        // 4. Update Database Loop
+        api('ADD_APPROVED', { concept: q.concept, answer: ans }); 
+    }
   }
 
   const fb = document.getElementById('qFeedback'); fb.style.display="block"; fb.className = `fb-box ${ok?'ok':'ng'}`;
-  fb.innerHTML = `
-    <div class="fb-tit">${ok ? '😼 Correct!' : '😿 Not quite'}</div>
-    <div class="fb-txt">The term is: <b>${q.concept}</b></div>
-  `;
-  
-  if(ok) QZ.score++; 
-  QZ.results.push({concept:q.concept, ok});
+  fb.innerHTML = `<b>${ok?'😼 Correct!':'😿 Incorrect'}</b><br>Term: ${q.concept}`;
+  if(ok) QZ.score++; QZ.results.push({concept:q.concept, ok});
   document.getElementById('btnCheck').style.display="none"; document.getElementById('btnSkip').style.display="none"; document.getElementById('btnNext').style.display="flex";
 }
 
 function handleSkip() { S.totalSkipped++; QZ.results.push({concept:QZ.questions[QZ.currentIdx].concept, ok:false}); handleNext(); }
-function handleNext() { 
-  QZ.currentIdx++; 
-  if(QZ.currentIdx >= QZ.questions.length) finishQuiz(); 
-  else renderQuestion(); 
-}
+function handleNext() { QZ.currentIdx++; if(QZ.currentIdx >= QZ.questions.length) finishQuiz(); else renderQuestion(); }
 
 async function finishQuiz() {
-  QZ.results.forEach(r => { 
-    S.totalAnswered++; if(r.ok) S.totalCorrect++; 
+  QZ.results.forEach(r => {
+    S.totalAnswered++; if(r.ok) S.totalCorrect++;
     if(!S.termStats[r.concept]) S.termStats[r.concept]={answered:0,correct:0};
     S.termStats[r.concept].answered++; if(r.ok) S.termStats[r.concept].correct++;
   });
   await api('PUT_STUDENT', { student: S });
   document.getElementById('quizScreen').classList.remove('active'); document.getElementById('resultScreen').classList.add('active');
-  document.getElementById('resScore').textContent = `${QZ.score} / ${QZ.questions.length} Correct`;
+  document.getElementById('resScore').textContent = `${QZ.score} / 10 Correct`;
 }
+
+async function goTeacher() {
+  const pin = prompt("Teacher PIN:");
+  const d = await api('AUTH', { pin });
+  if (d.ok) {
+    document.getElementById('loginScreen').classList.remove('active');
+    document.getElementById('teacherScreen').classList.add('active');
+    const data = await api('GET_ALL');
+    document.getElementById('teacherContent').innerHTML = Object.values(data.students).map(s => `
+      <div class="card" style="font-size:0.8rem;">
+        <b>${s.name}</b> (${s.nickname})<br>
+        Accuracy: ${calcAcc(s.totalCorrect, s.totalAnswered, s.totalSkipped)}%
+      </div>`).join('');
+  } else alert("Denied");
+}
+
+function handleReset() { if(confirm("Sign out? Progress is saved.")) location.reload(); }
+function exitQuiz() { if(confirm("Lose progress?")) showHome(); }
 </script>
 </body>
 </html>
