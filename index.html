@@ -155,11 +155,39 @@ async function api(method, data = {}) {
 }
 
 window.addEventListener('load', async () => {
-  const qData = await api('GET_QUESTIONS');
-  QUESTIONS = (qData.questions || []).filter(q => q && q.concept);
-  APPROVED = qData.approvedAnswers || {};
-  document.getElementById('splash').style.display = 'none';
+  // 1. Set a "Maximum Wait" timer
+  // If the server doesn't respond in 4 seconds, hide the splash anyway
+  const safetyTimer = setTimeout(() => {
+    console.log("Server taking too long... using fallback.");
+    hideSplash();
+  }, 4000);
+
+  try {
+    const qData = await api('GET_QUESTIONS');
+    
+    // Check if we actually got questions from the cloud
+    if (qData && qData.questions && qData.questions.length > 0) {
+      QUESTIONS = qData.questions.filter(q => q && q.concept);
+      APPROVED = qData.approvedAnswers || {};
+      console.log("Cloud questions loaded.");
+    } else {
+      console.log("Cloud empty, using fallback questions.");
+      QUESTIONS = QUESTIONS_FALLBACK;
+    }
+  } catch (e) {
+    console.error("Connection failed. Using local questions.", e);
+    QUESTIONS = QUESTIONS_FALLBACK;
+  } finally {
+    // 2. Hide the splash screen NO MATTER WHAT
+    clearTimeout(safetyTimer);
+    hideSplash();
+  }
 });
+
+function hideSplash() {
+  const splash = document.getElementById('splash');
+  if (splash) splash.style.display = 'none';
+}
 
 // --- AUTH ---
 async function handleLookup() {
