@@ -19,18 +19,19 @@ body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: v
 .nav { display: flex; background: var(--sf); border-top: 1px solid var(--bd); padding: 10px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); position: fixed; bottom: 0; width: 100%; gap: 5px; z-index: 100; }
 .ntab { flex: 1; border: none; background: none; color: var(--mu); font-size: 0.65rem; font-weight: 700; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
 .ntab.on { color: var(--ac); }
-.hcontent { flex: 1; padding: 20px; padding-bottom: 100px; overflow-y: auto; }
-.card { background: var(--sf); border: 1px solid var(--bd); border-radius: 20px; padding: 20px; margin-bottom: 15px; }
+.hcontent { flex: 1; padding: 20px; padding-bottom: 120px; overflow-y: auto; }
+.card { background: var(--sf); border: 1px solid var(--bd); border-radius: 20px; padding: 18px; margin-bottom: 12px; }
 .clickable:hover { border-color: var(--ac); transform: translateY(-2px); cursor: pointer; }
-.pbar-container { width: 100%; height: 8px; background: var(--bd); border-radius: 4px; overflow: hidden; margin: 10px 0; }
+.pbar-container { width: 100%; height: 8px; background: var(--bd); border-radius: 4px; overflow: hidden; margin: 8px 0; }
 .pbar-fill { height: 100%; background: var(--ac); transition: width 0.4s ease; }
 .btn { width: 100%; padding: 14px; border-radius: 12px; border: none; font-family: inherit; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 1rem; }
 .btn-p { background: var(--ac); color: #000; }
 .btn-o { background: transparent; border: 1px solid var(--bd); color: var(--tx); }
-.q-tag { display: inline-block; padding: 4px 10px; border-radius: 20px; background: var(--sf2); color: var(--ac); font-size: 0.7rem; font-weight: 700; margin-bottom: 10px; }
-.q-main { font-family: 'DM Serif Display', serif; font-size: 1.6rem; line-height: 1.2; margin-bottom: 20px; color: var(--tx); }
+.q-tag { display: inline-flex; gap: 6px; align-items: center; padding: 4px 10px; border-radius: 20px; background: var(--sf2); color: var(--ac); font-size: 0.7rem; font-weight: 700; margin-bottom: 10px; }
+.ao-badge { padding: 2px 6px; border-radius: 4px; background: var(--ac); color: #000; font-size: 0.6rem; }
+.q-main { font-family: 'DM Serif Display', serif; font-size: 1.5rem; line-height: 1.2; margin-bottom: 15px; color: var(--tx); }
 .q-sub { font-size: 0.9rem; color: var(--mu); background: var(--sf2); padding: 15px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid var(--ac); }
-.tarea { width: 100%; min-height: 60px; background: var(--sf2); border: 1px solid var(--bd); border-radius: 12px; padding: 15px; color: var(--tx); font-family: inherit; font-size: 1.2rem; margin-bottom: 15px; outline: none; }
+.tarea { width: 100%; min-height: 60px; background: var(--sf2); border: 1px solid var(--bd); border-radius: 12px; padding: 15px; color: var(--tx); font-family: inherit; font-size: 1.1rem; margin-bottom: 15px; outline: none; }
 .fb-box { border-radius: 15px; padding: 15px; margin-top: 10px; display: none; }
 .fb-box.ok { background: rgba(34,197,94,0.15); border: 1px solid var(--gr); color: var(--gr); }
 .fb-box.ng { background: rgba(239,68,68,0.15); border: 1px solid var(--re); color: var(--re); }
@@ -38,22 +39,29 @@ body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: v
 .s-num { font-size: 1.3rem; font-weight: 800; }
 .spinner { width: 18px; height: 18px; border: 3px solid rgba(255,159,67,0.3); border-top-color: var(--ac); border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* Timer */
+#timer { position: fixed; top: 70px; right: 20px; font-weight: 800; color: var(--re); font-size: 1.2rem; display: none; }
+
+/* Leaderboard Rank Icons */
+.rk-1 { color: gold; } .rk-2 { color: silver; } .rk-3 { color: #cd7f32; }
 </style>
 </head>
 <body>
 
 <div id="splash" style="position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;">
   <div style="font-size:4rem;">😽</div>
-  <div style="font-family:'DM Serif Display',serif;font-size:2rem;color:var(--ac);">PsychCat</div>
+  <div style="font-family:'DM Serif Display',serif;font-size:2rem;color:var(--ac);margin-top:10px;">PsychCat</div>
 </div>
 
+<!-- LOGIN -->
 <div class="screen active" id="loginScreen">
   <div style="padding:40px 20px; text-align:center;">
     <div style="font-size:4rem;">😺</div>
     <div style="font-family:'DM Serif Display',serif; font-size:2.5rem; margin-bottom:30px;">PsychCat</div>
     <div id="loginStep1" class="card" style="text-align:left;">
-      <label style="font-size:0.65rem; font-weight:800; color:var(--mu);">FULL NAME</label>
-      <input type="text" id="iName" class="tarea" style="min-height:50px; margin-top:5px;" placeholder="e.g. Emma Clarke">
+      <label style="font-size:0.65rem; font-weight:800; color:var(--mu);">STUDENT FULL NAME</label>
+      <input type="text" id="iName" class="tarea" style="min-height:50px; margin-top:5px;" placeholder="e.g. Felix the Cat">
       <button class="btn btn-p" onclick="handleLookup()">Continue 🐾</button>
       <button class="btn btn-o" onclick="goTeacher()" style="margin-top:15px; border:none; font-size:0.75rem;">Teacher Access</button>
     </div>
@@ -65,6 +73,7 @@ body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: v
   </div>
 </div>
 
+<!-- HOME -->
 <div class="screen" id="homeScreen">
   <div class="hdr"><div class="logo">🐾 PsychCat</div><div id="uBadge" style="font-size:1.5rem;">🌱</div></div>
   <div class="hcontent">
@@ -76,16 +85,22 @@ body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: v
         <span id="uAccuracy">Accuracy: 0%</span><span id="uAnswered">0 Answered</span>
       </div>
     </div>
+    
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
-      <button class="btn btn-p" onclick="startQuiz('all')">🎲 Random Quiz</button>
-      <button class="btn btn-o" onclick="startQuiz('tricky')">🔥 Tricky Terms</button>
+      <button class="btn btn-p" onclick="startQuiz('all')">🎲 Quick Quiz</button>
+      <button class="btn btn-o" onclick="startQuiz('zen')">🧘 Zen Mode</button>
+      <button class="btn btn-o" onclick="startQuiz('time')">⏳ Time Trial</button>
+      <button class="btn btn-o" onclick="startQuiz('tricky')">🔥 Focus Areas</button>
     </div>
+
     <div style="display:flex; gap:10px; margin-bottom:20px;">
        <div class="scard"><div class="s-num" id="statG" style="color:var(--gr)">0</div><div style="font-size:0.6rem;">Mastered</div></div>
        <div class="scard"><div class="s-num" id="statA" style="color:var(--am)">0</div><div style="font-size:0.6rem;">Learning</div></div>
        <div class="scard"><div class="s-num" id="statR" style="color:var(--re)">0</div><div style="font-size:0.6rem;">Needs Work</div></div>
     </div>
-    <div id="topicGrid" style="display:grid; grid-template-columns:1fr; gap:8px;"></div>
+    
+    <div style="font-weight:800; font-size:0.7rem; color:var(--mu); margin-bottom:10px;">TOPIC PROGRESS</div>
+    <div id="topicGrid"></div>
   </div>
   <div class="nav">
     <button class="ntab on" onclick="showHome()">🏠<br>Home</button>
@@ -94,7 +109,9 @@ body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: v
   </div>
 </div>
 
+<!-- QUIZ SCREEN -->
 <div class="screen" id="quizScreen">
+  <div id="timer">60s</div>
   <div class="hdr">
     <button onclick="exitQuiz()" style="background:none; border:none; color:var(--mu); font-weight:700;">✕ EXIT</button>
     <div style="flex:1; margin:0 20px;"><div class="pbar-container"><div id="qPbar" class="pbar-fill"></div></div></div>
@@ -110,6 +127,7 @@ body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: v
   </div>
 </div>
 
+<!-- RESULT SCREEN -->
 <div class="screen" id="resultScreen" style="align-items:center; justify-content:center; padding:20px; text-align:center;">
     <div style="font-size:5rem;">🦁</div>
     <div id="resTitle" style="font-family:'DM Serif Display',serif; font-size:2.5rem; margin-top:10px;">Great Job!</div>
@@ -117,28 +135,29 @@ body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: v
     <button class="btn btn-p" style="max-width:320px; margin-top:20px;" onclick="showHome()">Back to Home 🐈</button>
 </div>
 
-<div class="screen" id="teacherScreen">
-  <div class="hdr"><div class="logo">🦁 Teacher Admin</div><button onclick="location.reload()" style="background:none; border:none; color:var(--ac);">✕</button></div>
-  <div class="hcontent" id="teacherContent"></div>
+<!-- TEACHER/RANK SCREEN -->
+<div class="screen" id="rankScreen">
+  <div class="hdr"><div class="logo">🏆 Ranks</div><button onclick="showHome()" style="background:none; border:none; color:var(--ac);">✕</button></div>
+  <div class="hcontent" id="rankContent"></div>
 </div>
 
 <script>
-// --- NICKNAME GEN ---
+// --- CONFIG ---
 const ADJ=['Bold','Brave','Clever','Daring','Epic','Fierce','Golden','Happy','Jolly','Mighty','Noble','Quick','Rapid','Swift','Wise'];
 const CAT=['Lion','Tiger','Panther','Cougar','Leopard','Lynx','Cheetah','Jaguar','Wildcat','Tomcat'];
+let S = null; let QUESTIONS = []; let QZ = null; let APPROVED = {};
+
 function genNick(name){
   let h=0; for(let i=0;i<name.length;i++) h=((h<<5)-h)+name.charCodeAt(i);
   const a=Math.abs(h); return ADJ[a%ADJ.length]+' '+CAT[Math.floor(a/ADJ.length)%CAT.length];
 }
-
-// --- STATE ---
-let S = null; let QUESTIONS = []; let QZ = null; let APPROVED = {};
 
 async function api(method, data = {}) {
   const res = await fetch("/api/jsonbin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ method, ...data }) });
   return res.json();
 }
 
+// --- INIT ---
 window.addEventListener('load', async () => {
   const qData = await api('GET_QUESTIONS');
   QUESTIONS = (qData.questions || []).filter(q => q && q.concept);
@@ -146,6 +165,7 @@ window.addEventListener('load', async () => {
   document.getElementById('splash').style.display = 'none';
 });
 
+// --- AUTH ---
 async function handleLookup() {
   const name = document.getElementById('iName').value.trim(); if (!name) return;
   const d = await api('GET_STUDENT', { name });
@@ -173,13 +193,18 @@ async function createAccount() {
   showHome();
 }
 
-function calcAcc(c, a, s) { return a===0?0:Math.round((c/(a+(s*0.5)))*100); }
+// --- UTILS ---
+function calcAcc(c, a, s) { 
+  const totalWeight = (a || 0) + ((s || 0) * 0.5);
+  return totalWeight === 0 ? 0 : Math.round((c / totalWeight) * 100); 
+}
 
 function showHome() {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('homeScreen').classList.add('active'); renderHome();
 }
 
+// --- DASHBOARD ---
 function renderHome() {
   const acc = calcAcc(S.totalCorrect, S.totalAnswered, S.totalSkipped);
   document.getElementById('uNick').textContent = S.nickname;
@@ -193,34 +218,72 @@ function renderHome() {
 
   tags.forEach(tag => {
     const qs = QUESTIONS.filter(q => q.tag === tag);
-    let tC=0, tA=0;
-    qs.forEach(q => { const st = S.termStats[q.concept] || {correct:0, answered:0}; tC+=st.correct; tA+=st.answered; });
-    const pct = tA > 0 ? Math.round((tC/tA)*100) : 0;
+    let tC=0, tA=0, tS=0;
+    qs.forEach(q => { 
+        const st = S.termStats[q.concept] || {correct:0, answered:0, skipped: 0}; 
+        tC += (st.correct || 0); 
+        tA += (st.answered || 0);
+        tS += (st.skipped || 0);
+    });
+    const pct = calcAcc(tC, tA, tS);
     if (tA > 0) { if(pct >= 75) g++; else if(pct >= 50) a++; else r++; }
-    grid.innerHTML += `<div class="card clickable" onclick="startQuiz('${tag}')"><b>${tag}</b><div style="font-size:0.7rem; color:var(--mu);">${pct}% Accuracy</div></div>`;
+    
+    grid.innerHTML += `
+      <div class="card clickable" onclick="startQuiz('${tag}')">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+           <b style="font-size:0.9rem;">${tag}</b>
+           <span style="font-size:0.7rem; color:var(--mu);">${pct}%</span>
+        </div>
+        <div class="pbar-container" style="height:5px;"><div class="pbar-fill" style="width:${pct}%; background:${pct>=75?'var(--gr)':pct>=50?'var(--am)':'var(--re)'}"></div></div>
+        <div style="font-size:0.6rem; color:var(--mu); margin-top:4px;">${qs.length} Terms Available</div>
+      </div>`;
   });
   document.getElementById('statG').textContent = g; document.getElementById('statA').textContent = a; document.getElementById('statR').textContent = r;
 }
 
+// --- GAME LOGIC ---
 function startQuiz(mode) {
   let pool = QUESTIONS;
-  if (mode === 'tricky') pool = QUESTIONS.filter(q => (S.termStats[q.concept]?.correct/S.termStats[q.concept]?.answered || 0) < 0.5);
-  else if (mode !== 'all') pool = QUESTIONS.filter(q => q.tag === mode);
-  QZ = { questions: pool.sort(() => 0.5 - Math.random()).slice(0, 10), currentIdx: 0, score: 0, results: [] };
+  if (mode === 'tricky') pool = QUESTIONS.filter(q => calcAcc(S.termStats[q.concept]?.correct, S.termStats[q.concept]?.answered, S.termStats[q.concept]?.skipped) < 50);
+  else if (mode !== 'all' && mode !== 'zen' && mode !== 'time') pool = QUESTIONS.filter(q => q.tag === mode);
+  
+  QZ = { mode, questions: pool.sort(() => 0.5 - Math.random()), currentIdx: 0, score: 0, results: [], startTime: Date.now(), timer: null };
+  if (mode !== 'zen' && mode !== 'time') QZ.questions = QZ.questions.slice(0, 10);
+
   document.getElementById('homeScreen').classList.remove('active');
-  document.getElementById('quizScreen').classList.add('active'); renderQuestion();
+  document.getElementById('quizScreen').classList.add('active');
+  
+  if (mode === 'time') {
+    let timeLeft = 60;
+    const tEl = document.getElementById('timer'); tEl.style.display = "block";
+    QZ.timer = setInterval(() => {
+        timeLeft--; tEl.textContent = timeLeft + "s";
+        if (timeLeft <= 0) finishQuiz();
+    }, 1000);
+  } else {
+    document.getElementById('timer').style.display = "none";
+  }
+  
+  renderQuestion();
 }
 
 function renderQuestion() {
   const q = QZ.questions[QZ.currentIdx];
-  document.getElementById('qPbar').style.width = (QZ.currentIdx / QZ.questions.length * 100) + "%";
-  document.getElementById('qCount').textContent = `${QZ.currentIdx+1}/10`;
+  const total = QZ.mode === 'zen' || QZ.mode === 'time' ? '∞' : QZ.questions.length;
+  document.getElementById('qPbar').style.width = (QZ.currentIdx / (QZ.mode==='zen'||QZ.mode==='time'?100:QZ.questions.length) * 100) + "%";
+  document.getElementById('qCount').textContent = `${QZ.currentIdx+1}/${total}`;
+  
+  // Decide AO Label
+  let ao = "AO1";
+  if (q.scenario) ao = "AO2";
+  if (q.scenario_strength || q.scenario_weakness) ao = "AO3";
+
   document.getElementById('qContent').innerHTML = `
-    <div class="q-tag">🐾 ${q.tag}</div>
+    <div class="q-tag"><span class="ao-badge">${ao}</span> 🐾 ${q.tag}</div>
     <div class="q-prompt">Identify the correct psychological term:</div>
     <div class="q-main">${q.definition}</div>
-    ${q.scenario ? `<div class="q-sub"><b>Context:</b> ${q.scenario}</div>` : ''}
-    <input type="text" id="qAns" class="tarea" placeholder="Type term here..." autocomplete="off">
+    ${q.scenario ? `<div class="q-sub"><b>Context/Scenario:</b> ${q.scenario}</div>` : ''}
+    <input type="text" id="qAns" class="tarea" placeholder="Type answer here..." autocomplete="off">
     <div id="qFeedback" class="fb-box"></div>
   `;
   document.getElementById('btnCheck').style.display="flex"; document.getElementById('btnSkip').style.display="flex"; document.getElementById('btnNext').style.display="none";
@@ -230,60 +293,97 @@ function renderQuestion() {
 async function handleCheck() {
   const q = QZ.questions[QZ.currentIdx]; const ans = document.getElementById('qAns').value.trim();
   if(!ans) return;
-  document.getElementById('btnCheck').innerHTML = '<span class="spinner"></span> Marking...';
+  document.getElementById('btnCheck').innerHTML = '<span class="spinner"></span> Checking...';
   
   const clean = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
   const target = clean(q.concept); const input = clean(ans);
 
-  // 1. Strict Match
-  let ok = (input === target);
+  // 1. Strict Keyword Match (Needs 3 shared words for definitions, or exact for concepts)
+  const wordsTarget = target.split(' ');
+  const wordsInput = input.split(' ');
+  const intersection = wordsTarget.filter(w => wordsInput.includes(w));
+  let ok = (input === target) || (intersection.length >= 3 && target.length > 5);
   
-  // 2. Database/Approved Match
+  // 2. Database Match
   if(!ok && APPROVED[q.concept]?.some(a => clean(a) === input)) ok = true;
   
-  // 3. Rigorous AI Check
+  // 3. AI Strict Check
   if(!ok) {
     const ai = await api('AI_CHECK', { concept: q.concept, definition: q.definition, studentAnswer: ans });
     if(ai.correct) { 
         ok = true; 
-        // 4. Update Database Loop
         api('ADD_APPROVED', { concept: q.concept, answer: ans }); 
     }
   }
 
   const fb = document.getElementById('qFeedback'); fb.style.display="block"; fb.className = `fb-box ${ok?'ok':'ng'}`;
-  fb.innerHTML = `<b>${ok?'😼 Correct!':'😿 Incorrect'}</b><br>Term: ${q.concept}`;
-  if(ok) QZ.score++; QZ.results.push({concept:q.concept, ok});
+  fb.innerHTML = `<b>${ok?'😼 Correct!':'😿 Incorrect'}</b><br>Term: ${q.concept}<br><button class="btn btn-o" style="margin-top:8px; font-size:0.6rem; padding:4px;" onclick="flagQ()">🚩 Report Issue</button>`;
+  if(ok) QZ.score++; 
+  QZ.results.push({concept:q.concept, ok});
   document.getElementById('btnCheck').style.display="none"; document.getElementById('btnSkip').style.display="none"; document.getElementById('btnNext').style.display="flex";
 }
 
-function handleSkip() { S.totalSkipped++; QZ.results.push({concept:QZ.questions[QZ.currentIdx].concept, ok:false}); handleNext(); }
-function handleNext() { QZ.currentIdx++; if(QZ.currentIdx >= QZ.questions.length) finishQuiz(); else renderQuestion(); }
+function handleSkip() { 
+  QZ.results.push({concept:QZ.questions[QZ.currentIdx].concept, ok:false, skipped: true}); 
+  handleNext(); 
+}
+
+function handleNext() { 
+  QZ.currentIdx++; 
+  if(QZ.mode !== 'zen' && QZ.mode !== 'time' && QZ.currentIdx >= QZ.questions.length) finishQuiz(); 
+  else renderQuestion(); 
+}
 
 async function finishQuiz() {
+  clearInterval(QZ.timer);
   QZ.results.forEach(r => {
-    S.totalAnswered++; if(r.ok) S.totalCorrect++;
-    if(!S.termStats[r.concept]) S.termStats[r.concept]={answered:0,correct:0};
-    S.termStats[r.concept].answered++; if(r.ok) S.termStats[r.concept].correct++;
+    S.totalAnswered++; 
+    if(r.ok) S.totalCorrect++;
+    if(r.skipped) S.totalSkipped++;
+    if(!S.termStats[r.concept]) S.termStats[r.concept]={answered:0,correct:0, skipped: 0};
+    S.termStats[r.concept].answered++; 
+    if(r.ok) S.termStats[r.concept].correct++;
+    if(r.skipped) S.termStats[r.concept].skipped++;
   });
   await api('PUT_STUDENT', { student: S });
   document.getElementById('quizScreen').classList.remove('active'); document.getElementById('resultScreen').classList.add('active');
-  document.getElementById('resScore').textContent = `${QZ.score} / 10 Correct`;
+  document.getElementById('resScore').textContent = `${QZ.score} Correct`;
 }
 
+// --- RANKINGS ---
+async function goRank() {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('rankScreen').classList.add('active');
+    document.getElementById('rankContent').innerHTML = `<div class="spinner"></div>`;
+    const data = await api('GET_ALL');
+    const sorted = Object.values(data.students).sort((a,b) => calcAcc(b.totalCorrect, b.totalAnswered, b.totalSkipped) - calcAcc(a.totalCorrect, a.totalAnswered, a.totalSkipped));
+    document.getElementById('rankContent').innerHTML = sorted.map((s,i) => `
+      <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+        <div><span class="rk-${i+1}">#${i+1}</span> <b>${s.nickname}</b></div>
+        <div style="text-align:right;"><b>${calcAcc(s.totalCorrect, s.totalAnswered, s.totalSkipped)}%</b><br><small style="color:var(--mu); font-size:0.6rem;">${s.totalAnswered} Ans</small></div>
+      </div>`).join('');
+}
+
+// --- TEACHER ---
 async function goTeacher() {
   const pin = prompt("Teacher PIN:");
   const d = await api('AUTH', { pin });
   if (d.ok) {
     document.getElementById('loginScreen').classList.remove('active');
-    document.getElementById('teacherScreen').classList.add('active');
+    document.getElementById('rankScreen').classList.add('active');
     const data = await api('GET_ALL');
-    document.getElementById('teacherContent').innerHTML = Object.values(data.students).map(s => `
+    document.getElementById('rankContent').innerHTML = Object.values(data.students).map(s => `
       <div class="card" style="font-size:0.8rem;">
         <b>${s.name}</b> (${s.nickname})<br>
         Accuracy: ${calcAcc(s.totalCorrect, s.totalAnswered, s.totalSkipped)}%
       </div>`).join('');
   } else alert("Denied");
+}
+
+function flagQ() {
+    const q = QZ.questions[QZ.currentIdx];
+    const note = prompt("What was wrong with this question?");
+    if(note) api('SUBMIT_FLAG', { flag: { concept: q.concept, note, studentAnswer: document.getElementById('qAns').value, user: S.name }});
 }
 
 function handleReset() { if(confirm("Sign out? Progress is saved.")) location.reload(); }
