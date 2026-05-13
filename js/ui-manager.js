@@ -44,7 +44,7 @@ window.UIManager = window.UIManager || {
             safeSet('statG', g); safeSet('statA', a); safeSet('statR', r);
         }
     },
-    renderQuestion() {
+renderQuestion() {
         const t = window.QZ.activeTask; if (!t) return;
         const q = t.q;
         const ao = t.type.split('_')[0];
@@ -53,29 +53,70 @@ window.UIManager = window.UIManager || {
         let displayMain = "";
         let hintText = q.scenario;
 
-        // --- Question Type Lane Selection ---
-        if (t.type === 'AO1_TERM') {
-            displayMain = q.definition;
-        } 
-        else if (t.type === 'AO1_DEF') {
-            displayMain = q.concept;
-        } 
-        else if (t.type === 'AO1_MC') {
-            displayMain = q.mc.question; // Fix: Show MC question text
-        }
-        else if (t.type === 'AO1_TF') {
-            displayMain = q.tf.statement; // Fix: Show TF statement text
-        }
-        else if (t.type === 'AO2_SCEN') {
-            displayMain = q.scenario;
-            hintText = ""; 
-        } 
+        // --- Logic Lane Selection ---
+        if (t.type === 'AO1_TERM') displayMain = q.definition;
+        else if (t.type === 'AO1_DEF') displayMain = q.concept;
+        else if (t.type === 'AO1_MC') displayMain = q.mc.question;
+        else if (t.type === 'AO1_TF') displayMain = q.tf.statement;
+        else if (t.type === 'AO2_SCEN') { displayMain = q.scenario; hintText = ""; }
         else if (t.type.startsWith('AO3')) {
             displayMain = t.prompt; 
             displayPrompt = "AO3 Evaluation Task:";
             hintText = q.definition;
         }
 
+        // --- Input HTML Generation ---
+        let inputHtml = `<textarea id="qAns" class="tarea" placeholder="Type answer here..." autocomplete="off"></textarea>`;
+        
+        if (t.type === 'AO1_MC') {
+            inputHtml = `<div class="grid-2" style="margin-bottom:15px;">
+                ${q.mc.options.map(opt => `<button class="btn btn-o" onclick="submitChoice('${opt.replace(/'/g, "\\'")}')">${opt}</button>`).join('')}
+            </div><input type="hidden" id="qAns">`;
+        } else if (t.type === 'AO1_TF') {
+            inputHtml = `<div class="grid-2" style="margin-bottom:15px;">
+                <button class="btn btn-o" onclick="submitChoice('true')">True</button>
+                <button class="btn btn-o" onclick="submitChoice('false')">False</button>
+            </div><input type="hidden" id="qAns">`;
+        }
+
+        // --- Inject into UI ---
+        document.getElementById('qCount').textContent = `${window.QZ.currentIdx + 1}/10`;
+        document.getElementById('qContent').innerHTML = `
+            <div class="q-tag"><span class="ao-badge">${ao}</span> 🐾 ${q.tag}</div>
+            <div class="q-prompt" style="font-size:0.9rem; color:var(--mu); margin-bottom:10px;">${displayPrompt}</div>
+            <div class="q-main">${displayMain}</div>
+            ${hintText ? `<button class="btn btn-o btn-s" id="hintBtn" style="margin-bottom:15px;">Get Hint 🐾</button><div id="qHint" class="q-hint-box">${hintText}</div>` : ''}
+            ${inputHtml}
+            <div id="qFeedback" class="fb-box"></div>`;
+
+        // --- RESET BUTTONS FOR NEW QUESTION ---
+        const btnCheck = document.getElementById('btnCheck');
+        const btnSkip = document.getElementById('btnSkip');
+        const btnNext = document.getElementById('btnNext');
+
+        // Reset "Check Answer" button to default (removes stripes/thinking text)
+        btnCheck.className = "btn btn-p"; 
+        btnCheck.innerHTML = "Check Answer 😼";
+        btnCheck.style.display = "flex";
+        btnCheck.disabled = false;
+
+        // Reset visibility of Skip/Next
+        btnSkip.style.display = "flex";
+        btnSkip.style.visibility = "visible";
+        btnNext.style.display = "none";
+
+        // Re-bind Hint Button
+        const hb = document.getElementById('hintBtn');
+        if (hb) {
+            hb.onclick = () => {
+                document.getElementById('qHint').style.display = 'block';
+                hb.style.display = 'none';
+            };
+        }
+        
+        const ta = document.getElementById('qAns'); 
+        if(ta && ta.type !== 'hidden') ta.focus();
+    },
         // --- Input Method Selection ---
         let inputHtml = `<textarea id="qAns" class="tarea" placeholder="Type answer here..." autocomplete="off"></textarea>`;
         if (t.type === 'AO1_MC') {
