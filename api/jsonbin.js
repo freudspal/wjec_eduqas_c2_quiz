@@ -69,14 +69,12 @@ export default async function handler(req, res) {
     }
 
     // ==========================================
-    // METHOD: AI_CHECK (Integrated Working Code)
+    // METHOD: AI_CHECK (With Model Fallback Chain)
     // ==========================================
     if (method === "AI_CHECK") {
-      try {
-        const { concept, target, studentAnswer } = body;
-        
-        // Context: 'target' is the correct definition or evaluation from your JSON
-        const prompt = `You are an A-Level Psychology examiner.
+      const { concept, target, studentAnswer } = body;
+      
+      const prompt = `You are an A-Level Psychology examiner.
         Topic: "${concept}"
         Correct Definition/Target: "${target}"
         Student's Answer: "${studentAnswer}"
@@ -88,44 +86,67 @@ export default async function handler(req, res) {
         OR
         {"correct": false, "feedback": "Explain what they missed"}`;
 
-        console.log(`🤖 [AI_CHECK] Request for: ${concept}`);
-///try gemini-3.1-flash-lite and also gemma-4-26b-a4b-it  but this one is working gemini-2.5-flash////
-        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${GEMINI_API_KEY}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { response_mime_type: "application/json" }
-          })
-        });
+      // THE FALLBACK LIST
+      const modelPool = [
+        "gemini-3.1-flash-lite",
+        "gemini-2.5-flash",
+        "gemini-2.0-flash",
+        "gemini-3-flash-preview"
+      ];
 
-        const data = await r.json();
-        
-        if (!r.ok) {
-            console.error("📡 Gemini API Error:", JSON.stringify(data));
-            throw new Error(`Google Status ${r.status}`);
+      for (let i = 0; i < modelPool.length; i++) {
+        const modelName = modelPool[i];
+        try {
+          console.log(`🤖 [AI_CHECK] Attempt ${i+1}: Trying ${modelName}`);
+
+          const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+              contents: [{ 
+                role: "user", 
+                parts: [{ text: prompt }] 
+              }],
+              generationConfig: { response_mime_type: "application/json" }
+            })
+          });
+
+          const data = await r.json();
+
+          // If this model is busy or errors out, move to the next one
+          if (!r.ok) {
+            console.error(`📡 ${modelName} failed (Status ${r.status}). Trying next...`);
+            continue; 
+          }
+
+          const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+          
+          // Robust JSON extraction in case model adds chatter
+          const start = text.indexOf('{');
+          const end = text.lastIndexOf('}');
+          const cleanJson = text.substring(start, end + 1);
+          const parsedResult = JSON.parse(cleanJson);
+
+          console.log(`✅ Success with ${modelName}. Verdict:`, parsedResult.correct);
+          return res.status(200).json(parsedResult);
+
+        } catch (err) {
+          console.error(`❌ ${modelName} Error:`, err.message);
+          // If it's the last model, we give up and trigger the catch block below
+          if (i === modelPool.length - 1) throw new Error("All AI models busy.");
         }
-
-        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-        
-        // Parse the AI response
-        const parsedResult = JSON.parse(text);
-        console.log("✅ Verdict:", parsedResult.correct);
-
-        return res.status(200).json(parsedResult);
-
-      } catch (aiErr) {
-        console.error("🚨 AI CRITICAL ERROR:", aiErr.message);
-        return res.status(200).json({ 
-          correct: false, 
-          feedback: "AI Busy. Your teacher will review this." 
-        });
       }
+
+      // Default safe response if for some reason the loop ends
+      return res.status(200).json({ correct: false, feedback: "AI busy. Teacher will review manually." });
     }
 
     return res.status(400).json({ error: "Invalid method" });
   } catch (err) { 
-    console.error("GLOBAL SERVER ERROR:", err.message);
-    return res.status(500).json({ error: err.message }); 
+    console.error("🚨 CRITICAL SYSTEM ERROR:", err.message);
+    return res.status(200).json({ 
+      correct: false, 
+      feedback: "AI Marking temporarily unavailable. Teacher will review." 
+    }); 
   }
 }
