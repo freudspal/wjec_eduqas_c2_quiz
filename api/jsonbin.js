@@ -69,36 +69,36 @@ export default async function handler(req, res) {
     }
 
     // ==========================================
-    // METHOD: AI_CHECK (With Model Fallback Chain)
+    // METHOD: AI_CHECK (Rebuilt with 7s Timeout & Fallbacks)
     // ==========================================
     if (method === "AI_CHECK") {
       const { concept, target, studentAnswer } = body;
       
-      const prompt = `You are an A-Level Psychology examiner.
-        Topic: "${concept}"
-        Correct Definition/Target: "${target}"
-        Student's Answer: "${studentAnswer}"
+      const prompt = `Act as an A-Level Psychology examiner.
+        Target Concept: "${concept}"
+        Correct Answer/Definition: "${target}"
+        Student Answer: "${studentAnswer}"
 
-        Rule: If the student describes the core meaning correctly (even with poor spelling or different words), mark it true.
-        
-        Respond ONLY in this JSON format:
-        {"correct": true, "feedback": "Brief explanation of why"}
-        OR
-        {"correct": false, "feedback": "Explain what they missed"}`;
+        Mark true if the student identifies the concept or describes it correctly. Accept paraphrasing.
+        Respond ONLY in JSON: {"correct": true, "feedback": "Short reason"}`;
 
-      // THE FALLBACK LIST
+      // OPTIMIZED FALLBACK LIST
       const modelPool = [
-        "gemini-2.0-flash-lite",
-        "gemini-3.1-flash-lite",
-        "gemini-2.5-flash",
-        "gemini-2.0-flash",
-        "gemini-3-flash-preview"
+        "gemini-1.5-flash",      // 1. Most stable and fastest
+        "gemini-2.0-flash-exp",  // 2. High intelligence fallback
+        "gemini-3.1-flash-lite"  // 3. Newest fallback
       ];
 
       for (let i = 0; i < modelPool.length; i++) {
         const modelName = modelPool[i];
+        
+        // Timeout: 7s for first try, 5s for fallbacks to save time
+        const currentTimeout = i === 0 ? 7000 : 5000; 
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), currentTimeout);
+
         try {
-          console.log(`🤖 [AI_CHECK] Attempt ${i+1}: Trying ${modelName}`);
+          console.log(`🤖 [AI_CHECK] Trying ${modelName} (${currentTimeout/1000}s limit)...`);
 
           const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`, {
             method: "POST",
@@ -108,13 +108,16 @@ export default async function handler(req, res) {
                 role: "user", 
                 parts: [{ text: prompt }] 
               }],
-              generationConfig: { response_mime_type: "application/json" }
-            })
+              generationConfig: { 
+                response_mime_type: "application/json" 
+              }
+            }),
+            signal: controller.signal
           });
 
           const data = await r.json();
+          clearTimeout(timeoutId);
 
-          // If this model is busy or errors out, move to the next one
           if (!r.ok) {
             console.error(`📡 ${modelName} failed (Status ${r.status}). Trying next...`);
             continue; 
@@ -122,9 +125,11 @@ export default async function handler(req, res) {
 
           const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
           
-          // Robust JSON extraction in case model adds chatter
+          // Robust extraction of JSON from text
           const start = text.indexOf('{');
           const end = text.lastIndexOf('}');
+          if (start === -1 || end === -1) throw new Error("No JSON found");
+          
           const cleanJson = text.substring(start, end + 1);
           const parsedResult = JSON.parse(cleanJson);
 
@@ -132,22 +137,30 @@ export default async function handler(req, res) {
           return res.status(200).json(parsedResult);
 
         } catch (err) {
-          console.error(`❌ ${modelName} Error:`, err.message);
-          // If it's the last model, we give up and trigger the catch block below
-          if (i === modelPool.length - 1) throw new Error("All AI models busy.");
+          clearTimeout(timeoutId);
+          if (err.name === 'AbortError') {
+            console.error(`⏱️ [TIMEOUT] ${modelName} took too long. Skipping...`);
+          } else {
+            console.error(`❌ ${modelName} Error:`, err.message);
+          }
+          // If this was the last model, we break and hit the final fallback below
+          if (i === modelPool.length - 1) break;
         }
       }
 
-      // Default safe response if for some reason the loop ends
-      return res.status(200).json({ correct: false, feedback: "AI busy. Teacher will review manually." });
+      // FINAL FALLBACK (If all AI models are busy or slow)
+      return res.status(200).json({ 
+        correct: false, 
+        feedback: "The cat is thinking slowly! Your answer is saved for teacher review. 🐾" 
+      });
     }
 
     return res.status(400).json({ error: "Invalid method" });
   } catch (err) { 
-    console.error("🚨 CRITICAL SYSTEM ERROR:", err.message);
-    return res.status(200).json({ 
-      correct: false, 
-      feedback: "AI Marking temporarily unavailable. Teacher will review." 
+    console.error("🚨 GLOBAL SERVER ERROR:", err.message);
+    return res.status(500).json({ 
+      error: "Server encountered an error", 
+      details: err.message 
     }); 
   }
 }
