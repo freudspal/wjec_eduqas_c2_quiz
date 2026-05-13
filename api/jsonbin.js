@@ -79,8 +79,16 @@ export default async function handler(req, res) {
         Correct Answer/Definition: "${target}"
         Student Answer: "${studentAnswer}"
 
-        Mark true if the student identifies the concept or describes it correctly. Accept paraphrasing.
-        Respond ONLY in JSON: {"correct": true, "feedback": "Short reason"}`;
+MARKING RULES:
+1. Prioritize MEANING over exact words.
+2. Accept synonyms (e.g., "norms" instead of "socially acceptable", "change" instead of "alter").
+3. If the student captures the core psychological mechanism, mark it TRUE.
+4. Only mark FALSE if the answer is factually incorrect or describes a different concept entirely.
+
+Respond ONLY in JSON format: 
+{"correct": true, "feedback": "Short encouraging comment"} 
+OR 
+{"correct": false, "feedback": "Explain the missing part briefly"}`;
 
       // OPTIMIZED FALLBACK LIST
       const modelPool = [
