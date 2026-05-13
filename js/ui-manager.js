@@ -19,44 +19,60 @@ window.UIManager = window.UIManager || {
     // 3. Renders the Home Screen Stats & Topics
     renderDashboard() {
         const S = window.S;
-        if (!S) return;
+        // STOP if no data (prevents crash)
+        if (!S) return console.error("UIManager: No student data found.");
 
-        // Update Header Banner
-        const acc = this.calcAcc(S.totalCorrect, S.totalAnswered, S.totalSkipped);
-        document.getElementById('uNick').textContent = S.nickname;
-        document.getElementById('uMeta').textContent = `Y${S.year || 1} • Group ${S.group || 'A'} • T:${S.teacher || 'J'}`;
-        document.getElementById('totalPbar').style.width = acc + "%";
-        document.getElementById('uAccuracy').textContent = `Accuracy: ${acc}%`;
-        document.getElementById('uAnswered').textContent = `${S.totalAnswered || 0} Ans`;
-
-        // Reset Topic Grid
-        const grid = document.getElementById('topicGrid');
-        if (!grid) return;
-        grid.innerHTML = "";
-        
-        const tags = [...new Set(window.QUESTIONS.map(q => q.tag))].sort();
-        
-        let g=0, a=0, r=0; // RAG Counters
-
-        tags.forEach(tag => {
-            const qsInTopic = window.QUESTIONS.filter(q => q.tag === tag);
-            let tC=0, tA=0, tS=0;
-            
-            qsInTopic.forEach(q => {
-                const st = S.termStats[q.concept] || {correct:0, answered:0, skipped:0};
-                tC += (st.correct || 0); tA += (st.answered || 0); tS += (st.skipped || 0);
-            });
-
-            const pct = this.calcAcc(tC, tA, tS);
-            if (tA > 0) {
-                if (pct >= 75) g++; else if (pct >= 50) a++; else r++;
+        // The Fail-Safe Helper: checks if element exists before updating
+        const safeSet = (id, val, isWidth = false) => {
+            const el = document.getElementById(id);
+            if (el) {
+                if (isWidth) el.style.width = val;
+                else el.textContent = val;
             }
+        };
 
-            const cardId = `topic-${tag.replace(/\s/g, '')}`;
-            const color = pct >= 75 ? 'var(--gr)' : pct >= 50 ? 'var(--am)' : 'var(--re)';
+        const acc = this.calcAcc(S.totalCorrect, S.totalAnswered, S.totalSkipped);
 
-            grid.innerHTML += `
-                <div class="card clickable" id="${cardId}">
+        // Update the Top Banner
+        safeSet('uNick', S.nickname || S.name);
+        safeSet('uMeta', `Y${S.year || 1} • Grp ${S.group || 'A'} • T:${S.teacher || 'J'}`);
+        safeSet('totalPbar', acc + "%", true); 
+        safeSet('uAccuracy', `Accuracy: ${acc}%`);
+        safeSet('uAnswered', `${S.totalAnswered || 0} Ans`);
+
+        // Counters for the RAG summary cards
+        let g = 0, a = 0, r = 0;
+
+        // Rebuild the Topic Grid
+        const grid = document.getElementById('topicGrid');
+        if (grid) {
+            grid.innerHTML = "";
+            const tags = [...new Set(window.QUESTIONS.map(q => q.tag))].sort();
+
+            tags.forEach(tag => {
+                const qs = window.QUESTIONS.filter(q => q.tag === tag);
+                let tC = 0, tA = 0, tS = 0;
+
+                qs.forEach(q => {
+                    const st = S.termStats[q.concept] || { correct: 0, answered: 0, skipped: 0 };
+                    tC += (st.correct || 0); tA += (st.answered || 0); tS += (st.skipped || 0);
+                });
+
+                const pct = this.calcAcc(tC, tA, tS);
+                
+                // Only count topics that have been attempted for the summary
+                if (tA > 0) {
+                    if (pct >= 75) g++; else if (pct >= 50) a++; else r++;
+                }
+
+                const color = pct >= 75 ? 'var(--gr)' : pct >= 50 ? 'var(--am)' : 'var(--re)';
+                const cardId = `topic-${tag.replace(/[^a-z0-9]/gi, '')}`;
+
+                // Create and append the topic card
+                const card = document.createElement('div');
+                card.className = "card clickable";
+                card.id = cardId;
+                card.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                         <b style="font-size:0.95rem;">${tag}</b>
                         <span style="font-size:0.8rem; font-weight:700; color:${color}">${tA > 0 ? pct + '%' : 'NEW'}</span>
@@ -65,22 +81,18 @@ window.UIManager = window.UIManager || {
                         <div class="pbar-fill" style="width:${pct}%; background:${color}"></div>
                     </div>
                     <div style="font-size:0.65rem; color:var(--mu); margin-top:4px;">
-                        ${qsInTopic.length} terms &middot; ${tA} attempted
+                        ${qs.length} terms &middot; ${tA} attempted
                     </div>
-                </div>`;
-            
-            // Wait for DOM to update then bind click
-            setTimeout(() => {
-                const el = document.getElementById(cardId);
-                if (el) el.onclick = () => startQuiz('all', tag);
-            }, 0);
-        });
+                `;
+                card.onclick = () => startQuiz('all', tag);
+                grid.appendChild(card);
+            });
+        }
 
-        // Update Dashboard Counters
-        const sg = document.getElementById('statG'), sa = document.getElementById('statA'), sr = document.getElementById('statR');
-        if (sg) sg.textContent = g;
-        if (sa) sa.textContent = a;
-        if (sr) sr.textContent = r;
+        // Update the RAG counters at the top
+        safeSet('statG', g);
+        safeSet('statA', a);
+        safeSet('statR', r);
     },
 
     // 4. Renders the Quiz Question UI
@@ -92,6 +104,7 @@ window.UIManager = window.UIManager || {
         
         let inputHtml = `<textarea id="qAns" class="tarea" placeholder="Type answer here..." autocomplete="off"></textarea>`;
         
+        // Handle Multiple Choice or True/False Task Types
         if (t.type === 'AO1_MC') {
             inputHtml = `<div class="grid-2">${q.mc.options.map(opt => `<button class="btn btn-o btn-s opt-btn" data-ans="${opt}">${opt}</button>`).join('')}</div><input type="hidden" id="qAns">`;
         } else if (t.type === 'AO1_TF') {
@@ -112,7 +125,7 @@ window.UIManager = window.UIManager || {
         document.querySelectorAll('.opt-btn').forEach(b => {
             b.onclick = () => { 
                 document.getElementById('qAns').value = b.getAttribute('data-ans'); 
-                handleCheck(); 
+                window.submitChoice(b.getAttribute('data-ans')); // Calls global helper in index.html
             };
         });
 
@@ -120,7 +133,8 @@ window.UIManager = window.UIManager || {
         const hb = document.getElementById('hintBtn');
         if (hb) {
             hb.onclick = () => {
-                document.getElementById('qHint').style.display = 'block';
+                const hintBox = document.getElementById('qHint');
+                if (hintBox) hintBox.style.display = 'block';
                 hb.style.display = 'none';
             };
         }
