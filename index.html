@@ -11,7 +11,132 @@
     <script src="js/quiz-engine.js"></script>
     <script src="js/checker.js"></script>
     <script src="js/ui-manager.js"></script>
+</head><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>PsychCat Component 2</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/api-client.js"></script><script src="js/auth.js"></script>
+    <script src="js/quiz-engine.js"></script><script src="js/checker.js"></script>
+    <script src="js/ui-manager.js"></script>
 </head>
+<body>
+    <div id="timer-box">180s</div>
+    <div id="splash" style="position:fixed;inset:0;background:#0a0a0f;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;">
+        <div style="font-size:4rem;">😽</div><div style="font-family:'DM Serif Display',serif;font-size:2rem;color:#ff9f43;margin-top:10px;">PsychCat</div>
+    </div>
+
+    <div class="screen active" id="loginScreen">
+        <div style="padding:40px 20px; text-align:center;">
+            <div style="font-size:4rem;">😺</div><h1 style="font-family:'DM Serif Display';">PsychCat</h1>
+            <div id="loginStep1" class="card">
+                <input type="text" id="iName" class="tarea" style="min-height:50px;" placeholder="Full Name">
+                <button class="btn btn-p" onclick="handleLookup()">Continue 🐾</button>
+                <button class="btn btn-o" onclick="goTeacherAdmin()">Admin</button>
+            </div>
+            <div id="loginStep2" class="card" style="display:none;">
+                <div id="pinMsg" style="color:var(--ac); margin-bottom:10px;"></div>
+                <input type="password" id="iPin" class="tarea" style="min-height:50px; text-align:center; letter-spacing:10px;" maxlength="4" placeholder="PIN">
+                <button class="btn btn-p" onclick="verifyPin()">Sign In</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="screen" id="homeScreen">
+        <div class="hdr"><div class="logo">🐾 PsychCat</div></div>
+        <div class="hcontent">
+            <div class="card" style="background:linear-gradient(135deg,rgba(255,159,67,0.1),transparent);">
+                <div id="uNick" style="font-family:'DM Serif Display'; font-size:1.8rem; color:var(--ac);">...</div>
+                <div class="pbar-container"><div id="totalPbar" class="pbar-fill"></div></div>
+                <div style="display:flex; justify-content:space-between; font-size:0.7rem; font-weight:800; color:var(--mu);">
+                    <span id="uAccuracy">Accuracy: 0%</span><span id="uAnswered">0 Ans</span>
+                </div>
+            </div>
+            <div class="grid-2">
+                <button class="btn btn-p" onclick="startQuiz('all')">Quick Quiz</button>
+                <button class="btn btn-o" onclick="startQuiz('zen')">Zen Mode</button>
+                <button class="btn btn-o" onclick="startQuiz('time')">Time Trial</button>
+                <button class="btn btn-o" onclick="startQuiz('tricky')">Focus</button>
+            </div>
+            <div id="topicGrid" style="display:grid; grid-template-columns:1fr; gap:12px;"></div>
+        </div>
+        <div class="nav">
+            <button class="ntab on" onclick="UIManager.showScreen('homeScreen')">🏠<br>Home</button>
+            <button class="ntab" onclick="goRank()">🏆<br>Rank</button>
+            <button class="ntab" onclick="showProfile()">😼<br>Me</button>
+        </div>
+    </div>
+
+    <div class="screen" id="quizScreen">
+        <div class="hdr">
+            <button onclick="exitQuiz()" style="background:none; border:none; color:var(--mu); font-weight:700;">✕ EXIT</button>
+            <div style="flex:1; margin:0 20px;"><div class="pbar-container"><div id="qPbar" class="pbar-fill"></div></div></div>
+            <div id="qCount" style="font-size:0.8rem; font-weight:800;"></div>
+        </div>
+        <div class="hcontent" id="qContent"></div>
+        <div id="qActions" style="padding:20px; background:var(--sf); border-top:1px solid var(--bd); display:flex; flex-direction:column; gap:12px;">
+             <button id="btnCheck" class="btn btn-p" onclick="handleCheck()">Check Answer 😼</button>
+             <div class="grid-2">
+                <button id="btnSkip" class="btn btn-o" onclick="handleSkip()">Skip</button>
+                <button id="btnNext" class="btn btn-p" style="display:none;" onclick="handleNext()">Next →</button>
+             </div>
+        </div>
+    </div>
+
+    <script>
+    window.S = null; window.QUESTIONS = []; window.QZ = null; window.APPROVED = {};
+    window.addEventListener('load', async () => {
+        const d = await ApiClient.call('GET_QUESTIONS');
+        window.QUESTIONS = d.questions || []; window.APPROVED = d.approvedAnswers || {};
+        document.getElementById('splash').style.display='none';
+    });
+    async function handleLookup() {
+        const n = document.getElementById('iName').value.trim(); if(!n) return;
+        const res = await Auth.lookup(n);
+        document.getElementById('loginStep1').style.display='none'; document.getElementById('loginStep2').style.display='block';
+        if(res.exists) document.getElementById('pinMsg').textContent = `Welcome back, ${res.nickname}!`;
+        else document.getElementById('pinMsg').textContent = "New student! Pick a PIN:";
+    }
+    async function verifyPin() {
+        const p = document.getElementById('iPin').value;
+        if (!window.S) {
+            window.S = { name: document.getElementById('iName').value, pin: p, nickname: Auth.genNick(document.getElementById('iName').value), totalAnswered: 0, totalCorrect: 0, totalSkipped: 0, termStats: {} };
+            await ApiClient.call('PUT_STUDENT', { student: window.S });
+        }
+        if (window.S.pin === p) { UIManager.showScreen('homeScreen'); UIManager.renderDashboard(); } else alert("No.");
+    }
+    function startQuiz(mode, tag = null) {
+        QuizEngine.init(mode, tag); UIManager.showScreen('quizScreen'); UIManager.renderQuestion();
+        if(mode === 'time') { 
+            let l=180; const el=document.getElementById('timer-box'); el.style.display='block';
+            QZ.timer = setInterval(() => { l--; el.textContent=l+'s'; if(l<=0) finishQuiz(); }, 1000);
+        }
+    }
+    async function handleCheck() {
+        const ans = document.getElementById('qAns').value; if(!ans) return;
+        document.getElementById('btnCheck').innerHTML = '<span class="spinner"></span>';
+        const res = await Checker.verify(window.QZ.activeTask, ans);
+        const fb = document.getElementById('qFeedback'); fb.style.display='block'; fb.className=`fb-box ${res.ok?'ok':'ng'}`;
+        fb.innerHTML = `<b>${res.ok?'Correct!':'Incorrect'}</b><span class="fb-res">${window.QZ.activeTask.target}</span>`;
+        if(res.ok) window.QZ.score++; window.QZ.results.push({concept:window.QZ.activeTask.q.concept, ok:res.ok});
+        document.getElementById('btnCheck').style.display='none'; document.getElementById('btnSkip').style.display='none'; document.getElementById('btnNext').style.display='flex';
+    }
+    function handleSkip() { window.QZ.results.push({concept:window.QZ.activeTask.q.concept, ok:false, skipped:true}); handleNext(); }
+    function handleNext() { if(QuizEngine.next()) UIManager.renderQuestion(); else finishQuiz(); }
+    async function finishQuiz() {
+        clearInterval(QZ.timer); document.getElementById('timer-box').style.display='none';
+        window.QZ.results.forEach(r => {
+            window.S.totalAnswered++; if(r.ok) window.S.totalCorrect++; if(r.skipped) window.S.totalSkipped++;
+            const st = window.S.termStats[r.concept] || {answered:0, correct:0, skipped:0};
+            st.answered++; if(r.ok) st.correct++; if(r.skipped) st.skipped++; window.S.termStats[r.concept] = st;
+        });
+        await ApiClient.call('PUT_STUDENT', { student: window.S }); UIManager.showScreen('homeScreen'); UIManager.renderDashboard();
+    }
+    function exitQuiz() { if(confirm("Exit?")) { clearInterval(QZ.timer); document.getElementById('timer-box').style.display='none'; UIManager.showScreen('homeScreen'); } }
+    </script>
+</body>
+</html>
 <body>
 
     <div id="splash">
