@@ -2,49 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>PsychCat Component 2</title>
-    <!-- Relative paths for Vercel/Local stability -->
     <link rel="stylesheet" href="css/style.css">
+    <!-- Modular Logic -->
     <script src="js/api-client.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/quiz-engine.js"></script>
     <script src="js/checker.js"></script>
     <script src="js/ui-manager.js"></script>
-</head><!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>PsychCat Component 2</title>
-    <link rel="stylesheet" href="css/style.css">
-    <script src="js/api-client.js"></script><script src="js/auth.js"></script>
-    <script src="js/quiz-engine.js"></script><script src="js/checker.js"></script>
-    <script src="js/ui-manager.js"></script>
 </head>
 <body>
     <div id="timer-box">180s</div>
+    
+    <!-- SPLASH -->
     <div id="splash" style="position:fixed;inset:0;background:#0a0a0f;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;">
-        <div style="font-size:4rem;">😽</div><div style="font-family:'DM Serif Display',serif;font-size:2rem;color:#ff9f43;margin-top:10px;">PsychCat</div>
+        <div style="font-size:4rem;">😽</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:2rem;color:#ff9f43;margin-top:10px;">PsychCat</div>
     </div>
 
+    <!-- LOGIN SCREEN -->
     <div class="screen active" id="loginScreen">
         <div style="padding:40px 20px; text-align:center;">
             <div style="font-size:4rem;">😺</div><h1 style="font-family:'DM Serif Display';">PsychCat</h1>
             <div id="loginStep1" class="card">
-                <input type="text" id="iName" class="tarea" style="min-height:50px;" placeholder="Full Name">
+                <input type="text" id="iName" class="tarea" style="min-height:50px;" placeholder="Full Real Name">
                 <button class="btn btn-p" onclick="handleLookup()">Continue 🐾</button>
-                <button class="btn btn-o" onclick="goTeacherAdmin()">Admin</button>
+                <button class="btn btn-o" onclick="goTeacherAdmin()" style="margin-top:10px; border:none; font-size:0.8rem;">Admin Access</button>
             </div>
-            <div id="loginStep2" class="card" style="display:none;">
-                <div id="pinMsg" style="color:var(--ac); margin-bottom:10px;"></div>
-                <input type="password" id="iPin" class="tarea" style="min-height:50px; text-align:center; letter-spacing:10px;" maxlength="4" placeholder="PIN">
-                <button class="btn btn-p" onclick="verifyPin()">Sign In</button>
+            <div id="loginStep2" class="card" style="display:none; text-align:left;">
+                <div id="pinMsg" style="color:var(--ac); margin-bottom:10px; font-weight:700;"></div>
+                <input type="password" id="iPin" class="tarea" style="min-height:50px; text-align:center; letter-spacing:10px;" maxlength="4" placeholder="PIN" inputmode="numeric">
+                <button class="btn btn-p" onclick="verifyPin()">Sign In 😼</button>
             </div>
         </div>
     </div>
 
+    <!-- HOME DASHBOARD -->
     <div class="screen" id="homeScreen">
-        <div class="hdr"><div class="logo">🐾 PsychCat</div></div>
+        <div class="hdr"><div class="logo">🐾 PsychCat</div><div id="uBadge" style="font-size:1.5rem;">🌱</div></div>
         <div class="hcontent">
             <div class="card" style="background:linear-gradient(135deg,rgba(255,159,67,0.1),transparent);">
                 <div id="uNick" style="font-family:'DM Serif Display'; font-size:1.8rem; color:var(--ac);">...</div>
@@ -62,12 +58,13 @@
             <div id="topicGrid" style="display:grid; grid-template-columns:1fr; gap:12px;"></div>
         </div>
         <div class="nav">
-            <button class="ntab on" onclick="UIManager.showScreen('homeScreen')">🏠<br>Home</button>
+            <button class="ntab on" onclick="showHome()">🏠<br>Home</button>
             <button class="ntab" onclick="goRank()">🏆<br>Rank</button>
             <button class="ntab" onclick="showProfile()">😼<br>Me</button>
         </div>
     </div>
 
+    <!-- QUIZ SCREEN -->
     <div class="screen" id="quizScreen">
         <div class="hdr">
             <button onclick="exitQuiz()" style="background:none; border:none; color:var(--mu); font-weight:700;">✕ EXIT</button>
@@ -84,391 +81,62 @@
         </div>
     </div>
 
+    <!-- RANK SCREEN -->
+    <div class="screen" id="rankScreen">
+        <div class="hdr"><div id="rankTitle" class="logo">🏆 Ranks</div><button onclick="showHome()" style="background:none; border:none; color:var(--ac);">✕</button></div>
+        <div class="hcontent" id="rankContent"></div>
+        <div class="nav">
+            <button class="ntab" onclick="showHome()">🏠<br>Home</button>
+            <button class="ntab on" onclick="goRank()">🏆<br>Rank</button>
+            <button class="ntab" onclick="showProfile()">😼<br>Me</button>
+        </div>
+    </div>
+
+    <!-- PROFILE SCREEN -->
+    <div class="screen" id="profileScreen">
+        <div class="hdr"><div class="logo">😼 Profile</div><button class="btn btn-o btn-s" onclick="handleSignOut()">Logout</button></div>
+        <div class="hcontent">
+            <div class="card">
+                <h3 style="font-family:'DM Serif Display'; margin-bottom:15px;">Your Stats</h3>
+                <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--bd);"><span>Total Correct</span><b id="pCorrect">0</b></div>
+                <div style="display:flex; justify-content:space-between; padding:8px 0;"><span>Total Skipped</span><b id="pSkipped">0</b></div>
+            </div>
+            <div class="card">
+                <h3 style="font-family:'DM Serif Display'; margin-bottom:10px;">Security</h3>
+                <input type="password" id="changePin" class="f-input" maxlength="4" placeholder="New PIN">
+                <button class="btn btn-p btn-s" onclick="updatePin()" style="margin-top:10px;">Update PIN</button>
+            </div>
+        </div>
+        <div class="nav">
+            <button class="ntab" onclick="showHome()">🏠<br>Home</button>
+            <button class="ntab" onclick="goRank()">🏆<br>Rank</button>
+            <button class="ntab on" onclick="showProfile()">😼<br>Me</button>
+        </div>
+    </div>
+
     <script>
+    // --- GLOBAL STATE ---
     window.S = null; window.QUESTIONS = []; window.QZ = null; window.APPROVED = {};
+
     window.addEventListener('load', async () => {
-        const d = await ApiClient.call('GET_QUESTIONS');
-        window.QUESTIONS = d.questions || []; window.APPROVED = d.approvedAnswers || {};
+        try {
+            const d = await ApiClient.call('GET_QUESTIONS');
+            window.QUESTIONS = d.questions || []; 
+            window.APPROVED = d.approvedAnswers || {};
+        } catch (e) { console.error("Initialization error", e); }
         document.getElementById('splash').style.display='none';
     });
+
+    // --- AUTH LOGIC ---
     async function handleLookup() {
         const n = document.getElementById('iName').value.trim(); if(!n) return;
         const res = await Auth.lookup(n);
-        document.getElementById('loginStep1').style.display='none'; document.getElementById('loginStep2').style.display='block';
+        document.getElementById('loginStep1').style.display='none'; 
+        document.getElementById('loginStep2').style.display='block';
         if(res.exists) document.getElementById('pinMsg').textContent = `Welcome back, ${res.nickname}!`;
         else document.getElementById('pinMsg').textContent = "New student! Pick a PIN:";
     }
+
     async function verifyPin() {
         const p = document.getElementById('iPin').value;
         if (!window.S) {
-            window.S = { name: document.getElementById('iName').value, pin: p, nickname: Auth.genNick(document.getElementById('iName').value), totalAnswered: 0, totalCorrect: 0, totalSkipped: 0, termStats: {} };
-            await ApiClient.call('PUT_STUDENT', { student: window.S });
-        }
-        if (window.S.pin === p) { UIManager.showScreen('homeScreen'); UIManager.renderDashboard(); } else alert("No.");
-    }
-    function startQuiz(mode, tag = null) {
-        QuizEngine.init(mode, tag); UIManager.showScreen('quizScreen'); UIManager.renderQuestion();
-        if(mode === 'time') { 
-            let l=180; const el=document.getElementById('timer-box'); el.style.display='block';
-            QZ.timer = setInterval(() => { l--; el.textContent=l+'s'; if(l<=0) finishQuiz(); }, 1000);
-        }
-    }
-    async function handleCheck() {
-        const ans = document.getElementById('qAns').value; if(!ans) return;
-        document.getElementById('btnCheck').innerHTML = '<span class="spinner"></span>';
-        const res = await Checker.verify(window.QZ.activeTask, ans);
-        const fb = document.getElementById('qFeedback'); fb.style.display='block'; fb.className=`fb-box ${res.ok?'ok':'ng'}`;
-        fb.innerHTML = `<b>${res.ok?'Correct!':'Incorrect'}</b><span class="fb-res">${window.QZ.activeTask.target}</span>`;
-        if(res.ok) window.QZ.score++; window.QZ.results.push({concept:window.QZ.activeTask.q.concept, ok:res.ok});
-        document.getElementById('btnCheck').style.display='none'; document.getElementById('btnSkip').style.display='none'; document.getElementById('btnNext').style.display='flex';
-    }
-    function handleSkip() { window.QZ.results.push({concept:window.QZ.activeTask.q.concept, ok:false, skipped:true}); handleNext(); }
-    function handleNext() { if(QuizEngine.next()) UIManager.renderQuestion(); else finishQuiz(); }
-    async function finishQuiz() {
-        clearInterval(QZ.timer); document.getElementById('timer-box').style.display='none';
-        window.QZ.results.forEach(r => {
-            window.S.totalAnswered++; if(r.ok) window.S.totalCorrect++; if(r.skipped) window.S.totalSkipped++;
-            const st = window.S.termStats[r.concept] || {answered:0, correct:0, skipped:0};
-            st.answered++; if(r.ok) st.correct++; if(r.skipped) st.skipped++; window.S.termStats[r.concept] = st;
-        });
-        await ApiClient.call('PUT_STUDENT', { student: window.S }); UIManager.showScreen('homeScreen'); UIManager.renderDashboard();
-    }
-    function exitQuiz() { if(confirm("Exit?")) { clearInterval(QZ.timer); document.getElementById('timer-box').style.display='none'; UIManager.showScreen('homeScreen'); } }
-    </script>
-</body>
-</html>
-<body>
-
-    <div id="splash">
-        <div style="font-size:4rem;">😽</div>
-        <div class="logo-text">PsychCat</div>
-    </div>
-
-    <!-- LOGIN -->
-    <div class="screen active" id="loginScreen">
-        <div class="login-box">
-            <div style="font-size:4rem;">😺</div>
-            <h1 class="dm-font">PsychCat</h1>
-            
-            <div id="loginStep1" class="card">
-                <label for="iName" class="label-tiny">REAL FULL NAME</label>
-                <input type="text" id="iName" class="tarea-small" placeholder="e.g. Emma Clarke">
-                <button class="btn btn-p" id="btnLookup">Continue 🐾</button>
-                <button class="btn btn-o" id="btnGoTeacher">Teacher Access</button>
-            </div>
-
-            <div id="loginNew" class="card" style="display:none;">
-                <p class="ac-text">New student! Set up your profile:</p>
-                <div class="grid-2">
-                    <div><label for="sYear" class="label-tiny">YEAR</label><select id="sYear" class="f-input"><option value="1">Year 1</option><option value="2">Year 2</option></select></div>
-                    <div><label for="sGroup" class="label-tiny">GROUP</label><select id="sGroup" class="f-input"><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option></select></div>
-                    <div><label for="sTeacher" class="label-tiny">TEACHER</label><select id="sTeacher" class="f-input"><option>S</option><option>J</option></select></div>
-                </div>
-                <label for="nPin" class="label-tiny">4-DIGIT PIN</label>
-                <input type="password" id="nPin" class="f-input pin-input" maxlength="4" inputmode="numeric">
-                <button class="btn btn-p" id="btnCreateAccount">Sign Up 😼</button>
-            </div>
-
-            <div id="loginPin" class="card" style="display:none;">
-                <div id="pinMsg" class="ac-text"></div>
-                <label for="iPin" class="label-tiny">ENTER PIN</label>
-                <input type="password" id="iPin" class="tarea-small pin-input" maxlength="4" inputmode="numeric">
-                <button class="btn btn-p" id="btnLogin">Sign In 😼</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- HOME -->
-    <div class="screen" id="homeScreen">
-        <div class="hdr"><div class="logo">🐾 PsychCat</div><div id="uBadge" style="font-size:1.5rem;">🌱</div></div>
-        <div class="hcontent">
-            <div class="card banner-card">
-                <div id="uNick" class="dm-font u-name">...</div>
-                <div id="uMeta" class="mu-text">...</div>
-                <div class="pbar-container"><div id="totalPbar" class="pbar-fill"></div></div>
-                <div class="flex-between">
-                    <span id="uAccuracy">Accuracy: 0%</span><span id="uAnswered">0 Answered</span>
-                </div>
-            </div>
-            <div class="grid-2 mb-20">
-                <button class="btn btn-p" id="btnQuickQuiz">🎲 Quick Quiz</button>
-                <button class="btn btn-o" id="btnTrickyQuiz">🔥 Weak Areas</button>
-            </div>
-            <div id="topicGrid" class="topic-list"></div>
-        </div>
-        <div class="nav">
-            <button class="ntab on" id="navHome">🏠<br>Home</button>
-            <button class="ntab" id="navRank">🏆<br>Rank</button>
-            <button class="ntab" id="navMe">😼<br>Me</button>
-        </div>
-    </div>
-
-    <!-- QUIZ -->
-    <div class="screen" id="quizScreen">
-        <div class="hdr">
-            <button class="exit-btn" id="btnExitQuiz">✕ EXIT</button>
-            <div class="flex-1 mx-20"><div class="pbar-container"><div id="qPbar" class="pbar-fill"></div></div></div>
-            <div id="qCount" class="q-counter">1/10</div>
-        </div>
-        <div class="hcontent" id="qContent"></div>
-        <div class="q-actions">
-             <button id="btnCheck" class="btn btn-p">Check Answer 😼</button>
-             <div class="grid-2">
-                <button id="btnSkip" class="btn btn-o">Skip 😿</button>
-                <button id="btnNext" class="btn btn-p" style="display:none;">Next →</button>
-             </div>
-        </div>
-    </div>
-
-    <!-- RANK -->
-    <div class="screen" id="rankScreen">
-        <div class="hdr"><div id="rankTitle" class="logo">🏆 Top Kittens</div><button class="close-btn" id="btnCloseRank">✕</button></div>
-        <div class="hcontent" id="rankContent"></div>
-        <div class="nav">
-            <button class="ntab" id="navHomeRank">🏠<br>Home</button>
-            <button class="ntab on" id="navRankRank">🏆<br>Rank</button>
-            <button class="ntab" id="navMeRank">😼<br>Me</button>
-        </div>
-    </div>
-
-    <!-- PROFILE -->
-    <div class="screen" id="profileScreen">
-        <div class="hdr"><div class="logo">😼 Profile</div><button class="btn btn-o btn-s" id="btnLogout">Logout</button></div>
-        <div class="hcontent">
-            <div class="card">
-                <h3 class="dm-font">Performance</h3>
-                <div class="flex-between py-10 bb-bd"><span>Total Correct</span><b id="pCorrect">0</b></div>
-                <div class="flex-between py-10"><span>Total Skipped</span><b id="pSkipped">0</b></div>
-            </div>
-            <div class="card">
-                <label for="changePin" class="label-tiny">CHANGE PIN</label>
-                <input type="password" id="changePin" class="f-input" maxlength="4" placeholder="New 4-digit PIN">
-                <button class="btn btn-p btn-s" id="btnUpdatePin">Update PIN</button>
-            </div>
-        </div>
-        <div class="nav">
-            <button class="ntab" id="navHomeMe">🏠<br>Home</button>
-            <button class="ntab" id="navRankMe">🏆<br>Rank</button>
-            <button class="ntab on" id="navMeMe">😼<br>Me</button>
-        </div>
-    </div>
-
-    <!-- MAIN CONTROLLER -->
-    <script>
-    // Global State
-    window.S = null; window.QUESTIONS = []; window.QZ = null; window.APPROVED = {};
-
-    window.addEventListener('load', async () => {
-        // Fallback safety to remove splash screen if server hangs
-        const safety = setTimeout(() => hideSplash(), 5000);
-
-        try {
-            const d = await ApiClient.call('GET_QUESTIONS');
-            window.QUESTIONS = d.questions || [];
-            window.APPROVED = d.approvedAnswers || {};
-        } catch (e) { console.error("Data load failed", e); }
-        
-        hideSplash();
-        clearTimeout(safety);
-        initAppListeners();
-    });
-
-    function hideSplash() {
-        const s = document.getElementById('splash');
-        if(s) s.style.display = 'none';
-    }
-
-    function initAppListeners() {
-        // Auth Listeners
-        document.getElementById('btnLookup').addEventListener('click', handleLookup);
-        document.getElementById('btnLogin').addEventListener('click', verifyPin);
-        document.getElementById('btnCreateAccount').addEventListener('click', createAccount);
-        document.getElementById('btnGoTeacher').addEventListener('click', goTeacherAdmin);
-
-        // Nav Listeners
-        const navs = ['navHome', 'navRank', 'navMe', 'navHomeRank', 'navRankRank', 'navMeRank', 'navHomeMe', 'navRankMe', 'navMeMe'];
-        navs.forEach(id => {
-            const el = document.getElementById(id);
-            if(!el) return;
-            el.addEventListener('click', () => {
-                if (id.includes('Home')) showHome();
-                if (id.includes('Rank')) goRank();
-                if (id.includes('Me')) showProfile();
-            });
-        });
-
-        // Quiz Listeners
-        document.getElementById('btnQuickQuiz').addEventListener('click', () => startQuiz('all'));
-        document.getElementById('btnTrickyQuiz').addEventListener('click', () => startQuiz('tricky'));
-        document.getElementById('btnCheck').addEventListener('click', handleCheck);
-        document.getElementById('btnSkip').addEventListener('click', handleSkip);
-        document.getElementById('btnNext').addEventListener('click', handleNext);
-        document.getElementById('btnExitQuiz').addEventListener('click', exitQuiz);
-
-        // Profile Listeners
-        document.getElementById('btnLogout').addEventListener('click', () => { localStorage.clear(); location.reload(); });
-        document.getElementById('btnUpdatePin').addEventListener('click', updatePin);
-        document.getElementById('btnCloseRank').addEventListener('click', showHome);
-    }
-
-    // Logic Functions
-    async function handleLookup() {
-        const name = document.getElementById('iName').value.trim();
-        if (!name) return;
-        const res = await Auth.lookup(name);
-        document.getElementById('loginStep1').style.display = 'none';
-        if (res.exists) {
-            document.getElementById('loginPin').style.display = 'block';
-            document.getElementById('pinMsg').textContent = `Hi, ${res.nickname}! Enter PIN:`;
-        } else {
-            document.getElementById('loginNew').style.display = 'block';
-        }
-    }
-
-    async function verifyPin() {
-        if (window.S.pin === document.getElementById('iPin').value) showHome();
-        else alert("Wrong PIN");
-    }
-
-    async function createAccount() {
-        await Auth.signup({
-            name: document.getElementById('iName').value.trim(),
-            pin: document.getElementById('nPin').value,
-            year: document.getElementById('sYear').value,
-            group: document.getElementById('sGroup').value,
-            teacher: document.getElementById('sTeacher').value
-        });
-        showHome();
-    }
-
-    function showHome() { 
-        UIManager.showScreen('homeScreen'); 
-        UIManager.renderDashboard(); 
-    }
-
-    function showProfile() {
-        UIManager.showScreen('profileScreen');
-        document.getElementById('pCorrect').textContent = window.S.totalCorrect;
-        document.getElementById('pSkipped').textContent = window.S.totalSkipped;
-    }
-
-    async function updatePin() {
-        const newP = document.getElementById('changePin').value;
-        if(newP.length === 4) {
-            window.S.pin = newP;
-            await ApiClient.call('PUT_STUDENT', { student: window.S });
-            alert("PIN Updated!");
-        }
-    }
-
-    function startQuiz(mode, tag = null) {
-        QuizEngine.init(mode, tag);
-        UIManager.showScreen('quizScreen');
-        UIManager.renderQuestion();
-    }
-
-    async function handleCheck() {
-        const ans = document.getElementById('qAns').value;
-        if (!ans) return;
-        const btn = document.getElementById('btnCheck');
-        btn.innerHTML = '<span class="spinner"></span>';
-        
-        const res = await Checker.verify(window.QZ.activeTask, ans);
-        const fb = document.getElementById('qFeedback');
-        fb.style.display = "block";
-        fb.className = `fb-box ${res.ok ? 'ok' : 'ng'}`;
-        fb.innerHTML = `<b>${res.ok ? '😼 Correct!' : '😿 Incorrect'}</b><span class="fb-concept">${window.QZ.activeTask.q.concept}</span>`;
-        
-        if (res.ok) window.QZ.score++;
-        window.QZ.results.push({ concept: window.QZ.activeTask.q.concept, ok: res.ok });
-        
-        btn.style.display = "none";
-        document.getElementById('btnSkip').style.display = "none";
-        document.getElementById('btnNext').style.display = "flex";
-    }
-
-    function handleSkip() {
-        window.QZ.results.push({ concept: window.QZ.activeTask.q.concept, ok: false, skipped: true });
-        handleNext();
-    }
-
-    function handleNext() {
-        if (QuizEngine.next()) {
-            UIManager.renderQuestion();
-            document.getElementById('btnCheck').style.display = "flex";
-            document.getElementById('btnCheck').innerHTML = "Check Answer 😼";
-            document.getElementById('btnSkip').style.display = "flex";
-            document.getElementById('btnNext').style.display = "none";
-        } else {
-            finishQuiz();
-        }
-    }
-
-    async function finishQuiz() {
-        window.QZ.results.forEach(r => {
-            window.S.totalAnswered++;
-            if (r.ok) window.S.totalCorrect++;
-            if (r.skipped) window.S.totalSkipped++;
-            const st = window.S.termStats[r.concept] || {answered:0, correct:0, skipped:0};
-            st.answered++;
-            if (r.ok) st.correct++;
-            if (r.skipped) st.skipped++;
-            window.S.termStats[r.concept] = st;
-        });
-        await ApiClient.call('PUT_STUDENT', { student: window.S });
-        showHome();
-    }
-
-    async function goRank() {
-        UIManager.showScreen('rankScreen');
-        const d = await ApiClient.call('GET_ALL');
-        const sorted = Object.values(d.students).sort((a,b) => calcAcc(b.totalCorrect, b.totalAnswered, b.totalSkipped) - calcAcc(a.totalCorrect, a.totalAnswered, a.totalSkipped));
-        document.getElementById('rankContent').innerHTML = sorted.map((s,i) => `
-            <div class="card flex-between">
-                <span>#${i+1} ${s.nickname}</span>
-                <b>${calcAcc(s.totalCorrect, s.totalAnswered, s.totalSkipped)}%</b>
-            </div>`).join('');
-    }
-
-    async function goTeacherAdmin() {
-        const pin = prompt("Teacher PIN:");
-        const d = await ApiClient.call('AUTH', { pin });
-        if (d.ok) {
-            UIManager.showScreen('rankScreen');
-            document.getElementById('rankTitle').textContent = "🦁 Admin";
-            const all = await ApiClient.call('GET_ALL');
-            document.getElementById('rankContent').innerHTML = Object.values(all.students).map(s => `
-                <div class="card clickable-drill" data-name="${s.name}">
-                    <b>${s.name}</b> (${s.nickname})<br>
-                    Acc: ${calcAcc(s.totalCorrect, s.totalAnswered, s.totalSkipped)}%
-                </div>
-            `).join('');
-            
-            document.querySelectorAll('.clickable-drill').forEach(el => {
-                el.addEventListener('click', (e) => drillStudent(e.currentTarget.getAttribute('data-name')));
-            });
-        }
-    }
-
-    async function drillStudent(name) {
-        const d = await ApiClient.call('GET_STUDENT', { name });
-        const st = d.student;
-        let h = `<div class="card drill-report"><h3>${st.name} Report</h3><br>`;
-        [...new Set(window.QUESTIONS.map(q=>q.tag))].forEach(t=>{
-            let c=0, an=0, sk=0; window.QUESTIONS.filter(q=>q.tag===t).forEach(q=>{ const s=st.termStats[q.concept]||{correct:0,answered:0,skipped:0}; c+=s.correct; an+=s.answered; sk+=s.skipped; });
-            h += `<div class="flex-between"><span>${t}</span><b>${calcAcc(c,an,sk)}%</b></div>`;
-        });
-        h += `<button class="btn btn-o btn-s mt-10" id="btnDetailClose">Close</button></div>`;
-        const cont = document.getElementById('rankContent');
-        cont.insertAdjacentHTML('afterbegin', h);
-        document.getElementById('btnDetailClose').addEventListener('click', (e) => e.target.parentElement.remove());
-    }
-
-    function exitQuiz() { if(confirm("Lose progress?")) showHome(); }
-    function calcAcc(c, a, s) { 
-        const tw = (a||0) + ((s||0)*0.5);
-        return tw===0 ? 0 : Math.round((c/tw)*100); 
-    }
-    </script>
-</body>
-</html>
