@@ -44,10 +44,10 @@ window.Checker = window.Checker || {
         
         try {
             const ai = await ApiClient.call('AI_CHECK', { 
-                type: task.type, 
-                concept: task.q.concept, 
-                target: task.target, 
-                studentAnswer: studentAns 
+            type: task.type, 
+            concept: task.q.concept, 
+            target: task.target, // This ensures Gemini knows what to mark against
+            studentAnswer: studentAns 
             });
 
             console.log("📡 [Checker] AI Response received:", ai);
