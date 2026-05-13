@@ -1,5 +1,5 @@
 window.UIManager = window.UIManager || {
-    // 1. Accuracy Utility (Fixes NaN% and handle skips)
+    // 1. Accuracy Utility (Fixes NaN% and handles skip weighting)
     calcAcc(c, a, s) {
         const correct = parseInt(c) || 0;
         const answered = parseInt(a) || 0;
@@ -15,10 +15,10 @@ window.UIManager = window.UIManager || {
         if (target) target.classList.add('active');
     },
 
-    // 3. Dashboard Renderer (Topic Cards & RAG)
+    // 3. Dashboard Renderer
     renderDashboard() {
         const S = window.S;
-        if (!S) return;
+        if (!S) return console.error("UIManager: No student data found.");
 
         const safeSet = (id, val, isWidth = false) => {
             const el = document.getElementById(id);
@@ -52,8 +52,10 @@ window.UIManager = window.UIManager || {
                 if (tA > 0) { if (pct >= 75) g++; else if (pct >= 50) a++; else r++; }
 
                 const color = pct >= 75 ? 'var(--gr)' : pct >= 50 ? 'var(--am)' : 'var(--re)';
+                const cardId = `topic-${tag.replace(/[^a-z0-9]/gi, '')}`;
                 const card = document.createElement('div');
                 card.className = "card clickable";
+                card.id = cardId;
                 card.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
                         <b>${tag}</b><span>${pct}%</span>
@@ -68,26 +70,33 @@ window.UIManager = window.UIManager || {
         }
     },
 
-    // 4. Question Renderer (Dynamic AO Lettering)
+    // 4. Question Renderer (Dynamic AO Lettering & Progress Bar)
     renderQuestion() {
         const t = window.QZ.activeTask;
         if (!t) return;
         const q = t.q;
         const ao = t.type.split('_')[0];
 
-        let displayPrompt = t.prompt; // The small text
-        let displayMain = "";        // The LARGE lettering
-        let hintText = q.scenario;   // The content for hint box
-        // --- UPDATE PROGRESS BAR ---
+        // --- A. UPDATE PROGRESS BAR & COUNTER ---
         const progressEl = document.getElementById('qPbar');
+        const countEl = document.getElementById('qCount');
+        
         if (progressEl) {
-    // If Zen/Time mode, we use a fake 100-step progress, 
-    // otherwise use the actual percentage of the 10 questions.
-    const total = (window.QZ.mode === 'zen' || window.QZ.mode === 'time') ? 100 : window.QZ.questions.length;
-    const pct = (window.QZ.currentIdx / total) * 100;
-    progressEl.style.width = pct + '%';
-}
-        // --- Layout Selector based on Task Type ---
+            const barTotal = (window.QZ.mode === 'zen' || window.QZ.mode === 'time') ? 100 : 10;
+            const pct = (window.QZ.currentIdx / barTotal) * 100;
+            progressEl.style.width = Math.min(pct, 100) + '%';
+        }
+        
+        if (countEl) {
+            const totalText = (window.QZ.mode === 'zen' || window.QZ.mode === 'time') ? '∞' : '10';
+            countEl.textContent = `${window.QZ.currentIdx + 1} / ${totalText}`;
+        }
+
+        // --- B. SETUP DISPLAY TEXT ---
+        let displayPrompt = t.prompt;
+        let displayMain = "";
+        let hintText = q.scenario;
+
         if (t.type === 'AO1_TERM') {
             displayMain = q.definition;
         } else if (t.type === 'AO1_DEF') {
@@ -98,15 +107,14 @@ window.UIManager = window.UIManager || {
             displayMain = q.tf.statement;
         } else if (t.type === 'AO2_SCEN') {
             displayMain = q.scenario;
-            hintText = ""; // No hints for scenario questions
+            hintText = ""; 
         } else if (t.type.startsWith('AO3')) {
-            // Task: "Identify a weakness of..." becomes the LARGE text
-            displayMain = t.prompt;
+            displayMain = t.prompt; // instruction is big
             displayPrompt = "AO3 Evaluation Task:";
-            hintText = q.definition; // Hint shows the definition
+            hintText = q.definition; // def is hint
         }
 
-        // --- Input Method Generation ---
+        // --- C. GENERATE INPUT METHOD ---
         let inputHtml = `<textarea id="qAns" class="tarea" placeholder="Type answer here..." autocomplete="off"></textarea>`;
         if (t.type === 'AO1_MC') {
             inputHtml = `<div class="grid-2" style="margin-bottom:15px;">
@@ -119,8 +127,7 @@ window.UIManager = window.UIManager || {
             </div><input type="hidden" id="qAns">`;
         }
 
-        // --- Inject into DOM ---
-        document.getElementById('qCount').textContent = `${window.QZ.currentIdx + 1}/10`;
+        // --- D. INJECT CONTENT ---
         document.getElementById('qContent').innerHTML = `
             <div class="q-tag"><span class="ao-badge">${ao}</span> 🐾 ${q.tag}</div>
             <div class="q-prompt" style="font-size:0.9rem; color:var(--mu); margin-bottom:10px;">${displayPrompt}</div>
@@ -130,15 +137,15 @@ window.UIManager = window.UIManager || {
             <div id="qFeedback" class="fb-box"></div>
         `;
 
-        // --- RESET BUTTONS & ACTIONS ---
+        // --- E. RESET BUTTONS ---
         const btnCheck = document.getElementById('btnCheck');
         const btnSkip = document.getElementById('btnSkip');
         const btnNext = document.getElementById('btnNext');
 
         if (btnCheck) {
-            btnCheck.className = "btn btn-p"; // Remove stripes/thinking classes
+            btnCheck.className = "btn btn-p"; 
             btnCheck.innerHTML = "Check Answer 😼";
-            btnCheck.style.display = "flex";
+            btnCheck.style.display = (t.type === 'AO1_MC' || t.type === 'AO1_TF') ? "none" : "flex";
             btnCheck.disabled = false;
         }
         if (btnSkip) {
