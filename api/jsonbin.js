@@ -90,7 +90,7 @@ export default async function handler(req, res) {
 
         console.log(`🤖 [AI_CHECK] Request for: ${concept}`);
 ///try gemini-3.1-flash-lite and also gemma-4-26b-a4b-it  but this one is working gemini-2.5-flash////
-        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemma-4-26b-a4b:generateContent?key=${GEMINI_API_KEY}`, {
+        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemma-4-26b-a4b-it:generateContent?key=${GEMINI_API_KEY}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ 
