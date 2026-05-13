@@ -16,15 +16,26 @@ window.Checker = window.Checker || {
         const input = this.clean(studentAns);
         const target = this.clean(task.target);
         
-        console.log(`🔍 [Checker] Verifying: "${studentAns}" for Concept: "${task.q.concept}"`);
+        console.log(`🔍 [Checker] Type: ${task.type} | Input: "${studentAns}"`);
 
-        // --- STAGE 1: Strict / Stem Match ---
+        // --- NEW: FAST TRACK FOR MC & TF ---
+        // These are binary choices. No AI, No Database, No Stemming needed.
+        if (task.type === 'AO1_MC' || task.type === 'AO1_TF') {
+            const isOk = (input === target);
+            console.log(`🎯 [Checker] MC/TF result: ${isOk}`);
+            return { 
+                ok: isOk, 
+                feedback: isOk ? "Correct choice! 🐾" : "Incorrect selection." 
+            };
+        }
+
+        // --- STAGE 1: Strict / Stem Match (For Terms/Definitions) ---
         if (input === target || this.stem(input) === this.stem(target)) {
             console.log("✅ [Checker] Stage 1 Match: Strict/Stem equality.");
             return { ok: true, feedback: "Perfect match!" };
         }
 
-        // --- STAGE 2: Proximity / Substring ---
+        // --- STAGE 2: Proximity Check ---
         if (target.length > 4 && input.length > 4) {
             if (target.includes(input) || input.includes(target)) {
                 console.log("✅ [Checker] Stage 2 Match: Substring proximity.");
@@ -39,34 +50,31 @@ window.Checker = window.Checker || {
             return { ok: true, feedback: "Database match" };
         }
 
-        // --- STAGE 4: AI Check (Final) ---
-        console.log("🤖 [Checker] No local match. Requesting AI verification...");
+        // --- STAGE 4: AI Check (Final Fallback for Definitions/AO3) ---
+        console.log("🤖 [Checker] Requesting AI verification...");
         
         try {
             const ai = await ApiClient.call('AI_CHECK', { 
-            type: task.type, 
-            concept: task.q.concept, 
-            target: task.target, // This ensures Gemini knows what to mark against
-            studentAnswer: studentAns 
+                type: task.type, 
+                concept: task.q.concept, 
+                target: task.target, 
+                studentAnswer: studentAns 
             });
 
-            console.log("📡 [Checker] AI Response received:", ai);
-
             if (ai.correct) {
-                console.log("✅ [Checker] AI Approved the answer.");
-                // Stage 5: Auto-Learn
-                if (!task.type.includes('AO3')) {
-                    console.log("🧠 [Checker] Adding answer to auto-learn queue...");
+                console.log("✅ [Checker] AI Approved.");
+                // Auto-Learn: Add to database if it was a term/scenario identification
+                if (task.type === 'AO1_TERM' || task.type === 'AO2_SCEN') {
                     ApiClient.call('ADD_APPROVED', { concept: task.q.concept, answer: studentAns });
                 }
                 return { ok: true, feedback: ai.feedback };
             } else {
-                console.log("❌ [Checker] AI Rejected the answer.");
+                console.log("❌ [Checker] AI Rejected.");
                 return { ok: false, feedback: ai.feedback };
             }
         } catch (err) {
-            console.error("🚨 [Checker] AI Call Failed:", err);
-            return { ok: false, feedback: "Marking service error. Please tell your teacher." };
+            console.error("🚨 [Checker] AI Error:", err.message);
+            return { ok: false, feedback: "Marking service error." };
         }
     }
 };
