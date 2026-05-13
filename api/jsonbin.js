@@ -88,6 +88,7 @@ export default async function handler(req, res) {
 
       // THE FALLBACK LIST
       const modelPool = [
+        "gemini-2.0-flash-lite",
         "gemini-3.1-flash-lite",
         "gemini-2.5-flash",
         "gemini-2.0-flash",
