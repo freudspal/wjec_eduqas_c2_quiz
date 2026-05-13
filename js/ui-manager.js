@@ -78,7 +78,15 @@ window.UIManager = window.UIManager || {
         let displayPrompt = t.prompt; // The small text
         let displayMain = "";        // The LARGE lettering
         let hintText = q.scenario;   // The content for hint box
-
+        // --- UPDATE PROGRESS BAR ---
+        const progressEl = document.getElementById('qPbar');
+        if (progressEl) {
+    // If Zen/Time mode, we use a fake 100-step progress, 
+    // otherwise use the actual percentage of the 10 questions.
+    const total = (window.QZ.mode === 'zen' || window.QZ.mode === 'time') ? 100 : window.QZ.questions.length;
+    const pct = (window.QZ.currentIdx / total) * 100;
+    progressEl.style.width = pct + '%';
+}
         // --- Layout Selector based on Task Type ---
         if (t.type === 'AO1_TERM') {
             displayMain = q.definition;
