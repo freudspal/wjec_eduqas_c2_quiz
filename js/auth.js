@@ -1,6 +1,6 @@
 window.Auth = window.Auth || {
-    ADJ: ['Bold','Brave','Clever','Daring','Epic','Fierce','Golden','Happy','Jolly','Mighty','Noble','Quick','Rapid','Swift','Wise'],
-    CAT: ['Lion','Tiger','Panther','Cougar','Leopard','Lynx','Cheetah','Jaguar','Wildcat','Tomcat'],
+    ADJ: ['Bold','Brave','Clever','Daring','Epic','Fierce','Golden','Happy','Jolly','Mighty','Noble','Quick','Rapid','Swift','Wise','Silent','Cosmic','Vibrant','Keen','Sharp','Mellow','Grand','Royal','Valiant','Steady','Witty','Bright','Cunning','Tenacious','Agile'],
+    CAT: ['Lion','Tiger','Panther','Cougar','Leopard','Lynx','Cheetah','Jaguar','Wildcat','Tomcat','Serval','Ocelot','Caracal','Bobcat','Puma','Tabby','Calico','Siamese','Sphynx','Persian','Bengal','Manx','Ragdoll','Maltese','Burmese','Korat','Siberian','Savannah','Angora','Abyssinian'],
 
     // Generates a consistent cat-themed nickname based on the student's real name
     genNick(name) {
