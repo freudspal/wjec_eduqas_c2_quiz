@@ -53,31 +53,33 @@ window.UIManager = window.UIManager || {
         let displayMain = "";
         let hintText = q.scenario;
 
-        // --- Targeted Display Logic ---
+        // --- Question Type Lane Selection ---
         if (t.type === 'AO1_TERM') {
-            // "PERFECT" behavior for AO1: Big Definition
             displayMain = q.definition;
         } 
         else if (t.type === 'AO1_DEF') {
-            // "PERFECT" behavior for AO1: Big Concept name
             displayMain = q.concept;
         } 
+        else if (t.type === 'AO1_MC') {
+            displayMain = q.mc.question; // Fix: Show MC question text
+        }
+        else if (t.type === 'AO1_TF') {
+            displayMain = q.tf.statement; // Fix: Show TF statement text
+        }
         else if (t.type === 'AO2_SCEN') {
-            // "PERFECT" behavior for AO2: Big Scenario
             displayMain = q.scenario;
             hintText = ""; 
         } 
         else if (t.type.startsWith('AO3')) {
-            // THE FIX: For AO3, move the Prompt ("Identify weakness...") to the Big Text
-            // and hide the Definition text from the primary view.
             displayMain = t.prompt; 
             displayPrompt = "AO3 Evaluation Task:";
-            hintText = q.definition; // Moved definition to the hint box
+            hintText = q.definition;
         }
 
+        // --- Input Method Selection ---
         let inputHtml = `<textarea id="qAns" class="tarea" placeholder="Type answer here..." autocomplete="off"></textarea>`;
         if (t.type === 'AO1_MC') {
-            inputHtml = `<div class="grid-2">${q.mc.options.map(opt => `<button class="btn btn-o btn-s" onclick="submitChoice('${opt}')">${opt}</button>`).join('')}</div><input type="hidden" id="qAns">`;
+            inputHtml = `<div class="grid-2">${q.mc.options.map(opt => `<button class="btn btn-o" onclick="submitChoice('${opt.replace(/'/g, "\\'")}')">${opt}</button>`).join('')}</div><input type="hidden" id="qAns">`;
         } else if (t.type === 'AO1_TF') {
             inputHtml = `<div class="grid-2"><button class="btn btn-o" onclick="submitChoice('true')">True</button><button class="btn btn-o" onclick="submitChoice('false')">False</button></div><input type="hidden" id="qAns">`;
         }
