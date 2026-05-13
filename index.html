@@ -259,33 +259,63 @@
         handleCheck();
     };
 
-    async function handleCheck() {
-        const ans = document.getElementById('qAns').value; if(!ans) return;
+async function handleCheck() {
+        const ans = document.getElementById('qAns').value;
+        if (!ans) return;
+
         const btn = document.getElementById('btnCheck');
-        btn.innerHTML = '<span class="spinner"></span>';
-        
+        const skipBtn = document.getElementById('btnSkip');
+
+        // --- TRIGGER THINKING ANIMATION ---
+        btn.classList.add('btn-thinking');
+        btn.innerHTML = '<span class="flashing-text">AI VERIFICATION IN PROGRESS...</span>';
+        btn.disabled = true;
+        skipBtn.style.visibility = "hidden"; // Hide skip while AI works
+
         const res = await Checker.verify(window.QZ.activeTask, ans);
-        const fb = document.getElementById('qFeedback'); fb.style.display='block'; fb.className=`fb-box ${res.ok?'ok':'ng'}`;
-        fb.innerHTML = `<b>${res.ok?'😼 Correct!':'😿 Not quite'}</b><span class="fb-res">${window.QZ.activeTask.target}</span>`;
         
-        if(res.ok) window.QZ.score++; 
-        window.QZ.results.push({concept:window.QZ.activeTask.q.concept, ok:res.ok});
+        // --- STOP ANIMATION ---
+        btn.classList.remove('btn-thinking');
+        btn.disabled = false;
+        btn.innerHTML = "Check Answer 😼";
+
+        const fb = document.getElementById('qFeedback');
+        fb.style.display = "block";
+        fb.className = `fb-box ${res.ok ? 'ok' : 'ng'}`;
         
-        btn.style.display='none'; 
-        document.getElementById('btnSkip').style.display='none'; 
-        document.getElementById('btnNext').style.display='flex';
+        // Use the large font class for the answer display
+        fb.innerHTML = `<b>${res.ok ? '😼 Correct!' : '😿 Not quite'}</b><span class="fb-res">${window.QZ.activeTask.target}</span>`;
+        
+        if (res.ok) window.QZ.score++;
+        window.QZ.results.push({ concept: window.QZ.activeTask.q.concept, ok: res.ok });
+        
+        // Swap buttons
+        btn.style.display = "none";
+        skipBtn.style.display = "none";
+        document.getElementById('btnNext').style.display = "flex";
     }
 
     function handleSkip() { window.QZ.results.push({concept:window.QZ.activeTask.q.concept, ok:false, skipped:true}); handleNext(); }
     
-    function handleNext() { 
+function handleNext() { 
         if(QuizEngine.next()) {
             UIManager.renderQuestion();
-            document.getElementById('btnCheck').style.display='flex';
-            document.getElementById('btnCheck').innerHTML = "Check Answer 😼";
-            document.getElementById('btnSkip').style.display='flex';
-            document.getElementById('btnNext').style.display='none';
-        } else finishQuiz(); 
+            
+            // Reset Button State
+            const btnCheck = document.getElementById('btnCheck');
+            btnCheck.style.display = 'flex';
+            btnCheck.classList.remove('btn-thinking');
+            btnCheck.innerHTML = "Check Answer 😼";
+            btnCheck.disabled = false;
+
+            const btnSkip = document.getElementById('btnSkip');
+            btnSkip.style.display = 'flex';
+            btnSkip.style.visibility = 'visible';
+
+            document.getElementById('btnNext').style.display = 'none';
+        } else {
+            finishQuiz(); 
+        }
     }
 
     async function finishQuiz() {
