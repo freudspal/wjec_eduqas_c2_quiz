@@ -35,17 +35,47 @@
             </div>
 
             <!-- Step 2A: New User Signup -->
-            <div id="loginNew" class="card" style="display:none; text-align:left;">
-                <div style="font-weight:700; color:var(--ac); margin-bottom:15px;">New student! Set up your profile:</div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                    <div><label for="sYear" class="label-tiny">YEAR</label><select id="sYear" class="f-input"><option value="1">Year 1</option><option value="2">Year 2</option></select></div>
-                    <div><label for="sGroup" class="label-tiny">GROUP</label><select id="sGroup" class="f-input"><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option></select></div>
-                    <div><label for="sTeacher" class="label-tiny">TEACHER</label><select id="sTeacher" class="f-input"><option value="S">Teacher S</option><option value="J">Teacher J</option></select></div>
-                </div>
-                <label for="nPin" class="label-tiny" style="margin-top:10px;">CHOOSE 4-DIGIT PIN</label>
-                <input type="password" id="nPin" class="f-input" maxlength="4" style="text-align:center; letter-spacing:10px;" inputmode="numeric">
-                <button class="btn btn-p" id="btnCreate">Sign Up 😼</button>
-            </div>
+<!-- NEW USER SIGNUP -->
+<div id="loginNew" class="card" style="display:none; text-align:left;">
+    <div class="dm-font" style="font-size: 1.4rem; color: var(--ac); margin-bottom: 5px;">Welcome, Kitten! 🐾</div>
+    <p style="font-size: 0.85rem; color: var(--mu); margin-bottom: 20px;">Tell us a bit about your studies:</p>
+    
+    <div class="signup-grid">
+        <div>
+            <label for="sYear" class="label-tiny">Year Group</label>
+            <select id="sYear" class="f-input">
+                <option value="1">Year 1</option>
+                <option value="2">Year 2</option>
+            </select>
+        </div>
+        <div>
+            <label for="sGroup" class="label-tiny">Class Group</label>
+            <select id="sGroup" class="f-input">
+                <option value="A">Group A</option>
+                <option value="B">Group B</option>
+                <option value="C">Group C</option>
+                <option value="D">Group D</option>
+                <option value="E">Group E</option>
+                <option value="F">Group F</option>
+            </select>
+        </div>
+        <div style="grid-column: span 2;">
+            <label for="sTeacher" class="label-tiny">Teacher</label>
+            <select id="sTeacher" class="f-input">
+                <option value="S">Teacher S</option>
+                <option value="J">Teacher J</option>
+            </select>
+        </div>
+    </div>
+
+    <div style="margin-top: 10px; padding-top: 15px; border-top: 1px solid var(--bd);">
+        <label for="nPin" class="label-tiny">Create a 4-Digit PIN</label>
+        <p style="font-size: 0.7rem; color: var(--mu); margin-bottom: 10px;">You will use this to sign in next time.</p>
+        <input type="password" id="nPin" class="f-input pin-field" maxlength="4" inputmode="numeric" placeholder="••••">
+    </div>
+
+    <button class="btn btn-p" id="btnCreate" style="margin-top: 20px;">Create My Account 😼</button>
+</div>
 
             <!-- Step 2B: Returning User -->
             <div id="loginPin" class="card" style="display:none; text-align:left;">
