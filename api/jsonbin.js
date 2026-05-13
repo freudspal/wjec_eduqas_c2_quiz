@@ -71,69 +71,83 @@ export default async function handler(req, res) {
     // ==========================================
     // METHOD: AI_CHECK (With Model Fallback Chain)
     // ==========================================
-if (method === "AI_CHECK") {
+    if (method === "AI_CHECK") {
       const { concept, target, studentAnswer } = body;
-      const prompt = `Strict Psychology Examiner. Concept: "${concept}". Target: "${target}". Student: "${studentAnswer}". Mark true if correct. Respond ONLY JSON: {"correct":boolean, "feedback":string}`;
+      
+      const prompt = `You are an A-Level Psychology examiner.
+        Topic: "${concept}"
+        Correct Definition/Target: "${target}"
+        Student's Answer: "${studentAnswer}"
 
+        Rule: If the student describes the core meaning correctly (even with poor spelling or different words), mark it true.
+        
+        Respond ONLY in this JSON format:
+        {"correct": true, "feedback": "Brief explanation of why"}
+        OR
+        {"correct": false, "feedback": "Explain what they missed"}`;
+
+      // THE FALLBACK LIST
       const modelPool = [
-        "gemini-3.1-flash-lite",        
-        "gemini-2.0-flash-lite",        
+        "gemini-2.0-flash-lite",
+        "gemini-3.1-flash-lite",
         "gemini-2.5-flash",
         "gemini-2.0-flash",
-        "gemini-3-flash-preview"  
+        "gemini-3-flash-preview"
       ];
 
       for (let i = 0; i < modelPool.length; i++) {
         const modelName = modelPool[i];
-        
-        // 7 seconds for the first try, 5 seconds for fallbacks to save time
-        const currentTimeout = i === 0 ? 7000 : 5000; 
-
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), currentTimeout);
-
         try {
-          console.log(`🤖 [AI_CHECK] ${modelName} (${currentTimeout/1000}s limit)...`);
+          console.log(`🤖 [AI_CHECK] Attempt ${i+1}: Trying ${modelName}`);
 
           const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ 
-              contents: [{ role: "user", parts: [{ text: prompt }] }],
+              contents: [{ 
+                role: "user", 
+                parts: [{ text: prompt }] 
+              }],
               generationConfig: { response_mime_type: "application/json" }
-            }),
-            signal: controller.signal
+            })
           });
 
           const data = await r.json();
-          clearTimeout(timeoutId);
 
+          // If this model is busy or errors out, move to the next one
           if (!r.ok) {
-            console.warn(`⚠️ ${modelName} busy (Status ${r.status}).`);
+            console.error(`📡 ${modelName} failed (Status ${r.status}). Trying next...`);
             continue; 
           }
 
           const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+          
+          // Robust JSON extraction in case model adds chatter
           const start = text.indexOf('{');
           const end = text.lastIndexOf('}');
-          const parsedResult = JSON.parse(text.substring(start, end + 1));
+          const cleanJson = text.substring(start, end + 1);
+          const parsedResult = JSON.parse(cleanJson);
 
+          console.log(`✅ Success with ${modelName}. Verdict:`, parsedResult.correct);
           return res.status(200).json(parsedResult);
 
         } catch (err) {
-          clearTimeout(timeoutId);
-          if (err.name === 'AbortError') {
-            console.error(`⏱️ [TIMEOUT] ${modelName} skipped at ${currentTimeout/1000}s.`);
-          } else {
-            console.error(`❌ [ERROR] ${modelName}:`, err.message);
-          }
-          
-          if (i === modelPool.length - 1) break;
+          console.error(`❌ ${modelName} Error:`, err.message);
+          // If it's the last model, we give up and trigger the catch block below
+          if (i === modelPool.length - 1) throw new Error("All AI models busy.");
         }
       }
 
-      return res.status(200).json({ 
-        correct: false, 
-        feedback: "The cat is thinking slowly today! Your answer is saved for teacher review. 🐾" 
-      });
+      // Default safe response if for some reason the loop ends
+      return res.status(200).json({ correct: false, feedback: "AI busy. Teacher will review manually." });
     }
+
+    return res.status(400).json({ error: "Invalid method" });
+  } catch (err) { 
+    console.error("🚨 CRITICAL SYSTEM ERROR:", err.message);
+    return res.status(200).json({ 
+      correct: false, 
+      feedback: "AI Marking temporarily unavailable. Teacher will review." 
+    }); 
+  }
+}
