@@ -62,7 +62,7 @@ export default async function handler(req, res) {
     }
 
     // ==========================================
-    // METHOD: ADD_APPROVED
+    // METHOD: ADD_APPROVED (Smart Learning)
     // ==========================================
     if (method === "ADD_APPROVED") {
       const { concept, answer } = body;
@@ -106,13 +106,23 @@ export default async function handler(req, res) {
     }
 
     // ==========================================
-    // METHOD: AI_CHECK (FIXED 404 ERROR)
+    // METHOD: AI_CHECK (With Debug Logging)
     // ==========================================
     if (method === "AI_CHECK") {
       try {
-        const prompt = `Strict Psychology Examiner. Concept to identify: "${body.concept}". Student wrote: "${body.studentAnswer}". Instruction: Is this correctly identified? Minor typos okay. Return ONLY JSON: {"correct":boolean, "feedback":string}`;
+        // --- LOG 1: Incoming Request ---
+        console.log("🤖 [AI_CHECK] Incoming:", {
+          concept: body.concept,
+          studentAnswer: body.studentAnswer
+        });
+
+        const prompt = `Strict Psychology Examiner Mode. 
+        The student must identify the concept name.
+        Required Concept: "${body.concept}". 
+        Student Answer: "${body.studentAnswer}". 
+        Instruction: Is this correctly identified? Accept minor typos, but reject if they name a different concept. 
+        Return ONLY valid JSON: {"correct":boolean, "feedback":string}`;
         
-        // Reverted to v1beta for model "gemini-1.5-flash" - this usually fixes the 404
         const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -131,17 +141,24 @@ export default async function handler(req, res) {
 
         const data = await r.json();
 
+        // --- LOG 2: Raw Gemini Response ---
+        console.log(`📡 [AI_CHECK] Gemini Status: ${r.status}`);
         if (!r.ok) {
-          console.error("Google Error Detail:", JSON.stringify(data));
+          console.error("📡 [AI_CHECK] Gemini Error Body:", JSON.stringify(data));
           throw new Error(`Google API Status ${r.status}`);
         }
 
         let text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '{"correct":false,"feedback":"AI Empty"}';
-        return res.status(200).json(JSON.parse(text));
+        const parsed = JSON.parse(text);
+
+        // --- LOG 3: Final Verdict ---
+        console.log("✅ [AI_CHECK] Verdict:", parsed);
+
+        return res.status(200).json(parsed);
         
       } catch (aiErr) {
-        console.error("AI Inner Error:", aiErr);
-        // Fail gracefully so the quiz doesn't stop
+        console.error("🚨 [AI_CHECK] ERROR:", aiErr.message);
+        // Return safe failure so the frontend doesn't hang
         return res.status(200).json({ 
           correct: false, 
           feedback: "AI Marking unavailable. Teacher will review." 
