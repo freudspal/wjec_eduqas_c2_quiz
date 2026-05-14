@@ -4,8 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
     <title>PsychCat Component 2</title>
-    <!-- Relative paths for Vercel/Local stability -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐾</text></svg>">
+    
     <link rel="stylesheet" href="css/style.css">
+    
+    <!-- 1. Local Question Bank (Loads instantly) -->
+    <script src="js/questions.js"></script>
+
+    <!-- 2. Modular Logic Files -->
     <script src="js/api-client.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/quiz-engine.js"></script>
@@ -15,7 +21,7 @@
 <body>
     <div id="timer-box">180s</div>
     
-    <!-- SPLASH (Guaranteed to hide) -->
+    <!-- SPLASH -->
     <div id="splash" style="position:fixed;inset:0;background:#0a0a0f;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;">
         <div style="font-size:4rem;">😽</div>
         <div style="font-family:'DM Serif Display',serif;font-size:2rem;color:#ff9f43;margin-top:10px;">PsychCat</div>
@@ -26,62 +32,35 @@
         <div style="padding:40px 20px; text-align:center;">
             <div style="font-size:4rem;">😺</div><h1 class="dm-font">PsychCat</h1>
             
-            <!-- Step 1: Name Lookup -->
             <div id="loginStep1" class="card">
                 <label for="iName" class="label-tiny">REAL FULL NAME</label>
                 <input type="text" id="iName" class="tarea" style="min-height:50px;" placeholder="e.g. Emma Clarke">
                 <button class="btn btn-p" id="btnLookup">Continue 🐾</button>
-                <button class="btn btn-o" id="btnAdmin" style="margin-top:15px; border:none; font-size:0.8rem;">Admin Access</button>
+                <button class="btn btn-o" id="btnAdmin" style="margin-top:15px; border:none; font-size:0.8rem;">Teacher Access</button>
             </div>
 
-            <!-- Step 2A: New User Signup -->
-<!-- NEW USER SIGNUP -->
-<div id="loginNew" class="card" style="display:none; text-align:left;">
-    <div class="dm-font" style="font-size: 1.4rem; color: var(--ac); margin-bottom: 5px;">Welcome, Kitten! 🐾</div>
-    <p style="font-size: 0.85rem; color: var(--mu); margin-bottom: 20px;">Tell us a bit about your studies:</p>
-    
-    <div class="signup-grid">
-        <div>
-            <label for="sYear" class="label-tiny">Year Group</label>
-            <select id="sYear" class="f-input">
-                <option value="1">Year 1</option>
-                <option value="2">Year 2</option>
-            </select>
-        </div>
-        <div>
-            <label for="sGroup" class="label-tiny">Class Group</label>
-            <select id="sGroup" class="f-input">
-                <option value="A">Group A</option>
-                <option value="B">Group B</option>
-                <option value="C">Group C</option>
-                <option value="D">Group D</option>
-                <option value="E">Group E</option>
-                <option value="F">Group F</option>
-            </select>
-        </div>
-        <div style="grid-column: span 2;">
-            <label for="sTeacher" class="label-tiny">Teacher</label>
-            <select id="sTeacher" class="f-input">
-                <option value="S">Teacher S</option>
-                <option value="J">Teacher J</option>
-            </select>
-        </div>
-    </div>
+            <div id="loginNew" class="card" style="display:none; text-align:left;">
+                <div class="dm-font" style="font-size: 1.4rem; color: var(--ac); margin-bottom: 5px;">Welcome, Kitten! 🐾</div>
+                <div class="signup-grid">
+                    <div><label for="sYear" class="label-tiny">Year Group</label>
+                        <select id="sYear" class="f-input"><option value="1">Year 1</option><option value="2">Year 2</option></select>
+                    </div>
+                    <div><label for="sGroup" class="label-tiny">Class Group</label>
+                        <select id="sGroup" class="f-input"><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option></select>
+                    </div>
+                    <div style="grid-column: span 2;"><label for="sTeacher" class="label-tiny">Teacher</label>
+                        <select id="sTeacher" class="f-input"><option value="S">Teacher S</option><option value="J">Teacher J</option></select>
+                    </div>
+                </div>
+                <label for="nPin" class="label-tiny">CHOOSE 4-DIGIT PIN</label>
+                <input type="password" id="nPin" class="f-input pin-field" maxlength="4" inputmode="numeric" placeholder="••••">
+                <button class="btn btn-p" id="btnCreate" style="margin-top:20px;">Create Account 😼</button>
+            </div>
 
-    <div style="margin-top: 10px; padding-top: 15px; border-top: 1px solid var(--bd);">
-        <label for="nPin" class="label-tiny">Create a 4-Digit PIN</label>
-        <p style="font-size: 0.7rem; color: var(--mu); margin-bottom: 10px;">You will use this to sign in next time.</p>
-        <input type="password" id="nPin" class="f-input pin-field" maxlength="4" inputmode="numeric" placeholder="••••">
-    </div>
-
-    <button class="btn btn-p" id="btnCreate" style="margin-top: 20px;">Create My Account 😼</button>
-</div>
-
-            <!-- Step 2B: Returning User -->
             <div id="loginPin" class="card" style="display:none; text-align:left;">
                 <div id="pinMsg" style="color:var(--ac); margin-bottom:10px; font-weight:700;"></div>
                 <label for="iPin" class="label-tiny">ENTER PIN</label>
-                <input type="password" id="iPin" class="tarea" style="min-height:50px; text-align:center; letter-spacing:10px;" maxlength="4" placeholder="PIN" inputmode="numeric">
+                <input type="password" id="iPin" class="tarea pin-field" style="min-height:60px;" maxlength="4" inputmode="numeric" placeholder="••••">
                 <button class="btn btn-p" id="btnLogin">Sign In 😼</button>
             </div>
         </div>
@@ -107,7 +86,6 @@
                 <button class="btn btn-o" id="modeTricky">Focus Area</button>
             </div>
 
-            <!-- RAG SUMMARY CARDS (Added back) -->
             <div style="display:flex; gap:10px; margin-bottom:20px;">
                 <div class="scard"><div class="s-num" id="statG" style="color:var(--gr)">0</div><div style="font-size:0.6rem;">Mastered</div></div>
                 <div class="scard"><div class="s-num" id="statA" style="color:var(--am)">0</div><div style="font-size:0.6rem;">Learning</div></div>
@@ -123,8 +101,7 @@
         </div>
     </div>
 
-
-<!-- QUIZ SCREEN -->
+    <!-- QUIZ SCREEN -->
     <div class="screen" id="quizScreen">
         <div class="hdr">
             <button id="btnExit" style="background:none; border:none; color:#6b6b85; font-weight:700;">✕ EXIT</button>
@@ -132,14 +109,12 @@
             <div id="qCount" style="font-size:0.8rem; font-weight:800;"></div>
         </div>
         
-        <!-- BUTTONS ARE NOW INSIDE THE SCROLLING CONTENT -->
         <div class="hcontent">
             <div id="qContent"></div>
-            
-            <div id="qActions" style="margin-top: 10px; display:flex; flex-direction:column; gap:12px;">
+            <div id="qActions" style="margin-top: 10px; display:flex; flex-direction:column; gap:12px; z-index:1000;">
                  <button id="btnCheck" class="btn btn-p">Check Answer 😼</button>
                  <div class="grid-2">
-                    <button id="btnSkip" class="btn btn-o">Skip</button>
+                    <button id="btnSkip" class="btn btn-o">Skip 😿</button>
                     <button id="btnNext" class="btn btn-p" style="display:none;">Next →</button>
                  </div>
             </div>
@@ -164,12 +139,12 @@
             <div class="card">
                 <h3 class="dm-font">Performance</h3>
                 <div class="flex-between py-10 bb-bd"><span>Total Correct</span><b id="pCorrect">0</b></div>
-                <div class="flex-between py-10"><span>Total Skipped</span><b id="pSkipped">0</b></div>
+                <div class="flex-between py-10"><span>Questions Skipped</span><b id="pSkipped">0</b></div>
             </div>
             <div class="card">
                 <h3 class="dm-font">Security</h3>
                 <label for="changePin" class="label-tiny">NEW 4-DIGIT PIN</label>
-                <input type="password" id="changePin" class="f-input" maxlength="4" placeholder="New PIN">
+                <input type="password" id="changePin" class="f-input pin-field" maxlength="4" placeholder="••••">
                 <button class="btn btn-p btn-s" id="btnUpdatePin" style="margin-top:10px;">Update PIN</button>
             </div>
         </div>
@@ -181,59 +156,47 @@
     </div>
 
     <script>
-    // --- GLOBAL STATE ---
-    window.S = null; window.QUESTIONS = []; window.QZ = null; window.APPROVED = {};
+    window.S = null; window.QZ = null; window.APPROVED = {};
 
-    // --- INITIALIZATION ---
     window.addEventListener('load', async () => {
         const forceHide = setTimeout(() => hideSplash(), 4000);
         try {
             if (typeof ApiClient === 'undefined') throw new Error("Scripts failed to load");
-            const d = await ApiClient.call('GET_QUESTIONS');
-            window.QUESTIONS = (d && d.questions) ? d.questions : []; 
+            // Sync only the AI-learned library from the main student bin
+            const d = await ApiClient.call('GET_SYSTEM_DATA');
             window.APPROVED = (d && d.approvedAnswers) ? d.approvedAnswers : {};
-        } catch (e) { console.error("API Error:", e.message); }
+            console.log("✅ Initialization complete. Local bank ready.");
+        } catch (e) { console.error("Sync Error:", e.message); }
         finally { hideSplash(); clearTimeout(forceHide); setupApp(); }
     });
 
-    function hideSplash() {
-        const s = document.getElementById('splash');
-        if(s) s.style.display = 'none';
-    }
+    function hideSplash() { const s = document.getElementById('splash'); if(s) s.style.display = 'none'; }
 
-    // --- EVENT LISTENERS ---
     function setupApp() {
-        // Auth
         document.getElementById('btnLookup').onclick = handleLookup;
         document.getElementById('btnLogin').onclick = verifyPin;
         document.getElementById('btnCreate').onclick = createAccount;
         document.getElementById('btnAdmin').onclick = goTeacherAdmin;
 
-        // Navigation
         const bind = (id, fn) => { const el = document.getElementById(id); if(el) el.onclick = fn; };
         bind('navHome', showHome); bind('navRank', goRank); bind('navMe', showProfile);
         bind('navHomeRank', showHome); bind('navRankRank', goRank); bind('navMeRank', showProfile);
         bind('navHomeMe', showHome); bind('navRankMe', goRank); bind('navMeMe', showProfile);
         bind('btnCloseRank', showHome);
 
-        // Game Modes
         bind('modeQuick', () => startQuiz('all'));
         bind('modeZen', () => startQuiz('zen'));
         bind('modeTime', () => startQuiz('time'));
         bind('modeTricky', () => startQuiz('tricky'));
 
-        // Quiz Actions
         bind('btnCheck', handleCheck);
         bind('btnSkip', handleSkip);
         bind('btnNext', handleNext);
         bind('btnExit', exitQuiz);
-
-        // Profile
         bind('btnLogout', () => { localStorage.clear(); location.reload(); });
         bind('btnUpdatePin', updatePin);
     }
 
-    // --- LOGIC FUNCTIONS ---
     async function handleLookup() {
         const n = document.getElementById('iName').value.trim(); if(!n) return;
         const res = await Auth.lookup(n);
@@ -241,24 +204,19 @@
         if(res.exists) {
             document.getElementById('loginPin').style.display='block';
             document.getElementById('pinMsg').textContent = `Hi, ${res.nickname}! Enter PIN:`;
-        } else {
-            document.getElementById('loginNew').style.display='block';
-        }
+        } else { document.getElementById('loginNew').style.display='block'; }
     }
 
     async function verifyPin() {
-        if (window.S.pin === document.getElementById('iPin').value) showHome(); 
-        else alert("Wrong PIN, Kitty!");
+        const p = document.getElementById('iPin').value;
+        if (window.S.pin === p) showHome(); else alert("Wrong PIN!");
     }
 
     async function createAccount() {
-        const n = document.getElementById('iName').value.trim();
         const p = document.getElementById('nPin').value;
         if(p.length !== 4) return alert("PIN must be 4 digits");
-        
         await Auth.signup({
-            name: n,
-            pin: p,
+            name: document.getElementById('iName').value.trim(), pin: p,
             year: document.getElementById('sYear').value,
             group: document.getElementById('sGroup').value,
             teacher: document.getElementById('sTeacher').value
@@ -289,100 +247,53 @@
         }
     }
 
-    // Global helper for MC/TF buttons
-    window.submitChoice = (val) => {
-        document.getElementById('qAns').value = val;
-        handleCheck();
-    };
+    window.submitChoice = (val) => { document.getElementById('qAns').value = val; handleCheck(); };
 
-async function handleCheck() {
-        const ans = document.getElementById('qAns').value;
-        if (!ans) return;
-
+    async function handleCheck() {
+        const ans = document.getElementById('qAns').value; if (!ans) return;
         const btn = document.getElementById('btnCheck');
         const skipBtn = document.getElementById('btnSkip');
-
-        // --- TRIGGER THINKING ANIMATION ---
         btn.classList.add('btn-thinking');
         btn.innerHTML = '<span class="flashing-text">AI VERIFICATION IN PROGRESS...</span>';
         btn.disabled = true;
-        skipBtn.style.visibility = "hidden"; // Hide skip while AI works
-
+        skipBtn.style.visibility = "hidden";
         const res = await Checker.verify(window.QZ.activeTask, ans);
-        
-        // --- STOP ANIMATION ---
-        btn.classList.remove('btn-thinking');
-        btn.disabled = false;
-        btn.innerHTML = "Check Answer 😼";
-
-        const fb = document.getElementById('qFeedback');
-        fb.style.display = "block";
-        fb.className = `fb-box ${res.ok ? 'ok' : 'ng'}`;
-        
-        // Use the large font class for the answer display
-        fb.innerHTML = `<b>${res.ok ? '😼 Correct!' : '😿 Not quite'}</b><span class="fb-res">${window.QZ.activeTask.target}</span>`;
-        
-        if (res.ok) window.QZ.score++;
-        window.QZ.results.push({ concept: window.QZ.activeTask.q.concept, ok: res.ok });
-        
-        // Swap buttons
-        btn.style.display = "none";
-        skipBtn.style.display = "none";
-        document.getElementById('btnNext').style.display = "flex";
+        btn.classList.remove('btn-thinking'); btn.disabled = false; btn.innerHTML = "Check Answer 😼";
+        const fb = document.getElementById('qFeedback'); fb.style.display='block'; fb.className=`fb-box ${res.ok?'ok':'ng'}`;
+        fb.innerHTML = `<b>${res.ok?'😼 Correct!':'😿 Incorrect'}</b><span class="fb-res">${window.QZ.activeTask.target}</span>`;
+        if(res.ok) window.QZ.score++; 
+        window.QZ.results.push({concept:window.QZ.activeTask.q.concept, ok:res.ok});
+        btn.style.display='none'; skipBtn.style.display='none'; document.getElementById('btnNext').style.display='flex';
     }
 
     function handleSkip() { window.QZ.results.push({concept:window.QZ.activeTask.q.concept, ok:false, skipped:true}); handleNext(); }
-    
-function handleNext() { 
-        if(QuizEngine.next()) {
-            UIManager.renderQuestion();
-            
-            // Reset Button State
-            const btnCheck = document.getElementById('btnCheck');
-            btnCheck.style.display = 'flex';
-            btnCheck.classList.remove('btn-thinking');
-            btnCheck.innerHTML = "Check Answer 😼";
-            btnCheck.disabled = false;
-
-            const btnSkip = document.getElementById('btnSkip');
-            btnSkip.style.display = 'flex';
-            btnSkip.style.visibility = 'visible';
-
-            document.getElementById('btnNext').style.display = 'none';
-        } else {
-            finishQuiz(); 
-        }
-    }
+    function handleNext() { if(QuizEngine.next()) { UIManager.renderQuestion(); } else finishQuiz(); }
 
     async function finishQuiz() {
         if(window.QZ.timer) clearInterval(window.QZ.timer);
         window.QZ.results.forEach(r => {
-            window.S.totalAnswered++; 
-            if(r.ok) window.S.totalCorrect++; 
-            if(r.skipped) window.S.totalSkipped++;
+            window.S.totalAnswered++; if(r.ok) window.S.totalCorrect++; if(r.skipped) window.S.totalSkipped++;
             const st = window.S.termStats[r.concept] || {answered:0, correct:0, skipped:0};
             st.answered++; if(r.ok) st.correct++; if(r.skipped) st.skipped++;
             window.S.termStats[r.concept] = st;
         });
-        await ApiClient.call('PUT_STUDENT', { student: window.S }); 
-        showHome();
+        await ApiClient.call('PUT_STUDENT', { student: window.S }); showHome();
     }
 
     async function goRank() {
         UIManager.showScreen('rankScreen');
         const d = await ApiClient.call('GET_ALL');
-        const sorted = Object.values(d.students || {}).sort((a,b) => calcAcc(b.totalCorrect, b.totalAnswered, b.totalSkipped) - calcAcc(a.totalCorrect, a.totalAnswered, a.totalSkipped));
-        document.getElementById('rankContent').innerHTML = sorted.map((s,i) => `<div class="card flex-between"><span>#${i+1} <b>${s.nickname}</b></span><b>${calcAcc(s.totalCorrect, s.totalAnswered, s.totalSkipped)}%</b></div>`).join('');
+        const sorted = Object.values(d.students || {}).sort((a,b) => UIManager.calcAcc(b.totalCorrect, b.totalAnswered, b.totalSkipped) - UIManager.calcAcc(a.totalCorrect, a.totalAnswered, a.totalSkipped));
+        document.getElementById('rankContent').innerHTML = sorted.map((s,i) => `<div class="card flex-between"><span>#${i+1} <b>${s.nickname}</b></span><b>${UIManager.calcAcc(s.totalCorrect, s.totalAnswered, s.totalSkipped)}%</b></div>`).join('');
     }
 
     async function goTeacherAdmin() {
         const p = prompt("Teacher PIN:");
         const d = await ApiClient.call('AUTH', { pin: p });
         if (d.ok) {
-            UIManager.showScreen('rankScreen');
-            document.getElementById('rankTitle').textContent = "🦁 Admin View";
+            UIManager.showScreen('rankScreen'); document.getElementById('rankTitle').textContent = "🦁 Admin View";
             const all = await ApiClient.call('GET_ALL');
-            document.getElementById('rankContent').innerHTML = Object.values(all.students || {}).map(s => `<div class="card" onclick="drillStudent('${s.name}')" style="cursor:pointer"><b>${s.name}</b> (${s.nickname})<br>Acc: ${calcAcc(s.totalCorrect, s.totalAnswered, s.totalSkipped)}%</div>`).join('');
+            document.getElementById('rankContent').innerHTML = Object.values(all.students || {}).map(s => `<div class="card" onclick="drillStudent('${s.name}')" style="cursor:pointer"><b>${s.name}</b> (${s.nickname})<br>Acc: ${UIManager.calcAcc(s.totalCorrect, s.totalAnswered, s.totalSkipped)}%</div>`).join('');
         }
     }
 
@@ -392,7 +303,7 @@ function handleNext() {
         let h = `<div class="card" style="border:2px solid var(--ac);"><h3>${st.name} Report</h3><br>`;
         [...new Set(window.QUESTIONS.map(q=>q.tag))].forEach(t=>{
             let c=0, an=0, sk=0; window.QUESTIONS.filter(q=>q.tag===t).forEach(q=>{ const s = st.termStats[q.concept] || {correct:0,answered:0,skipped:0}; c+=s.correct; an+=s.answered; sk+=s.skipped; });
-            h += `<div class="flex-between"><span>${t}</span><b>${calcAcc(c,an,sk)}%</b></div>`;
+            h += `<div class="flex-between"><span>${t}</span><b>${UIManager.calcAcc(c,an,sk)}%</b></div>`;
         });
         h += `<button class="btn btn-o btn-s mt-10" onclick="this.parentElement.remove()">Close</button></div>`;
         document.getElementById('rankContent').insertAdjacentHTML('afterbegin', h);
@@ -400,11 +311,9 @@ function handleNext() {
 
     async function updatePin() {
         const newP = document.getElementById('changePin').value;
-        if(newP.length === 4) { window.S.pin = newP; await ApiClient.call('PUT_STUDENT', { student: window.S }); alert("PIN Updated!"); }
+        if(newP.length === 4) { window.S.pin = newP; await ApiClient.call('PUT_STUDENT', { student: window.S }); alert("Updated"); }
     }
-
     function exitQuiz() { if(confirm("Exit?")) showHome(); }
-    function calcAcc(c, a, s) { const tw = (a||0) + ((s||0)*0.5); return tw===0 ? 0 : Math.round((c/tw)*100); }
     </script>
 </body>
 </html>
