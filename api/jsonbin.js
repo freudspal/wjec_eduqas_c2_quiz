@@ -91,7 +91,6 @@ Respond ONLY in JSON format: {"correct": boolean, "feedback": string}`;
       // YOUR UPDATED MODEL LIST
       const modelPool = [
         "gemini-3.1-flash-lite",
-        "gemini-2.0-flash-lite",
         "gemini-2.5-flash",
         "gemini-2.0-flash",
         "gemini-3-flash-preview",
