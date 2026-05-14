@@ -1,5 +1,5 @@
 export default async function handler(req, res) {
-  const { MASTER_KEY, BIN_ID, QUESTIONS_BIN_ID, GEMINI_API_KEY, TEACHER_PIN } = process.env;
+  const { MASTER_KEY, BIN_ID, GEMINI_API_KEY, TEACHER_PIN } = process.env;
 
   let body = {};
   try {
@@ -11,15 +11,16 @@ export default async function handler(req, res) {
   try {
     if (!method) return res.status(400).json({ error: "No method provided" });
 
-    // --- 1. QUESTIONS & SMART LEARNING ---
-    if (method === "GET_QUESTIONS") {
-      const r = await fetch(`https://api.jsonbin.io/v3/b/${QUESTIONS_BIN_ID}/latest`, { headers: { "X-Master-Key": MASTER_KEY } });
+    // --- 1. SYSTEM DATA (Approved Answers/Learned Bank) ---
+    // Links updated to use the main BIN_ID
+    if (method === "GET_SYSTEM_DATA") {
+      const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { "X-Master-Key": MASTER_KEY } });
       const j = await r.json();
-      return res.status(200).json(j.record || { questions: [], approvedAnswers: {} });
+      return res.status(200).json({ approvedAnswers: j.record.approvedAnswers || {} });
     }
 
     if (method === "ADD_APPROVED") {
-      const r = await fetch(`https://api.jsonbin.io/v3/b/${QUESTIONS_BIN_ID}/latest`, { headers: { "X-Master-Key": MASTER_KEY } });
+      const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { "X-Master-Key": MASTER_KEY } });
       const j = await r.json();
       const data = j.record;
       if (!data.approvedAnswers) data.approvedAnswers = {};
@@ -27,7 +28,7 @@ export default async function handler(req, res) {
       
       if (!data.approvedAnswers[body.concept].includes(body.answer)) {
         data.approvedAnswers[body.concept].push(body.answer.trim());
-        await fetch(`https://api.jsonbin.io/v3/b/${QUESTIONS_BIN_ID}`, {
+        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json", "X-Master-Key": MASTER_KEY },
           body: JSON.stringify(data)
@@ -47,7 +48,7 @@ export default async function handler(req, res) {
     if (method === "PUT_STUDENT") {
       const r1 = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { "X-Master-Key": MASTER_KEY } });
       const j = await r1.json();
-      const data = j.record || { students: {} };
+      const data = j.record || { students: {}, approvedAnswers: {} };
       data.students[body.student.name.toLowerCase()] = body.student;
       await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
         method: "PUT",
@@ -69,7 +70,7 @@ export default async function handler(req, res) {
     }
 
     // ==========================================
-    // METHOD: AI_CHECK (Rebuilt with 7s Timeout & Fallbacks)
+    // METHOD: AI_CHECK (With your custom model order)
     // ==========================================
     if (method === "AI_CHECK") {
       const { concept, target, studentAnswer } = body;
@@ -81,44 +82,37 @@ export default async function handler(req, res) {
 
 MARKING RULES:
 1. Prioritize MEANING over exact words.
-2. Accept synonyms (e.g., "norms" instead of "socially acceptable", "change" instead of "alter").
+2. Accept synonyms (e.g., "norms" instead of "socially acceptable").
 3. If the student captures the core psychological mechanism, mark it TRUE.
-4. Only mark FALSE if the answer is factually incorrect or describes a different concept entirely.
+4. Only mark FALSE if the answer is factually incorrect.
 
-Respond ONLY in JSON format: 
-{"correct": true, "feedback": "Short encouraging comment"} 
-OR 
-{"correct": false, "feedback": "Explain the missing part briefly"}`;
+Respond ONLY in JSON format: {"correct": boolean, "feedback": string}`;
 
-      // OPTIMIZED FALLBACK LIST
+      // YOUR UPDATED MODEL LIST
       const modelPool = [
-        "gemini-1.5-flash",      // 1. Most stable and fastest
-        "gemini-2.0-flash-exp",  // 2. High intelligence fallback
-        "gemini-3.1-flash-lite"  // 3. Newest fallback
+        "gemini-3.1-flash-lite",
+        "gemini-2.0-flash-lite",
+        "gemini-2.5-flash",
+        "gemini-2.0-flash",
+        "gemini-3-flash-preview",
+        "gemini-1.5-flash" // Safety net
       ];
 
       for (let i = 0; i < modelPool.length; i++) {
         const modelName = modelPool[i];
-        
-        // Timeout: 7s for first try, 5s for fallbacks to save time
         const currentTimeout = i === 0 ? 7000 : 5000; 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), currentTimeout);
 
         try {
-          console.log(`🤖 [AI_CHECK] Trying ${modelName} (${currentTimeout/1000}s limit)...`);
+          console.log(`🤖 Attempt ${i+1}: Trying ${modelName}...`);
 
           const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ 
-              contents: [{ 
-                role: "user", 
-                parts: [{ text: prompt }] 
-              }],
-              generationConfig: { 
-                response_mime_type: "application/json" 
-              }
+              contents: [{ role: "user", parts: [{ text: prompt }] }],
+              generationConfig: { response_mime_type: "application/json" }
             }),
             signal: controller.signal
           });
@@ -127,48 +121,30 @@ OR
           clearTimeout(timeoutId);
 
           if (!r.ok) {
-            console.error(`📡 ${modelName} failed (Status ${r.status}). Trying next...`);
+            console.error(`📡 ${modelName} failed (${r.status})`);
             continue; 
           }
 
           const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-          
-          // Robust extraction of JSON from text
           const start = text.indexOf('{');
           const end = text.lastIndexOf('}');
-          if (start === -1 || end === -1) throw new Error("No JSON found");
-          
-          const cleanJson = text.substring(start, end + 1);
-          const parsedResult = JSON.parse(cleanJson);
-
-          console.log(`✅ Success with ${modelName}. Verdict:`, parsedResult.correct);
-          return res.status(200).json(parsedResult);
+          return res.status(200).json(JSON.parse(text.substring(start, end + 1)));
 
         } catch (err) {
           clearTimeout(timeoutId);
-          if (err.name === 'AbortError') {
-            console.error(`⏱️ [TIMEOUT] ${modelName} took too long. Skipping...`);
-          } else {
-            console.error(`❌ ${modelName} Error:`, err.message);
-          }
-          // If this was the last model, we break and hit the final fallback below
           if (i === modelPool.length - 1) break;
         }
       }
 
-      // FINAL FALLBACK (If all AI models are busy or slow)
       return res.status(200).json({ 
         correct: false, 
-        feedback: "The cat is thinking slowly! Your answer is saved for teacher review. 🐾" 
+        feedback: "AI is currently slow. Teacher will check manually. 🐾" 
       });
     }
 
     return res.status(400).json({ error: "Invalid method" });
   } catch (err) { 
     console.error("🚨 GLOBAL SERVER ERROR:", err.message);
-    return res.status(500).json({ 
-      error: "Server encountered an error", 
-      details: err.message 
-    }); 
+    return res.status(500).json({ error: err.message }); 
   }
 }
