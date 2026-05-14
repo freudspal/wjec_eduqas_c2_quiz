@@ -90,11 +90,11 @@ Respond ONLY in JSON format: {"correct": boolean, "feedback": string}`;
 
       // YOUR UPDATED MODEL LIST
       const modelPool = [
-        "gemini-flash-latest",
         "gemini-2.5-flash",
         "gemini-3.1-flash-lite",
         "gemini-3.1-flash",
         "gemini-2.0-flash-001",
+        "gemini-flash-latest",
         "gemini-3-flash-preview",
         "gemini-1.5-flash", // Safety net
       ];
